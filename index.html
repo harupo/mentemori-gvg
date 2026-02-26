@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>メメントモリ ギルドバトル / グランドバトル 拠点占有ダッシュボード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+  :root {
+    --bg-deep:#0a0a0f;--bg-card:#12121a;--bg-card-hover:#1a1a26;
+    --border:#2a2a3a;--text:#e0e0ec;--text-dim:#8888a0;--accent:#6c5ce7;
+    --domination:#ff6b6b;--monopoly:#e74c3c;--oligopoly:#f39c12;--contested:#2ecc71;
+    --oligo-a:#f39c12;--oligo-b:#74b9ff;--oligo-c:#fd79a8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg-deep);color:var(--text);min-height:100vh;line-height:1.6;}
+  .header{padding:2rem 2rem 1rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101018,var(--bg-deep));}
+  .header h1{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#fff,#a0a0d0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .header .sub{color:var(--text-dim);font-size:.85rem;margin-top:.3rem;}
+  .tabs{display:flex;border-bottom:1px solid var(--border);}
+  .tab-btn{font-family:'Noto Sans JP',sans-serif;font-size:.9rem;font-weight:600;padding:.8rem 1.5rem;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;}
+  .tab-btn:hover{color:var(--text);} .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .controls{padding:1rem 2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border);}
+  .controls label{font-size:.85rem;color:var(--text-dim);}
+  .controls select,.controls button{font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;}
+  .controls button{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;transition:all .2s;}
+  .controls button:hover{filter:brightness(1.2);} .controls button:disabled{opacity:.5;cursor:not-allowed;}
+  .status-bar{padding:.6rem 2rem;font-size:.8rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
+  .status-bar .ok{color:#2ecc71;} .status-bar .err{color:#e74c3c;} .status-bar .loading{color:#f39c12;}
+  .info-bar{border-bottom:1px solid var(--border);}
+  .info-row{padding:0 2rem .6rem;display:flex;gap:2rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);}
+  .dashboard{padding:1.5rem 2rem;display:grid;gap:1.5rem;}
+  .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;}
+  .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center;}
+  .stat-card .value{font-size:2rem;font-weight:900;font-family:'JetBrains Mono',monospace;}
+  .stat-card .label{font-size:.7rem;color:var(--text-dim);margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em;}
+  .stat-card.domination .value{color:var(--domination);} .stat-card.monopoly .value{color:var(--monopoly);}
+  .stat-card.oligopoly .value{color:var(--oligopoly);} .stat-card.contested .value{color:var(--contested);}
+  .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;}
+  @media(max-width:900px){.charts-row{grid-template-columns:1fr;}}
+  .chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;}
+  .chart-card h3{font-size:.9rem;font-weight:600;margin-bottom:1rem;color:var(--text-dim);}
+  .chart-container{position:relative;width:100%;max-height:350px;}
+  .table-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .table-card h3{font-size:.9rem;font-weight:600;padding:1rem 1.2rem;color:var(--text-dim);border-bottom:1px solid var(--border);}
+  .table-wrap{overflow-x:auto;max-height:600px;overflow-y:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.82rem;}
+  thead th{position:sticky;top:0;background:#1a1a26;padding:.6rem .8rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;z-index:2;}
+  tbody td{padding:.5rem .8rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;}
+  tbody tr:hover{background:var(--bg-card-hover);}
+  .castle-cell{font-weight:600;font-size:.78rem;white-space:nowrap;}
+  .tag-domination{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);}
+  .tag-monopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:var(--monopoly);}
+  .tag-oligopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:var(--oligopoly);}
+  .tag-contested{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:var(--contested);}
+  .filter-row{padding:0 1.2rem .8rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
+  .filter-row input,.filter-row select{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.3rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);}
+  .filter-row input{width:260px;}
+  .hidden{display:none !important;}
+  .g-hide-srv .srv-col{display:none !important;}
+  .mono-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;min-width:max-content;}
+  .mono-item:hover{background:var(--bg-card-hover);}
+  .mono-item .world-id{font-family:'JetBrains Mono',monospace;font-weight:600;min-width:50px;flex-shrink:0;}
+  .mono-item .guild-name{font-weight:600;white-space:nowrap;flex-shrink:0;}
+  .mono-item .castle-count{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--text-dim);flex-shrink:0;}
+  .mono-section-header{padding:.6rem .8rem .3rem;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);}
+  .mono-section-header.domination-header{color:var(--domination);}
+  .mono-section-header.monopoly-header{color:var(--monopoly);}
+  .mono-section-header.oligopoly-header{color:var(--oligopoly);}
+  .worlds-cell{max-width:260px;white-space:normal;line-height:1.8;}
+  .world-tag{display:inline-block;padding:.1rem .45rem;margin:.1rem .15rem;border-radius:4px;font-size:.72rem;font-family:'JetBrains Mono',monospace;font-weight:600;background:#1e1e3a;border:1px solid #2e2e4a;color:#b0b0d0;cursor:pointer;transition:all .15s;}
+  .world-tag:hover{background:#2a2a50;border-color:#4a4a7a;color:#e0e0ff;}
+  .world-tag.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .wf-float{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--accent);border-radius:10px;padding:.6rem 1.2rem;display:flex;align-items:center;gap:1rem;z-index:100;box-shadow:0 4px 24px rgba(108,92,231,.3);}
+  .wf-float .wf-label{font-size:.85rem;font-weight:600;color:var(--text);}
+  .wf-float .wf-label span{color:var(--accent);font-family:'JetBrains Mono',monospace;}
+  .wf-float button{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:600;padding:.4rem 1rem;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;}
+  .wf-float button:hover{filter:brightness(1.2);}
+  @media(max-width:768px){
+    .header{padding:1.2rem 1rem .8rem;} .header h1{font-size:1.2rem;}
+    .controls{padding:.8rem 1rem;} .dashboard{padding:1rem;}
+    .summary-row{grid-template-columns:repeat(3,1fr);gap:.5rem;}
+    .stat-card{padding:.8rem .5rem;} .stat-card .value{font-size:1.4rem;} .stat-card .label{font-size:.6rem;}
+    .table-wrap{font-size:.75rem;} tbody td,thead th{padding:.4rem .5rem;}
+    .castle-cell{white-space:nowrap;}
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>⚔️ メメントモリ 拠点占有ダッシュボード</h1>
+  <div class="sub">ギルドバトル・グランドバトルの城保有状況と制覇・独占・寡占分析</div>
+</div>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="local" onclick="switchTab('local')">⚔️ ギルドバトル</button>
+  <button class="tab-btn" data-tab="global" onclick="switchTab('global')">🌐 グランドバトル</button>
+</div>
+<div class="info-bar" id="infoBar">
+  <div class="status-bar" id="statusBar">待機中…</div>
+  <div class="info-row">
+    <span id="lastUpdate"></span>
+    <span id="schedNext"></span>
+  </div>
+</div>
+
+<!-- ギルドバトル -->
+<div class="dashboard hidden" id="dash-local">
+  <div class="summary-row">
+    <div class="stat-card"><div class="value" id="l-total">-</div><div class="label">ワールド数</div></div>
+    <div class="stat-card domination"><div class="value" id="l-dom">-</div><div class="label">制覇(21城)</div></div>
+    <div class="stat-card monopoly"><div class="value" id="l-mono">-</div><div class="label">独占(5城)</div></div>
+    <div class="stat-card oligopoly"><div class="value" id="l-oligo">-</div><div class="label">寡占(3-4城)</div></div>
+    <div class="stat-card contested"><div class="value" id="l-cont">-</div><div class="label">分散</div></div>
+    <div class="stat-card"><div class="value" id="l-guilds">-</div><div class="label">ユニークギルド</div></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card" style="overflow:auto;max-height:420px;"><h3>制覇・独占・寡占ワールド</h3><div id="l-side"></div></div>
+    <div class="chart-card"><h3>占有分布</h3><div class="chart-container"><canvas id="l-donut"></canvas></div></div>
+  </div>
+  <div class="table-card" id="l-domCard"><h3><span style="color:var(--domination);">👑 制覇</span> <span id="l-domC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>制覇ギルド</th><th>城数</th></tr></thead><tbody id="l-domB"></tbody></table></div></div>
+  <div class="table-card"><h3><span style="color:var(--monopoly);">🔴 独占</span> <span id="l-monoC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>独占ギルド</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th></tr></thead><tbody id="l-monoB"></tbody></table></div></div>
+  <div class="table-card"><h3><span style="color:var(--oligopoly);">🟠 寡占</span> <span id="l-oligoC"></span> <span style="font-size:.72rem;font-weight:400;margin-left:1rem;color:var(--text-dim);">凡例: <span style="color:var(--oligo-a);font-weight:700;">■寡占</span> <span style="color:var(--oligo-b);font-weight:700;margin-left:.4rem;">■他B</span> <span style="color:var(--oligo-c);font-weight:700;margin-left:.4rem;">■他C</span></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>最多ギルド</th><th>数</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th></tr></thead><tbody id="l-oligoB"></tbody></table></div></div>
+  <div class="table-card"><h3>全ワールド一覧</h3><div class="filter-row"><input type="text" id="l-fG" placeholder="ギルド名 / ワールド番号で検索…" oninput="renderLT()"><select id="l-fS" onchange="renderLT()"><option value="all">全て</option><option value="domination">制覇</option><option value="monopoly">独占</option><option value="oligopoly">寡占</option><option value="contested">分散</option></select></div><div class="table-wrap"><table><thead><tr><th>World</th><th>状態</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th><th>支配ギルド</th></tr></thead><tbody id="l-tB"></tbody></table></div></div>
+</div>
+
+<!-- グランドバトル -->
+<div class="dashboard hidden" id="dash-global">
+  <div class="summary-row">
+    <div class="stat-card"><div class="value" id="g-total">-</div><div class="label">ブロック数</div></div>
+    <div class="stat-card domination"><div class="value" id="g-dom">-</div><div class="label">制覇(21城)</div></div>
+    <div class="stat-card monopoly"><div class="value" id="g-mono">-</div><div class="label">独占(5城)</div></div>
+    <div class="stat-card oligopoly"><div class="value" id="g-oligo">-</div><div class="label">寡占(3-4城)</div></div>
+    <div class="stat-card contested"><div class="value" id="g-cont">-</div><div class="label">分散</div></div>
+    <div class="stat-card"><div class="value" id="g-guilds">-</div><div class="label">ユニークギルド</div></div>
+  </div>
+  <div class="charts-row">
+    <div class="chart-card" style="overflow:auto;max-height:420px;"><h3>制覇・独占・寡占ブロック</h3><div id="g-side"></div></div>
+    <div class="chart-card"><h3>占有分布</h3><div class="chart-container"><canvas id="g-donut"></canvas></div></div>
+  </div>
+  <div class="table-card" id="g-domCard"><h3><span style="color:var(--domination);">👑 制覇</span> <span id="g-domC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>制覇ギルド</th><th>城数</th></tr></thead><tbody id="g-domB"></tbody></table></div></div>
+  <div class="table-card"><h3><span style="color:var(--monopoly);">🔴 独占</span> <span id="g-monoC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>独占ギルド</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th></tr></thead><tbody id="g-monoB"></tbody></table></div></div>
+  <div class="table-card"><h3><span style="color:var(--oligopoly);">🟠 寡占</span> <span id="g-oligoC"></span> <span style="font-size:.72rem;font-weight:400;margin-left:1rem;color:var(--text-dim);">凡例: <span style="color:var(--oligo-a);font-weight:700;">■寡占</span> <span style="color:var(--oligo-b);font-weight:700;margin-left:.4rem;">■他B</span> <span style="color:var(--oligo-c);font-weight:700;margin-left:.4rem;">■他C</span></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>最多ギルド</th><th>数</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th></tr></thead><tbody id="g-oligoB"></tbody></table></div></div>
+  <div class="table-card"><h3>全ブロック一覧</h3><div class="filter-row"><input type="text" id="g-fG" placeholder="ギルド名 / ワールド番号で検索…" oninput="renderGT()"><select id="g-fS" onchange="renderGT()"><option value="all">全て</option><option value="domination">制覇</option><option value="monopoly">独占</option><option value="oligopoly">寡占</option><option value="contested">分散</option></select></div><div class="table-wrap"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>状態</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th><th>支配ギルド</th></tr></thead><tbody id="g-tB"></tbody></table></div></div>
+</div>
+
+<div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
+
+<script>
+const MI=[1,2,3,4,5],AI=Array.from({length:21},(_,i)=>i+1);
+const CN={1:"Elite",2:"Expert",3:"Grand Master"};
+const BN={0:"A",1:"B",2:"C",3:"D"};
+const SN={1:"JP",2:"KR",3:"Asia",4:"NA",5:"EU",6:"Global"};
+const TC={domination:"tag-domination",monopoly:"tag-monopoly",oligopoly:"tag-oligopoly",contested:"tag-contested"};
+const TL={domination:"制覇",monopoly:"独占",oligopoly:"寡占",contested:"分散"};
+const MF="font-family:'JetBrains Mono',monospace;font-weight:600";
+const CNA={1:"EL",2:"EX",3:"GM"};
+const SCHED_HOUR=22,SCHED_MIN=0;
+const DATA_BASE="data/";
+
+let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null;
+
+function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;document.getElementById("wf-float").classList.remove("hidden");renderG();}
+function clearWF(){gWF=null;document.getElementById("wf-float").classList.add("hidden");renderG();}
+function gfGD(){return gWF?GD.filter(it=>it._wds.split(", ").includes(gWF)):GD;}
+
+function ss(t,c=""){document.getElementById("statusBar").innerHTML=`<span class="${c}">${t}</span>`;}
+function oc(n,a){if(!n||n==="NPC")return"#444";if(n===a.dominant)return"var(--oligo-a)";const o=[];for(const x of a.mn){if(x!==a.dominant&&x!=="NPC"&&!o.includes(x))o.push(x);}return o.indexOf(n)===0?"var(--oligo-b)":"var(--oligo-c)";}
+
+function az(co){
+  const mn=MI.map(id=>co[id]?.guildName||"NPC");
+  const mc={};for(const n of mn)mc[n]=(mc[n]||0)+1;
+  const mm=Math.max(...Object.values(mc));
+  const dom=Object.keys(mc).find(k=>mc[k]===mm);
+  const ac={};for(const id of AI){const n=co[id]?.guildName||"NPC";if(n!=="NPC")ac[n]=(ac[n]||0)+1;}
+  const am=Math.max(0,...Object.values(ac));
+  const ad=Object.keys(ac).find(k=>ac[k]===am)||"NPC";
+  let st;if(am===21)st="domination";else if(mm===5)st="monopoly";else if(mm>=3)st="oligopoly";else st="contested";
+  return{mn,mm,dominant:dom,am,ad,status:st};
+}
+
+function cntS(items){
+  const r={total:items.length,domination:0,monopoly:0,oligopoly:0,contested:0,guilds:new Set()};
+  for(const it of items){r[it._a.status]++;for(const id of MI){const g=it.co[id]?.guildName;if(g&&g!=="NPC")r.guilds.add(g);}}return r;
+}
+
+function mkSide(el,items){
+  el.innerHTML="";const gs={domination:[],monopoly:[],oligopoly:[]};
+  for(const it of items){const s=it._a.status;if(gs[s])gs[s].push(it);}
+  function sec(arr,label,cls,sT){if(!arr.length)return;
+    const h=document.createElement("div");h.className=`mono-section-header ${cls}`;h.textContent=`${label} — ${arr.length}件`;el.appendChild(h);
+    for(const it of arr){const a=it._a,d=document.createElement("div");d.className="mono-item";
+      const w=document.createElement("span");w.className="world-id";w.textContent=it._label;d.appendChild(w);
+      const t=document.createElement("span");t.className=TC[sT];t.textContent=TL[sT];d.appendChild(t);
+      const nm=document.createElement("span");nm.className="guild-name";nm.textContent=sT==="domination"?a.ad:a.dominant;
+      nm.style.color=sT==="domination"?"var(--domination)":sT==="monopoly"?"var(--monopoly)":"var(--oligopoly)";d.appendChild(nm);
+      const ct=document.createElement("span");ct.className="castle-count";ct.textContent=sT==="domination"?a.am+"/21":sT==="monopoly"?"5/5":a.mm+"/5";d.appendChild(ct);
+      el.appendChild(d);}}
+  sec(gs.domination,"制覇","domination-header","domination");
+  sec(gs.monopoly,"独占","monopoly-header","monopoly");
+  sec(gs.oligopoly,"寡占","oligopoly-header","oligopoly");
+  if(!gs.domination.length&&!gs.monopoly.length&&!gs.oligopoly.length)el.innerHTML='<div style="padding:1rem;color:var(--text-dim);">該当なし</div>';
+}
+
+function mkDonut(cv,items,ex){
+  let d=0,m=0,o=0,c=0;for(const it of items){const s=it._a.status;if(s==="domination")d++;else if(s==="monopoly")m++;else if(s==="oligopoly")o++;else c++;}
+  if(ex)ex.destroy();
+  return new Chart(cv.getContext("2d"),{type:"doughnut",data:{labels:["制覇(21城)","独占(5城)","寡占(3-4城)","分散"],datasets:[{data:[d,m,o,c],backgroundColor:["#ff6b6b","#e74c3c","#f39c12","#2ecc71"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom",labels:{color:"#e0e0ec",padding:12,font:{size:11}}}}}});
+}
+
+function addGM(tr,it){
+  const t1=document.createElement("td");t1.textContent=it._sn;t1.className="srv-col";tr.appendChild(t1);
+  const t3=document.createElement("td");t3.className="worlds-cell";for(const w of it._wds.split(", ")){const sp=document.createElement("span");sp.className="world-tag"+(gWF===w?" active":"");sp.textContent=w;sp.onclick=(e)=>{e.stopPropagation();setWF(w);};t3.appendChild(sp);}tr.appendChild(t3);
+  const t4=document.createElement("td");t4.textContent=CNA[it._cls]+"-"+BN[it._blk];t4.style.cssText=MF;tr.appendChild(t4);
+}
+
+function bldDet(items,dB,mB,oB,dC,mC,oC,dCard,isGw){
+  dB.innerHTML="";mB.innerHTML="";oB.innerHTML="";let dc=0,mc=0,occ=0;
+  for(const it of items){const a=it._a;
+    if(a.status==="domination"){dc++;const tr=document.createElement("tr");
+      if(isGw)addGM(tr,it);else{const td=document.createElement("td");td.textContent=it._label;td.style.cssText=MF;tr.appendChild(td);}
+      const tg=document.createElement("td");tg.textContent=a.ad;tg.style.cssText="font-weight:700;color:var(--domination)";tr.appendChild(tg);
+      const tc=document.createElement("td");tc.textContent=a.am+"/21";tc.style.cssText=MF+";color:var(--domination)";tr.appendChild(tc);dB.appendChild(tr);}
+    if(a.status==="monopoly"){mc++;const tr=document.createElement("tr");
+      if(isGw)addGM(tr,it);else{const td=document.createElement("td");td.textContent=it._label;td.style.cssText=MF;tr.appendChild(td);}
+      const tg=document.createElement("td");tg.textContent=a.dominant;tg.style.cssText="font-weight:700;color:var(--monopoly)";tr.appendChild(tg);
+      for(let i=0;i<5;i++){const td=document.createElement("td");td.className="castle-cell";td.textContent=a.mn[i];td.style.color="var(--monopoly)";tr.appendChild(td);}mB.appendChild(tr);}
+    if(a.status==="oligopoly"){occ++;const tr=document.createElement("tr");
+      if(isGw)addGM(tr,it);else{const td=document.createElement("td");td.textContent=it._label;td.style.cssText=MF;tr.appendChild(td);}
+      const tg=document.createElement("td");tg.textContent=a.dominant;tg.style.cssText="font-weight:700;color:var(--oligopoly)";tr.appendChild(tg);
+      const tc=document.createElement("td");tc.textContent=a.mm+"/5";tc.style.cssText=MF;tr.appendChild(tc);
+      for(let i=0;i<5;i++){const td=document.createElement("td");td.className="castle-cell";td.textContent=a.mn[i];td.style.color=oc(a.mn[i],a);tr.appendChild(td);}oB.appendChild(tr);}
+  }
+  dC.textContent=`(${dc}件)`;mC.textContent=`(${mc}件)`;oC.textContent=`(${occ}件)`;
+  if(dCard)dCard.style.display=dc===0?"none":"";
+}
+
+function bldFull(tb,items,fG,fS,isGw){
+  tb.innerHTML="";const fg=fG.value.toLowerCase(),fs=fS.value;
+  for(const it of items){const a=it._a;
+    if(fs!=="all"&&a.status!==fs)continue;
+    if(fg){const fl=fg.toLowerCase();const gm=a.mn.some(n=>n.toLowerCase().includes(fl));const wm=it._wds&&it._wds.toLowerCase().includes(fl);const lm=it._label&&it._label.toLowerCase().includes(fl);if(!gm&&!wm&&!lm)continue;}
+    const tr=document.createElement("tr");
+    if(isGw)addGM(tr,it);else{const td=document.createElement("td");td.textContent=it._label;td.style.cssText=MF;tr.appendChild(td);}
+    const tdS=document.createElement("td");tdS.innerHTML=`<span class="${TC[a.status]}">${TL[a.status]}</span>`;tr.appendChild(tdS);
+    for(let i=0;i<5;i++){const td=document.createElement("td");td.className="castle-cell";const n=a.mn[i];td.textContent=n;
+      if(a.status==="domination")td.style.color="var(--domination)";
+      else if(a.status==="monopoly")td.style.color="var(--monopoly)";
+      else if(a.status==="oligopoly")td.style.color=oc(n,a);
+      else td.style.color="var(--text)";tr.appendChild(td);}
+    const tdD=document.createElement("td");
+    if(a.status==="domination"){tdD.textContent=a.ad+" ("+a.am+"城制覇)";tdD.style.cssText="font-weight:700;color:var(--domination)";}
+    else if(a.status==="monopoly"){tdD.textContent=a.dominant;tdD.style.cssText="font-weight:700;color:var(--monopoly)";}
+    else if(a.status==="oligopoly"){tdD.textContent=a.dominant+" ("+a.mm+"城)";tdD.style.color="var(--oligopoly)";}
+    else{tdD.textContent="-";tdD.style.color="var(--text-dim)";}
+    tr.appendChild(tdD);tb.appendChild(tr);}
+}
+
+function switchTab(tab){curTab=tab;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  document.getElementById("dash-local").classList.toggle("hidden",tab!=="local"||!LD.length);
+  document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
+  document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
+}
+
+// JSON読み込み
+async function loadData(){
+  ss("データ読み込み中…","loading");
+  try{
+    const [lRes,gRes]=await Promise.all([fetch(DATA_BASE+"local.json"),fetch(DATA_BASE+"global.json")]);
+    if(!lRes.ok||!gRes.ok)throw new Error("データファイルが見つかりません");
+    const lData=await lRes.json(),gData=await gRes.json();
+    // ギルドバトル
+    LD=[];
+    for(const it of lData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,wid:it.wid};r._a=az(co);LD.push(r);}
+    // グランドバトル
+    GD=[];
+    for(const it of gData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,_gid:it.gid,_cls:it.cls,_blk:it.blk,_sn:it.sn,_wds:it.wds};r._a=az(co);GD.push(r);}
+    // 最終更新
+    const ts=Math.max(lData.timestamp||0,gData.timestamp||0);
+    if(ts>0)document.getElementById("lastUpdate").textContent=`📋 最終更新: ${new Date(ts*1000).toLocaleString("ja-JP")}`;
+    showNextUpdate();
+    ss(`✓ ギルバト ${LD.length}件 / グラバト ${GD.length}件 読み込み完了`,"ok");
+    document.getElementById("dash-local").classList.remove("hidden");renderL();
+    if(GD.length){document.getElementById("dash-global").classList.remove("hidden");}renderG();
+  }catch(e){ss(`✗ ${e.message}`,"err");}
+}
+
+function showNextUpdate(){
+  const el=document.getElementById("schedNext"),now=new Date();
+  const next=new Date(now.getFullYear(),now.getMonth(),now.getDate(),SCHED_HOUR,SCHED_MIN,0,0);
+  if(next<=now)next.setDate(next.getDate()+1);
+  el.textContent=`⏰ 次回更新: ${next.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}`;
+}
+
+function renderL(){const s=cntS(LD);
+  document.getElementById("l-total").textContent=s.total;document.getElementById("l-dom").textContent=s.domination;
+  document.getElementById("l-mono").textContent=s.monopoly;document.getElementById("l-oligo").textContent=s.oligopoly;
+  document.getElementById("l-cont").textContent=s.contested;document.getElementById("l-guilds").textContent=s.guilds.size;
+  mkSide(document.getElementById("l-side"),LD);lC=mkDonut(document.getElementById("l-donut"),LD,lC);
+  bldDet(LD,document.getElementById("l-domB"),document.getElementById("l-monoB"),document.getElementById("l-oligoB"),
+    document.getElementById("l-domC"),document.getElementById("l-monoC"),document.getElementById("l-oligoC"),document.getElementById("l-domCard"),false);
+  renderLT();}
+function renderLT(){bldFull(document.getElementById("l-tB"),LD,document.getElementById("l-fG"),document.getElementById("l-fS"),false);}
+
+function renderG(){const fd=gfGD(),s=cntS(fd);
+  const dg=document.getElementById("dash-global");dg.classList.add("g-hide-srv");
+  document.getElementById("g-total").textContent=s.total;document.getElementById("g-dom").textContent=s.domination;
+  document.getElementById("g-mono").textContent=s.monopoly;document.getElementById("g-oligo").textContent=s.oligopoly;
+  document.getElementById("g-cont").textContent=s.contested;document.getElementById("g-guilds").textContent=s.guilds.size;
+  mkSide(document.getElementById("g-side"),fd);gC=mkDonut(document.getElementById("g-donut"),fd,gC);
+  bldDet(fd,document.getElementById("g-domB"),document.getElementById("g-monoB"),document.getElementById("g-oligoB"),
+    document.getElementById("g-domC"),document.getElementById("g-monoC"),document.getElementById("g-oligoC"),document.getElementById("g-domCard"),true);
+  renderGT();}
+function renderGT(){bldFull(document.getElementById("g-tB"),gfGD(),document.getElementById("g-fG"),document.getElementById("g-fS"),true);}
+
+document.addEventListener("DOMContentLoaded",()=>{loadData();});
+</script>
+</body>
+</html>
