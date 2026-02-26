@@ -268,7 +268,7 @@ async function loadData(){
   ss("データ読み込み中…","loading");
   try{
     const [lRes,gRes]=await Promise.all([fetch(DATA_BASE+"local.json"),fetch(DATA_BASE+"global.json")]);
-    if(!lRes.ok||!gRes.ok)throw new Error("データファイルが見つかりません");
+    if(!lRes.ok||!gRes.ok)throw new Error("APIサーバーがメンテナンス中です。しばらく待ってから再度アクセスしてください");
     const lData=await lRes.json(),gData=await gRes.json();
     // ギルドバトル
     LD=[];
