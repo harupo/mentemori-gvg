@@ -30,5 +30,6 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update GvG data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase origin main
             git push
           fi
