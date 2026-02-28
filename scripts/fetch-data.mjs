@@ -140,8 +140,8 @@ async function main() {
   // 同日(JST)スキップ判定
   try {
     const existing = JSON.parse(readFileSync('data/local.json', 'utf-8'));
-    if (existing.timestamp) {
-      const prev = new Date(existing.timestamp * 1000);
+    if (existing.fetchedAt) {
+      const prev = new Date(existing.fetchedAt);
       const now = new Date();
       const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
       if (toJSTDate(prev) === toJSTDate(now)) {
@@ -152,12 +152,14 @@ async function main() {
   } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
 
   const local = await fetchLocal();
+  local.fetchedAt = new Date().toISOString();
   writeFileSync('data/local.json', JSON.stringify(local));
   console.log(`  → data/local.json (${(JSON.stringify(local).length / 1024).toFixed(1)} KB)`);
 
   await sleep(2000); // API負荷軽減
 
   const global = await fetchGlobal();
+  global.fetchedAt = new Date().toISOString();
   writeFileSync('data/global.json', JSON.stringify(global));
   console.log(`  → data/global.json (${(JSON.stringify(global).length / 1024).toFixed(1)} KB)`);
 
