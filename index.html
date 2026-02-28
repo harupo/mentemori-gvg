@@ -308,8 +308,9 @@ async function loadData(){
     for(const it of gData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,_gid:it.gid,_cls:it.cls,_blk:it.blk,_sn:it.sn,_wds:it.wds};r._a=az(co);GD.push(r);}
     initFilters();
     // 最終更新
-    const ts=Math.max(lData.timestamp||0,gData.timestamp||0);
-    if(ts>0){const d=new Date(ts*1000);document.getElementById("lastUpdate").textContent=fD(d);}
+    const fa=lData.fetchedAt||gData.fetchedAt;
+    if(fa){document.getElementById("lastUpdate").textContent=fD(new Date(fa));}
+    else{const ts=Math.max(lData.timestamp||0,gData.timestamp||0);if(ts>0)document.getElementById("lastUpdate").textContent=fD(new Date(ts*1000));}
     showNextUpdate();
     ss(`✓ ギルバト ${LD.length}件 / グラバト ${GD.length}件 読み込み完了`,"ok");
     renderL();renderG();switchTab(curTab);
