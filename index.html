@@ -110,7 +110,6 @@
 <!-- ギルドバトル -->
 <div class="dashboard hidden" id="dash-local">
   <div class="global-filter-bar">
-    <label>サーバー</label><select id="lf-srv" onchange="renderL()"><option value="all">全て</option></select>
     <label>ワールド</label><input type="text" id="lf-world" placeholder="例: 127" oninput="renderL()" style="width:80px;">
   </div>
   <div class="summary-row">
@@ -134,7 +133,6 @@
 <!-- グランドバトル -->
 <div class="dashboard hidden" id="dash-global">
   <div class="global-filter-bar">
-    <label>サーバー</label><select id="gf-srv" onchange="renderG()"><option value="all">全て</option></select>
     <label>ワールド</label><input type="text" id="gf-world" placeholder="例: 127" oninput="renderG()" style="width:80px;">
     <label>クラス</label><select id="gf-cls" onchange="renderG()"><option value="all">全て</option></select>
   </div>
@@ -176,10 +174,8 @@ function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;documen
 function clearWF(){gWF=null;document.getElementById("wf-float").classList.add("hidden");renderG();}
 function gfGD(){
   let d=gWF?GD.filter(it=>it._wds.split(", ").includes(gWF)):GD;
-  const srv=document.getElementById("gf-srv")?.value;
   const wld=document.getElementById("gf-world")?.value.trim();
   const cls=document.getElementById("gf-cls")?.value;
-  if(srv&&srv!=="all")d=d.filter(it=>it._sn===srv);
   if(wld)d=d.filter(it=>it._wds&&it._wds.split(", ").some(w=>w.includes(wld)));
   if(cls&&cls!=="all")d=d.filter(it=>String(it._cls)===cls);
   return d;
@@ -187,24 +183,12 @@ function gfGD(){
 
 function filteredLD(){
   let d=LD;
-  const srv=document.getElementById("lf-srv")?.value;
   const wld=document.getElementById("lf-world")?.value.trim();
-  if(srv&&srv!=="all")d=d.filter(it=>it._sn===srv);
   if(wld)d=d.filter(it=>it._label&&it._label.includes(wld));
   return d;
 }
 
 function initFilters(){
-  // ギルバト：サーバー
-  const lSrv=document.getElementById("lf-srv");
-  const lSrvSet=new Set(LD.map(it=>it._sn).filter(Boolean));
-  lSrv.innerHTML='<option value="all">全て</option>';
-  [...lSrvSet].sort().forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;lSrv.appendChild(o);});
-  // グラバト：サーバー
-  const gSrv=document.getElementById("gf-srv");
-  const gSrvSet=new Set(GD.map(it=>it._sn).filter(Boolean));
-  gSrv.innerHTML='<option value="all">全て</option>';
-  [...gSrvSet].sort().forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;gSrv.appendChild(o);});
   // グラバト：クラス
   const gCls=document.getElementById("gf-cls");
   const gClsSet=new Set(GD.map(it=>it._cls).filter(Boolean));
