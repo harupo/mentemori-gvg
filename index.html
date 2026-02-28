@@ -136,7 +136,7 @@
   </div>
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="g-total">-</div><div class="label">ブロック数</div></div>
-    <div class="stat-card domination"><div class="value" id="g-dom">-</div><div class="label">制覇(21城)</div></div>
+    <div class="stat-card domination"><div class="value" id="g-dom">-</div><div class="rate" id="g-dom-rate"></div><div class="label">制覇(21城)</div></div>
     <div class="stat-card monopoly"><div class="value" id="g-mono">-</div><div class="rate" id="g-mono-rate"></div><div class="label">独占(5城)</div></div>
     <div class="stat-card oligopoly"><div class="value" id="g-oligo">-</div><div class="rate" id="g-oligo-rate"></div><div class="label">寡占(3-4城)</div></div>
     <div class="stat-card contested"><div class="value" id="g-cont">-</div><div class="rate" id="g-cont-rate"></div><div class="label">分散</div></div>
@@ -332,6 +332,7 @@ function renderG(){const fd=gfGD(),s=cntS(fd);
   document.getElementById("g-mono").textContent=s.monopoly;document.getElementById("g-oligo").textContent=s.oligopoly;
   document.getElementById("g-cont").textContent=s.contested;document.getElementById("g-guilds").textContent=s.guilds.size;
   const pct=n=>s.total?((n/s.total)*100).toFixed(1)+"%":"";
+  document.getElementById("g-dom-rate").textContent=pct(s.domination);
   document.getElementById("g-mono-rate").textContent=pct(s.monopoly);
   document.getElementById("g-oligo-rate").textContent=pct(s.oligopoly);
   document.getElementById("g-cont-rate").textContent=pct(s.contested);
