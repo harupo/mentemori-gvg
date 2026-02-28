@@ -112,10 +112,10 @@
 <div class="dashboard hidden" id="dash-local">
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="l-total">-</div><div class="label">ワールド数</div></div>
-    <div class="stat-card domination"><div class="value" id="l-dom">-</div><div class="label">制覇(21城)</div></div>
-    <div class="stat-card monopoly"><div class="value" id="l-mono">-</div><div class="label">独占(5城)</div></div>
-    <div class="stat-card oligopoly"><div class="value" id="l-oligo">-</div><div class="label">寡占(3-4城)</div></div>
-    <div class="stat-card contested"><div class="value" id="l-cont">-</div><div class="label">分散</div></div>
+    <div class="stat-card domination"><div class="value" id="l-dom">-</div><div class="rate" id="l-dom-rate"></div><div class="label">制覇(21城)</div></div>
+    <div class="stat-card monopoly"><div class="value" id="l-mono">-</div><div class="rate" id="l-mono-rate"></div><div class="label">独占(5城)</div></div>
+    <div class="stat-card oligopoly"><div class="value" id="l-oligo">-</div><div class="rate" id="l-oligo-rate"></div><div class="label">寡占(3-4城)</div></div>
+    <div class="stat-card contested"><div class="value" id="l-cont">-</div><div class="rate" id="l-cont-rate"></div><div class="label">分散</div></div>
     <div class="stat-card"><div class="value" id="l-guilds">-</div><div class="label">ユニークギルド</div></div>
   </div>
   <div class="charts-row">
@@ -320,6 +320,11 @@ function renderL(){const fd=LD,s=cntS(fd);
   document.getElementById("l-total").textContent=s.total;document.getElementById("l-dom").textContent=s.domination;
   document.getElementById("l-mono").textContent=s.monopoly;document.getElementById("l-oligo").textContent=s.oligopoly;
   document.getElementById("l-cont").textContent=s.contested;document.getElementById("l-guilds").textContent=s.guilds.size;
+  const pct=n=>s.total?((n/s.total)*100).toFixed(1)+"%":"";
+  document.getElementById("l-dom-rate").textContent=pct(s.domination);
+  document.getElementById("l-mono-rate").textContent=pct(s.monopoly);
+  document.getElementById("l-oligo-rate").textContent=pct(s.oligopoly);
+  document.getElementById("l-cont-rate").textContent=pct(s.contested);
   mkSide(document.getElementById("l-side"),fd);lC=mkDonut(document.getElementById("l-donut"),fd,lC);
   bldDet(fd,document.getElementById("l-domB"),document.getElementById("l-monoB"),document.getElementById("l-oligoB"),
     document.getElementById("l-domC"),document.getElementById("l-monoC"),document.getElementById("l-oligoC"),document.getElementById("l-domCard"),false);
