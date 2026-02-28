@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -29,7 +30,10 @@
   .status-bar{padding:.6rem 2rem;font-size:.8rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
   .status-bar .ok{color:#2ecc71;} .status-bar .err{color:#e74c3c;} .status-bar .loading{color:#f39c12;}
   .info-bar{border-bottom:1px solid var(--border);}
-  .info-row{padding:0 2rem .6rem;display:flex;gap:2rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);}
+  .info-row{padding:0 2rem .6rem;display:flex;gap:1.5rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);flex-wrap:wrap;}
+  .info-item{display:flex;flex-direction:column;gap:.1rem;min-width:max-content;}
+  .info-item .info-label{font-size:.7rem;color:var(--text-dim);opacity:.7;}
+  .info-item .info-value{font-size:.82rem;font-weight:600;color:var(--text-dim);}
   .dashboard{padding:1.5rem 2rem;display:grid;gap:1.5rem;}
   .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;}
   .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center;}
@@ -103,12 +107,13 @@
 <div class="info-bar" id="infoBar">
   <div class="status-bar" id="statusBar">待機中…</div>
   <div class="info-row">
-    <span id="lastUpdate"></span>
-    <span id="schedNext"></span>
+    <div class="info-item"><span class="info-label">📋 最終更新</span><span class="info-value" id="lastUpdate">-</span></div>
+    <div class="info-item"><span class="info-label">⏰ 次回更新</span><span class="info-value" id="schedNext">-</span></div>
   </div>
 </div>
 
 <!-- ギルドバトル -->
+
 <div class="dashboard hidden" id="dash-local">
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="l-total">-</div><div class="label">ワールド数</div></div>
@@ -129,6 +134,7 @@
 </div>
 
 <!-- グランドバトル -->
+
 <div class="dashboard hidden" id="dash-global">
   <div class="global-filter-bar">
     <label>ワールド</label><input type="text" id="gf-world" placeholder="例: 127" oninput="renderG()" style="width:80px;">
@@ -165,6 +171,7 @@ const MF="font-family:'JetBrains Mono',monospace;font-weight:600";
 const CNA={1:"EL",2:"EX",3:"GM"};
 const SCHED_HOUR=22,SCHED_MIN=0;
 const DATA_BASE="data/";
+function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
 let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null;
 
@@ -302,7 +309,7 @@ async function loadData(){
     initFilters();
     // 最終更新
     const ts=Math.max(lData.timestamp||0,gData.timestamp||0);
-    if(ts>0)document.getElementById("lastUpdate").textContent=`📋 最終更新: ${new Date(ts*1000).toLocaleString("ja-JP")}`;
+    if(ts>0){const d=new Date(ts*1000);document.getElementById("lastUpdate").textContent=fD(d);}
     showNextUpdate();
     ss(`✓ ギルバト ${LD.length}件 / グラバト ${GD.length}件 読み込み完了`,"ok");
     renderL();renderG();switchTab(curTab);
@@ -313,7 +320,7 @@ function showNextUpdate(){
   const el=document.getElementById("schedNext"),now=new Date();
   const next=new Date(now.getFullYear(),now.getMonth(),now.getDate(),SCHED_HOUR,SCHED_MIN,0,0);
   if(next<=now)next.setDate(next.getDate()+1);
-  el.textContent=`⏰ 次回更新: ${next.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}`;
+  el.textContent=fD(next);
 }
 
 function renderL(){const fd=LD,s=cntS(fd);
@@ -349,5 +356,6 @@ function renderGT(){bldFull(document.getElementById("g-tB"),gfGD(),document.getE
 
 document.addEventListener("DOMContentLoaded",()=>{loadData();});
 </script>
+
 </body>
 </html>
