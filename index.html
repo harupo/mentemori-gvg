@@ -330,8 +330,7 @@ async function loadData(){
     if(ts>0)document.getElementById("lastUpdate").textContent=`📋 最終更新: ${new Date(ts*1000).toLocaleString("ja-JP")}`;
     showNextUpdate();
     ss(`✓ ギルバト ${LD.length}件 / グラバト ${GD.length}件 読み込み完了`,"ok");
-    document.getElementById("dash-local").classList.remove("hidden");renderL();
-    if(GD.length){document.getElementById("dash-global").classList.remove("hidden");}renderG();
+    renderL();renderG();switchTab(curTab);
   }catch(e){ss(`✗ ${e.message}`,"err");}
 }
 
