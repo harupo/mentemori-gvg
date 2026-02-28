@@ -58,6 +58,9 @@
   .filter-row input,.filter-row select{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.3rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);}
   .filter-row input{width:260px;}
   .hidden{display:none !important;}
+  .global-filter-bar{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;padding:1rem 0;border-bottom:1px solid var(--border);margin-bottom:.5rem;}
+  .global-filter-bar label{font-size:.82rem;color:var(--text-dim);font-weight:600;}
+  .global-filter-bar select,.global-filter-bar input{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);}
   .g-hide-srv .srv-col{display:none !important;}
   .mono-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .8rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;min-width:max-content;}
   .mono-item:hover{background:var(--bg-card-hover);}
@@ -106,6 +109,10 @@
 
 <!-- ギルドバトル -->
 <div class="dashboard hidden" id="dash-local">
+  <div class="global-filter-bar">
+    <label>サーバー</label><select id="lf-srv" onchange="renderL()"><option value="all">全て</option></select>
+    <label>ワールド</label><input type="text" id="lf-world" placeholder="例: 127" oninput="renderL()" style="width:80px;">
+  </div>
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="l-total">-</div><div class="label">ワールド数</div></div>
     <div class="stat-card domination"><div class="value" id="l-dom">-</div><div class="label">制覇(21城)</div></div>
@@ -126,6 +133,11 @@
 
 <!-- グランドバトル -->
 <div class="dashboard hidden" id="dash-global">
+  <div class="global-filter-bar">
+    <label>サーバー</label><select id="gf-srv" onchange="renderG()"><option value="all">全て</option></select>
+    <label>ワールド</label><input type="text" id="gf-world" placeholder="例: 127" oninput="renderG()" style="width:80px;">
+    <label>クラス</label><select id="gf-cls" onchange="renderG()"><option value="all">全て</option></select>
+  </div>
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="g-total">-</div><div class="label">ブロック数</div></div>
     <div class="stat-card domination"><div class="value" id="g-dom">-</div><div class="label">制覇(21城)</div></div>
@@ -162,7 +174,43 @@ let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null;
 
 function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;document.getElementById("wf-float").classList.remove("hidden");renderG();}
 function clearWF(){gWF=null;document.getElementById("wf-float").classList.add("hidden");renderG();}
-function gfGD(){return gWF?GD.filter(it=>it._wds.split(", ").includes(gWF)):GD;}
+function gfGD(){
+  let d=gWF?GD.filter(it=>it._wds.split(", ").includes(gWF)):GD;
+  const srv=document.getElementById("gf-srv")?.value;
+  const wld=document.getElementById("gf-world")?.value.trim();
+  const cls=document.getElementById("gf-cls")?.value;
+  if(srv&&srv!=="all")d=d.filter(it=>it._sn===srv);
+  if(wld)d=d.filter(it=>it._wds&&it._wds.split(", ").some(w=>w.includes(wld)));
+  if(cls&&cls!=="all")d=d.filter(it=>String(it._cls)===cls);
+  return d;
+}
+
+function filteredLD(){
+  let d=LD;
+  const srv=document.getElementById("lf-srv")?.value;
+  const wld=document.getElementById("lf-world")?.value.trim();
+  if(srv&&srv!=="all")d=d.filter(it=>it._sn===srv);
+  if(wld)d=d.filter(it=>it._label&&it._label.includes(wld));
+  return d;
+}
+
+function initFilters(){
+  // ギルバト：サーバー
+  const lSrv=document.getElementById("lf-srv");
+  const lSrvSet=new Set(LD.map(it=>it._sn).filter(Boolean));
+  lSrv.innerHTML='<option value="all">全て</option>';
+  [...lSrvSet].sort().forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;lSrv.appendChild(o);});
+  // グラバト：サーバー
+  const gSrv=document.getElementById("gf-srv");
+  const gSrvSet=new Set(GD.map(it=>it._sn).filter(Boolean));
+  gSrv.innerHTML='<option value="all">全て</option>';
+  [...gSrvSet].sort().forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;gSrv.appendChild(o);});
+  // グラバト：クラス
+  const gCls=document.getElementById("gf-cls");
+  const gClsSet=new Set(GD.map(it=>it._cls).filter(Boolean));
+  gCls.innerHTML='<option value="all">全て</option>';
+  [...gClsSet].sort((a,b)=>a-b).forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=CN[c]||c;gCls.appendChild(o);});
+}
 
 function ss(t,c=""){document.getElementById("statusBar").innerHTML=`<span class="${c}">${t}</span>`;}
 function oc(n,a){if(!n||n==="NPC")return"#444";if(n===a.dominant)return"var(--oligo-a)";const o=[];for(const x of a.mn){if(x!==a.dominant&&x!=="NPC"&&!o.includes(x))o.push(x);}return o.indexOf(n)===0?"var(--oligo-b)":"var(--oligo-c)";}
@@ -272,10 +320,11 @@ async function loadData(){
     const lData=await lRes.json(),gData=await gRes.json();
     // ギルドバトル
     LD=[];
-    for(const it of lData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,wid:it.wid};r._a=az(co);LD.push(r);}
+    for(const it of lData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const sn=SN[String(it.wid).charAt(0)]||"?";const r={co,_label:it.label,wid:it.wid,_sn:sn};r._a=az(co);LD.push(r);}
     // グランドバトル
     GD=[];
     for(const it of gData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,_gid:it.gid,_cls:it.cls,_blk:it.blk,_sn:it.sn,_wds:it.wds};r._a=az(co);GD.push(r);}
+    initFilters();
     // 最終更新
     const ts=Math.max(lData.timestamp||0,gData.timestamp||0);
     if(ts>0)document.getElementById("lastUpdate").textContent=`📋 最終更新: ${new Date(ts*1000).toLocaleString("ja-JP")}`;
@@ -293,15 +342,15 @@ function showNextUpdate(){
   el.textContent=`⏰ 次回更新: ${next.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}`;
 }
 
-function renderL(){const s=cntS(LD);
+function renderL(){const fd=filteredLD(),s=cntS(fd);
   document.getElementById("l-total").textContent=s.total;document.getElementById("l-dom").textContent=s.domination;
   document.getElementById("l-mono").textContent=s.monopoly;document.getElementById("l-oligo").textContent=s.oligopoly;
   document.getElementById("l-cont").textContent=s.contested;document.getElementById("l-guilds").textContent=s.guilds.size;
-  mkSide(document.getElementById("l-side"),LD);lC=mkDonut(document.getElementById("l-donut"),LD,lC);
-  bldDet(LD,document.getElementById("l-domB"),document.getElementById("l-monoB"),document.getElementById("l-oligoB"),
+  mkSide(document.getElementById("l-side"),fd);lC=mkDonut(document.getElementById("l-donut"),fd,lC);
+  bldDet(fd,document.getElementById("l-domB"),document.getElementById("l-monoB"),document.getElementById("l-oligoB"),
     document.getElementById("l-domC"),document.getElementById("l-monoC"),document.getElementById("l-oligoC"),document.getElementById("l-domCard"),false);
   renderLT();}
-function renderLT(){bldFull(document.getElementById("l-tB"),LD,document.getElementById("l-fG"),document.getElementById("l-fS"),false);}
+function renderLT(){bldFull(document.getElementById("l-tB"),filteredLD(),document.getElementById("l-fG"),document.getElementById("l-fS"),false);}
 
 function renderG(){const fd=gfGD(),s=cntS(fd);
   const dg=document.getElementById("dash-global");dg.classList.add("g-hide-srv");
