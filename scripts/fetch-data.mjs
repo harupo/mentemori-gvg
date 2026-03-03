@@ -87,6 +87,18 @@ async function fetchGlobal() {
   if (!wg) throw new Error('wgroups取得失敗');
 
   const grps = wg.data.filter(g => g.globalgvg && String(g.worlds[0]).charAt(0) === SERVER);
+  if (!grps.length) {
+    console.log(`  デバッグ: wgroups total=${wg.data.length}`);
+    if (wg.data.length > 0) {
+      const sample = wg.data[0];
+      console.log(`  デバッグ: サンプル keys=${Object.keys(sample).join(', ')}`);
+      console.log(`  デバッグ: globalgvg=${sample.globalgvg}, worlds=${JSON.stringify(sample.worlds)}`);
+      const withGvg = wg.data.filter(g => g.globalgvg);
+      console.log(`  デバッグ: globalgvg=true は ${withGvg.length}件`);
+      const jpOnly = wg.data.filter(g => String(g.worlds?.[0]).charAt(0) === SERVER);
+      console.log(`  デバッグ: JP(worlds[0]先頭='1') は ${jpOnly.length}件`);
+    }
+  }
   const classes = [1, 2, 3];
   const blocks = [0, 1, 2, 3];
   const tasks = [];
@@ -139,9 +151,10 @@ async function main() {
 
   // 同日(JST)スキップ判定
   try {
-    const existing = JSON.parse(readFileSync('data/local.json', 'utf-8'));
-    if (existing.fetchedAt) {
-      const prev = new Date(existing.fetchedAt);
+    const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
+    const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
+    if (existingL.fetchedAt && existingG.items?.length > 0) {
+      const prev = new Date(existingL.fetchedAt);
       const now = new Date();
       const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
       if (toJSTDate(prev) === toJSTDate(now)) {
