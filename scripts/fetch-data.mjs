@@ -149,20 +149,26 @@ async function fetchGlobal() {
 async function main() {
   mkdirSync('data', { recursive: true });
 
-  // 同日(JST)スキップ判定
-  try {
-    const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
-    const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
-    if (existingL.fetchedAt && existingG.items?.length > 0) {
-      const prev = new Date(existingL.fetchedAt);
-      const now = new Date();
-      const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
-      if (toJSTDate(prev) === toJSTDate(now)) {
-        console.log(`=== スキップ: 同日(JST)のデータ取得済み (${toJSTDate(prev)}) ===`);
-        return;
+  const forceUpdate = process.env.FORCE_UPDATE === 'true';
+
+  // 同日(JST)スキップ判定（手動実行時はスキップしない）
+  if (!forceUpdate) {
+    try {
+      const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
+      const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
+      if (existingL.fetchedAt && existingG.items?.length > 0) {
+        const prev = new Date(existingL.fetchedAt);
+        const now = new Date();
+        const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
+        if (toJSTDate(prev) === toJSTDate(now)) {
+          console.log(`=== スキップ: 同日(JST)のデータ取得済み (${toJSTDate(prev)}) ===`);
+          return;
+        }
       }
-    }
-  } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
+    } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
+  } else {
+    console.log('=== 手動実行: 強制更新モード ===');
+  }
 
   const local = await fetchLocal();
   local.fetchedAt = new Date().toISOString();
