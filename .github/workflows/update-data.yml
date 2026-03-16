@@ -2,8 +2,8 @@ name: Update GvG Data
 
 on:
   schedule:
-    # 毎日 13:00 UTC = 22:00 JST
-    - cron: '0 13 * * *'
+    # 毎日 05:00 UTC = 14:00 JST
+    - cron: '0 5 * * *'
   workflow_dispatch: # 手動実行も可能
 
 jobs:
