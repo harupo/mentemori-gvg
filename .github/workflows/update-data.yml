@@ -2,8 +2,8 @@ name: Update GvG Data
 
 on:
   schedule:
-    # 毎日 19:00 UTC = 04:00 JST
-    - cron: '0 19 * * *'
+    # 毎日 13:00 UTC = 22:00 JST
+    - cron: '0 13 * * *'
   workflow_dispatch: # 手動実行も可能
 
 jobs:
@@ -20,6 +20,8 @@ jobs:
 
       - name: Fetch data from API
         run: node scripts/fetch-data.mjs
+        env:
+          FORCE_UPDATE: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
 
       - name: Commit and push
         run: |
@@ -30,6 +32,5 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update GvG data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            git pull --rebase origin main
             git push
           fi
