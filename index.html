@@ -115,6 +115,7 @@
   .hm-tile-body{position:relative;z-index:1;margin-top:1rem;}
   .hm-tile-rate{font-size:1.6rem;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.3rem;font-family:'JetBrains Mono',monospace;}
   .hm-tile-sub{font-size:.7rem;opacity:.92;}
+  .hm-tile-guild{font-size:.68rem;margin-top:.3rem;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   @media(max-width:1024px){.hm-controls-grid{grid-template-columns:1fr;}}
   @media(max-width:640px){.hm-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.hm-tile{min-height:100px;}.hm-tile-rate{font-size:1.3rem;}}
 </style>
@@ -469,7 +470,7 @@ function renderHM(){
     const bg=hmColor(d.ratio);const c=hmText(d.ratio);
     return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
       <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge">${hmLabel(d.ratio)}</div></div>
-      <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div></div>
+      <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div><div class="hm-tile-guild">${d.ad}</div></div>
     </article>`;
   }).join("");
 }
