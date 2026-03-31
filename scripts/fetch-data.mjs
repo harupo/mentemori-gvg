@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync, readFileSync } from 'fs';
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs';
 
 const API = 'https://api.mentemori.icu';
 const SERVER = '1'; // JP
@@ -149,26 +149,20 @@ async function fetchGlobal() {
 async function main() {
   mkdirSync('data', { recursive: true });
 
-  const forceUpdate = process.env.FORCE_UPDATE === 'true';
-
-  // 同日(JST)スキップ判定（手動実行時はスキップしない）
-  if (!forceUpdate) {
-    try {
-      const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
-      const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
-      if (existingL.fetchedAt && existingG.items?.length > 0) {
-        const prev = new Date(existingL.fetchedAt);
-        const now = new Date();
-        const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
-        if (toJSTDate(prev) === toJSTDate(now)) {
-          console.log(`=== スキップ: 同日(JST)のデータ取得済み (${toJSTDate(prev)}) ===`);
-          return;
-        }
+  // 同日(JST)スキップ判定
+  try {
+    const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
+    const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
+    if (existingL.fetchedAt && existingG.items?.length > 0) {
+      const prev = new Date(existingL.fetchedAt);
+      const now = new Date();
+      const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
+      if (toJSTDate(prev) === toJSTDate(now)) {
+        console.log(`=== スキップ: 同日(JST)のデータ取得済み (${toJSTDate(prev)}) ===`);
+        return;
       }
-    } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
-  } else {
-    console.log('=== 手動実行: 強制更新モード ===');
-  }
+    }
+  } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
 
   const local = await fetchLocal();
   local.fetchedAt = new Date().toISOString();
@@ -182,7 +176,47 @@ async function main() {
   writeFileSync('data/global.json', JSON.stringify(global));
   console.log(`  → data/global.json (${(JSON.stringify(global).length / 1024).toFixed(1)} KB)`);
 
+  // 履歴保存
+  saveHistory(local, global);
+
   console.log('=== 完了 ===');
+}
+
+function saveHistory(local, global) {
+  const toJSTDate = d => new Date(new Date(d).getTime() + 9 * 3600000).toISOString().slice(0, 10);
+  const today = toJSTDate(local.fetchedAt || new Date().toISOString());
+
+  mkdirSync('data/history/local', { recursive: true });
+  mkdirSync('data/history/global', { recursive: true });
+
+  // index.json 読み込み
+  const indexPath = 'data/history/index.json';
+  let index = { local: [], global: [] };
+  if (existsSync(indexPath)) {
+    try { index = JSON.parse(readFileSync(indexPath, 'utf-8')); } catch {}
+  }
+
+  // local 保存
+  if (local.items?.length > 0) {
+    const lPath = `data/history/local/${today}.json`;
+    writeFileSync(lPath, JSON.stringify(local));
+    if (!index.local.includes(today)) index.local.push(today);
+    console.log(`  → ${lPath}`);
+  }
+
+  // global 保存
+  if (global.items?.length > 0) {
+    const gPath = `data/history/global/${today}.json`;
+    writeFileSync(gPath, JSON.stringify(global));
+    if (!index.global.includes(today)) index.global.push(today);
+    console.log(`  → ${gPath}`);
+  }
+
+  // index.json 保存
+  index.local.sort();
+  index.global.sort();
+  writeFileSync(indexPath, JSON.stringify(index, null, 2));
+  console.log(`  → ${indexPath} (local:${index.local.length}件, global:${index.global.length}件)`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
