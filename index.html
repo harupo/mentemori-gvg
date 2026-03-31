@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
@@ -29,7 +30,10 @@
   .status-bar{padding:.6rem 2rem;font-size:.8rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
   .status-bar .ok{color:#2ecc71;} .status-bar .err{color:#e74c3c;} .status-bar .loading{color:#f39c12;}
   .info-bar{border-bottom:1px solid var(--border);}
-  .info-row{padding:0 2rem .6rem;display:flex;gap:2rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);}
+  .info-row{padding:0 2rem .6rem;display:flex;gap:1.5rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);flex-wrap:wrap;}
+  .info-item{display:flex;flex-direction:column;gap:.1rem;min-width:max-content;}
+  .info-item .info-label{font-size:.7rem;color:var(--text-dim);opacity:.7;}
+  .info-item .info-value{font-size:.82rem;font-weight:600;color:var(--text-dim);}
   .dashboard{padding:1.5rem 2rem;display:grid;gap:1.5rem;}
   .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;}
   .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center;}
@@ -89,6 +93,30 @@
     .table-wrap{font-size:.75rem;} tbody td,thead th{padding:.4rem .5rem;}
     .castle-cell{white-space:nowrap;}
   }
+  /* ヒートマップ */
+  .hm-controls{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1.2rem;}
+  .hm-controls-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1rem;align-items:end;}
+  .hm-field label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.4rem;}
+  .hm-field .hm-input,.hm-field .hm-select{width:100%;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);padding:0 .7rem;font-family:'Noto Sans JP',sans-serif;font-size:.82rem;outline:none;}
+  .hm-range-row{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-dim);margin-bottom:.4rem;}
+  .hm-field input[type="range"]{width:100%;accent-color:#ef4444;}
+  .hm-legend{margin-top:1rem;}
+  .hm-legend-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);margin-bottom:.4rem;}
+  .hm-legend-bar{height:10px;border-radius:99px;background:linear-gradient(90deg,#1d4ed8 0%,#67e8f9 40%,#fde68a 65%,#fb7185 82%,#b91c1c 100%);border:1px solid rgba(255,255,255,.08);}
+  .hm-meta{display:flex;gap:1.5rem;margin-top:.8rem;font-size:.78rem;color:var(--text-dim);}
+  .hm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;}
+  .hm-tile{min-height:110px;border-radius:14px;padding:1rem;border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 20px rgba(0,0,0,.22);transition:transform .15s,box-shadow .15s,filter .15s;position:relative;overflow:hidden;cursor:default;}
+  .hm-tile:hover{transform:translateY(-2px) scale(1.01);filter:brightness(1.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 14px 28px rgba(0,0,0,.3);}
+  .hm-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 35%);pointer-events:none;}
+  .hm-tile-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;position:relative;z-index:1;}
+  .hm-tile-world{font-size:.7rem;opacity:.88;}
+  .hm-tile-wid{font-weight:800;font-size:1.4rem;line-height:1;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+  .hm-badge{font-size:.65rem;padding:.3rem .5rem;border-radius:99px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.08);white-space:nowrap;}
+  .hm-tile-body{position:relative;z-index:1;margin-top:1rem;}
+  .hm-tile-rate{font-size:1.6rem;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.3rem;font-family:'JetBrains Mono',monospace;}
+  .hm-tile-sub{font-size:.7rem;opacity:.92;}
+  @media(max-width:1024px){.hm-controls-grid{grid-template-columns:1fr;}}
+  @media(max-width:640px){.hm-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.hm-tile{min-height:100px;}.hm-tile-rate{font-size:1.3rem;}}
 </style>
 </head>
 <body>
@@ -99,16 +127,18 @@
 <div class="tabs">
   <button class="tab-btn active" data-tab="local" onclick="switchTab('local')">⚔️ ギルドバトル</button>
   <button class="tab-btn" data-tab="global" onclick="switchTab('global')">🌐 グランドバトル</button>
+  <button class="tab-btn" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 占有ヒートマップ</button>
 </div>
 <div class="info-bar" id="infoBar">
   <div class="status-bar" id="statusBar">待機中…</div>
   <div class="info-row">
-    <span id="lastUpdate"></span>
-    <span id="schedNext"></span>
+    <div class="info-item"><span class="info-label">📋 最終更新</span><span class="info-value" id="lastUpdate">-</span></div>
+    <div class="info-item"><span class="info-label">⏰ 次回更新</span><span class="info-value" id="schedNext">-</span></div>
   </div>
 </div>
 
 <!-- ギルドバトル -->
+
 <div class="dashboard hidden" id="dash-local">
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="l-total">-</div><div class="label">ワールド数</div></div>
@@ -129,6 +159,7 @@
 </div>
 
 <!-- グランドバトル -->
+
 <div class="dashboard hidden" id="dash-global">
   <div class="global-filter-bar">
     <label>ワールド</label><input type="text" id="gf-world" placeholder="例: 127" oninput="renderG()" style="width:80px;">
@@ -152,6 +183,47 @@
   <div class="table-card"><h3>全ブロック一覧</h3><div class="filter-row"><input type="text" id="g-fG" placeholder="ギルド名 / ワールド番号で検索…" oninput="renderGT()"><select id="g-fS" onchange="renderGT()"><option value="all">全て</option><option value="domination">制覇</option><option value="monopoly">独占</option><option value="oligopoly">寡占</option><option value="contested">分散</option></select></div><div class="table-wrap"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>状態</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th><th>支配ギルド</th></tr></thead><tbody id="g-tB"></tbody></table></div></div>
 </div>
 
+<!-- 占有ヒートマップ -->
+
+<div class="dashboard hidden" id="dash-heatmap">
+  <div class="summary-row">
+    <div class="stat-card"><div class="value" id="hm-total">-</div><div class="label">対象ワールド数</div></div>
+    <div class="stat-card"><div class="value" id="hm-avg">-</div><div class="label">平均最大占有率</div></div>
+    <div class="stat-card"><div class="value" style="color:#ef4444;" id="hm-max">-</div><div class="label">最高占有率</div></div>
+    <div class="stat-card"><div class="value" style="color:#f39c12;" id="hm-high">-</div><div class="label">強寡占以上</div></div>
+  </div>
+  <div class="hm-controls">
+    <div class="hm-controls-grid">
+      <div class="hm-field">
+        <label>ワールド検索</label>
+        <input id="hm-search" class="hm-input" type="text" placeholder="例: 127" oninput="renderHM()">
+      </div>
+      <div class="hm-field">
+        <div class="hm-range-row"><span>最小占有率</span><span id="hm-rangeVal">0%</span></div>
+        <input id="hm-minRate" type="range" min="0" max="100" step="1" value="0" oninput="renderHM()">
+      </div>
+      <div class="hm-field">
+        <label>並び順</label>
+        <select id="hm-sort" class="hm-select" onchange="renderHM()">
+          <option value="wid-asc">ワールド 昇順</option>
+          <option value="wid-desc">ワールド 降順</option>
+          <option value="rate-desc">占有率 高い順</option>
+          <option value="rate-asc">占有率 低い順</option>
+        </select>
+      </div>
+    </div>
+    <div class="hm-legend">
+      <div class="hm-legend-row"><span>分散</span><span>独占</span></div>
+      <div class="hm-legend-bar"></div>
+    </div>
+    <div class="hm-meta">
+      <span id="hm-visCount">表示件数: 0</span>
+      <span>比率 = 最大占有拠点数 ÷ 21</span>
+    </div>
+  </div>
+  <div class="hm-grid" id="hm-grid"></div>
+</div>
+
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
 
 <script>
@@ -163,8 +235,9 @@ const TC={domination:"tag-domination",monopoly:"tag-monopoly",oligopoly:"tag-oli
 const TL={domination:"制覇",monopoly:"独占",oligopoly:"寡占",contested:"分散"};
 const MF="font-family:'JetBrains Mono',monospace;font-weight:600";
 const CNA={1:"EL",2:"EX",3:"GM"};
-const SCHED_HOUR=14,SCHED_MIN=0;
+const SCHED_HOUR=4,SCHED_MIN=0;
 const DATA_BASE="data/";
+function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
 let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null;
 
@@ -283,7 +356,9 @@ function switchTab(tab){curTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
   document.getElementById("dash-local").classList.toggle("hidden",tab!=="local"||!LD.length);
   document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
+  document.getElementById("dash-heatmap").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
+  if(tab==="heatmap"&&LD.length)renderHM();
 }
 
 // JSON読み込み
@@ -301,8 +376,9 @@ async function loadData(){
     for(const it of gData.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,_gid:it.gid,_cls:it.cls,_blk:it.blk,_sn:it.sn,_wds:it.wds};r._a=az(co);GD.push(r);}
     initFilters();
     // 最終更新
-    const ts=Math.max(lData.timestamp||0,gData.timestamp||0);
-    if(ts>0)document.getElementById("lastUpdate").textContent=`📋 最終更新: ${new Date(ts*1000).toLocaleString("ja-JP")}`;
+    const fa=lData.fetchedAt||gData.fetchedAt;
+    if(fa){document.getElementById("lastUpdate").textContent=fD(new Date(fa));}
+    else{const ts=Math.max(lData.timestamp||0,gData.timestamp||0);if(ts>0)document.getElementById("lastUpdate").textContent=fD(new Date(ts*1000));}
     showNextUpdate();
     ss(`✓ ギルバト ${LD.length}件 / グラバト ${GD.length}件 読み込み完了`,"ok");
     renderL();renderG();switchTab(curTab);
@@ -313,7 +389,7 @@ function showNextUpdate(){
   const el=document.getElementById("schedNext"),now=new Date();
   const next=new Date(now.getFullYear(),now.getMonth(),now.getDate(),SCHED_HOUR,SCHED_MIN,0,0);
   if(next<=now)next.setDate(next.getDate()+1);
-  el.textContent=`⏰ 次回更新: ${next.toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}`;
+  el.textContent=fD(next);
 }
 
 function renderL(){const fd=LD,s=cntS(fd);
@@ -347,7 +423,59 @@ function renderG(){const fd=gfGD(),s=cntS(fd);
   renderGT();}
 function renderGT(){bldFull(document.getElementById("g-tB"),gfGD(),document.getElementById("g-fG"),document.getElementById("g-fS"),true);}
 
+// ヒートマップ
+function hmColor(ratio){const t=Math.max(0,Math.min(1,(ratio-.14)/(1-.14)));const h=215-t*215;return`hsl(${h} 78% ${50-t*8}%)`;}
+function hmText(ratio){return ratio>=.25?"#fff":"#0f172a";}
+function hmLabel(ratio){if(ratio>=.6)return"独占級";if(ratio>=.4)return"強寡占";if(ratio>=.25)return"寡占";return"分散";}
+
+function renderHM(){
+  const grid=document.getElementById("hm-grid");
+  const q=document.getElementById("hm-search").value.trim().toLowerCase();
+  const minR=Number(document.getElementById("hm-minRate").value);
+  document.getElementById("hm-rangeVal").textContent=minR+"%";
+  const sortBy=document.getElementById("hm-sort").value;
+
+  // LDからヒートマップデータ生成
+  const hmData=LD.map(it=>({wid:it.wid||0,label:it._label,am:it._a.am,ad:it._a.ad,ratio:it._a.am/21,pct:it._a.am/21*100}));
+
+  // stats
+  if(hmData.length){
+    const rates=hmData.map(d=>d.ratio);
+    const avg=rates.reduce((a,b)=>a+b,0)/rates.length;
+    document.getElementById("hm-total").textContent=hmData.length;
+    document.getElementById("hm-avg").textContent=(avg*100).toFixed(1)+"%";
+    document.getElementById("hm-max").textContent=(Math.max(...rates)*100).toFixed(1)+"%";
+    document.getElementById("hm-high").textContent=hmData.filter(d=>d.ratio>=.4).length;
+  }
+
+  // filter & sort
+  let fd=hmData.filter(d=>{
+    if(q&&!d.label.includes(q))return false;
+    if(d.pct<minR)return false;
+    return true;
+  });
+  switch(sortBy){
+    case"wid-desc":fd.sort((a,b)=>b.wid-a.wid);break;
+    case"rate-desc":fd.sort((a,b)=>b.ratio-a.ratio||(a.wid-b.wid));break;
+    case"rate-asc":fd.sort((a,b)=>a.ratio-b.ratio||(a.wid-b.wid));break;
+    default:fd.sort((a,b)=>a.wid-b.wid);
+  }
+
+  document.getElementById("hm-visCount").textContent="表示件数: "+fd.length;
+
+  if(!fd.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">条件に一致するワールドがありません</div>';return;}
+
+  grid.innerHTML=fd.map(d=>{
+    const bg=hmColor(d.ratio);const c=hmText(d.ratio);
+    return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
+      <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge">${hmLabel(d.ratio)}</div></div>
+      <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div></div>
+    </article>`;
+  }).join("");
+}
+
 document.addEventListener("DOMContentLoaded",()=>{loadData();});
 </script>
+
 </body>
 </html>
