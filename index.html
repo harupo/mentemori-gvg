@@ -16,9 +16,8 @@
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Noto Sans JP',sans-serif;background:var(--bg-deep);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden;}
-  .header{padding:2rem 2rem 1rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101018,var(--bg-deep));}
-  .header h1{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#fff,#a0a0d0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .header .sub{color:var(--text-dim);font-size:.85rem;margin-top:.3rem;}
+  .header{padding:.6rem 2rem .4rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101018,var(--bg-deep));}
+  .header h1{font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,#fff,#a0a0d0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .tab-btn{font-family:'Noto Sans JP',sans-serif;font-size:.9rem;font-weight:600;padding:.8rem 1.5rem;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0;}
   .tab-btn:hover{color:var(--text);} .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
@@ -27,19 +26,16 @@
   .controls select,.controls button{font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;}
   .controls button{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;transition:all .2s;}
   .controls button:hover{filter:brightness(1.2);} .controls button:disabled{opacity:.5;cursor:not-allowed;}
-  .status-bar{padding:.6rem 2rem;font-size:.8rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;}
-  .status-bar .ok{color:#2ecc71;} .status-bar .err{color:#e74c3c;} .status-bar .loading{color:#f39c12;}
   .info-bar{border-bottom:1px solid var(--border);}
-  .info-row{padding:0 2rem .6rem;display:flex;gap:1.5rem;font-size:.8rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);flex-wrap:wrap;}
-  .info-item{display:flex;flex-direction:column;gap:.1rem;min-width:max-content;}
-  .info-item .info-label{font-size:.7rem;color:var(--text-dim);opacity:.7;}
-  .info-item .info-value{font-size:.82rem;font-weight:600;color:var(--text-dim);}
+  .info-row{padding:.35rem 2rem;display:flex;gap:.5rem;font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap;}
+  .info-sep{color:#3a3a4a;font-size:.65rem;}
+  .status-text .ok{color:#2ecc71;} .status-text .err{color:#e74c3c;} .status-text .loading{color:#f39c12;}
   .dashboard{padding:1.5rem 2rem;display:grid;gap:1.5rem;}
-  .summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;}
-  .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;text-align:center;}
-  .stat-card .value{font-size:2rem;font-weight:900;font-family:'JetBrains Mono',monospace;}
-  .stat-card .label{font-size:.7rem;color:var(--text-dim);margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em;}
-  .stat-card .rate{font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);margin-top:.1rem;}
+  .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+  .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.7rem .5rem;text-align:center;}
+  .stat-card .value{font-size:1.4rem;font-weight:900;font-family:'JetBrains Mono',monospace;}
+  .stat-card .label{font-size:.6rem;color:var(--text-dim);margin-top:.2rem;text-transform:uppercase;letter-spacing:.03em;}
+  .stat-card .rate{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);margin-top:.1rem;}
   .stat-card.domination .value{color:var(--domination);} .stat-card.monopoly .value{color:var(--monopoly);}
   .stat-card.oligopoly .value{color:var(--oligopoly);} .stat-card.contested .value{color:var(--contested);}
   .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;}
@@ -86,29 +82,39 @@
   .wf-float button{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:600;padding:.4rem 1rem;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;}
   .wf-float button:hover{filter:brightness(1.2);}
   @media(max-width:768px){
-    .header{padding:1.2rem 1rem .8rem;} .header h1{font-size:1.2rem;}
-    .tab-btn{padding:.7rem 1rem;font-size:.82rem;}
-    .controls{padding:.8rem 1rem;} .dashboard{padding:1rem;}
-    .summary-row{grid-template-columns:repeat(3,1fr);gap:.5rem;}
-    .stat-card{padding:.8rem .5rem;} .stat-card .value{font-size:1.4rem;} .stat-card .label{font-size:.6rem;}
+    .header{padding:.5rem 1rem .3rem;} .header h1{font-size:1rem;}
+    .tab-btn{padding:.6rem .8rem;font-size:.78rem;}
+    .info-row{padding:.3rem 1rem;font-size:.65rem;}
+    .controls{padding:.6rem 1rem;} .dashboard{padding:.6rem .8rem;gap:.6rem;}
+    .summary-row{grid-template-columns:repeat(4,1fr);gap:.3rem;}
+    .stat-card{padding:.4rem .2rem;border-radius:5px;} .stat-card .value{font-size:.9rem;} .stat-card .label{font-size:.45rem;}
+    .hm-controls{padding:.4rem .6rem;margin-bottom:.4rem;}
+    .hm-controls-grid{grid-template-columns:1fr!important;gap:.4rem;}
+    .hm-meta{font-size:.65rem;flex-wrap:wrap;}
+    .hm-view-btn{padding:.35rem .8rem;font-size:.75rem;}
+    .hm-filter-toggle{display:block;}
+    .hm-controls.collapsed{display:none;}
     .table-wrap{font-size:.75rem;} tbody td,thead th{padding:.4rem .5rem;}
     .castle-cell{white-space:nowrap;}
   }
   /* ヒートマップ */
-  .hm-controls{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1.2rem;}
-  .hm-controls-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:1rem;align-items:end;}
-  .hm-field label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.4rem;}
-  .hm-field .hm-input,.hm-field .hm-select{width:100%;height:38px;border-radius:8px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);padding:0 .7rem;font-family:'Noto Sans JP',sans-serif;font-size:.82rem;outline:none;}
-  .hm-range-row{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-dim);margin-bottom:.4rem;}
-  .hm-field input[type="range"]{width:100%;accent-color:#ef4444;}
-  .hm-legend{margin-top:1rem;}
-  .hm-legend-row{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-dim);margin-bottom:.4rem;}
-  .hm-legend-bar{height:10px;border-radius:99px;background:linear-gradient(90deg,#1d4ed8 0%,#67e8f9 40%,#fde68a 65%,#fb7185 82%,#b91c1c 100%);border:1px solid rgba(255,255,255,.08);}
-  .hm-meta{display:flex;gap:1.5rem;margin-top:.8rem;font-size:.78rem;color:var(--text-dim);align-items:center;}
-  .hm-view-toggle{display:flex;gap:2px;margin-left:auto;}
-  .hm-view-btn{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .7rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
-  .hm-view-btn:first-child{border-radius:6px 0 0 6px;} .hm-view-btn:last-child{border-radius:0 6px 6px 0;}
+  .hm-controls{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.5rem .8rem;margin-bottom:.6rem;}
+  .hm-controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;align-items:end;}
+  .hm-field label{display:block;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
+  .hm-field .hm-input,.hm-field .hm-select{width:100%;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);padding:0 .5rem;font-family:'Noto Sans JP',sans-serif;font-size:.75rem;outline:none;}
+  .hm-range-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
+  .hm-field input[type="range"]{width:100%;accent-color:var(--accent);}
+  .hm-legend{margin-top:.5rem;}
+  .hm-legend-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
+  .hm-legend-bar{height:6px;border-radius:99px;background:linear-gradient(90deg,#1d4ed8 0%,#67e8f9 40%,#fde68a 65%,#fb7185 82%,#b91c1c 100%);border:1px solid rgba(255,255,255,.08);}
+  .hm-meta{display:flex;gap:1rem;margin-top:.4rem;font-size:.7rem;color:var(--text-dim);align-items:center;}
+  .hm-view-toggle{display:flex;gap:0;margin-left:auto;}
+  .hm-view-btn{font-family:'Noto Sans JP',sans-serif;font-size:.8rem;font-weight:700;padding:.45rem 1rem;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;}
+  .hm-view-btn:first-child{border-radius:8px 0 0 8px;} .hm-view-btn:last-child{border-radius:0 8px 8px 0;}
   .hm-view-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .hm-filter-toggle{display:none;font-family:'Noto Sans JP',sans-serif;font-size:.7rem;font-weight:600;padding:.25rem .7rem;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);border-radius:6px;cursor:pointer;}
+  .hm-filter-toggle:hover{color:var(--text);border-color:var(--accent);}
+  .hm-controls.collapsed{}
   .hm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;}
   .hm-tile{min-height:110px;border-radius:14px;padding:1rem;border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 20px rgba(0,0,0,.22);transition:transform .15s,box-shadow .15s,filter .15s;position:relative;overflow:hidden;cursor:default;}
   .hm-tile:hover{transform:translateY(-2px) scale(1.01);filter:brightness(1.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 14px 28px rgba(0,0,0,.3);}
@@ -170,7 +176,6 @@
 <body>
 <div class="header">
   <h1>⚔️ メメントモリ 拠点占有ダッシュボード</h1>
-  <div class="sub">ギルドバトル・グランドバトルの城保有状況と制覇・独占・寡占分析</div>
 </div>
 <div class="tabs">
   <button class="tab-btn active" data-tab="local" onclick="switchTab('local')">⚔️ ギルドバトル</button>
@@ -178,10 +183,12 @@
   <button class="tab-btn" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 占有ヒートマップ</button>
 </div>
 <div class="info-bar" id="infoBar">
-  <div class="status-bar" id="statusBar">待機中…</div>
   <div class="info-row">
-    <div class="info-item"><span class="info-label">📋 最終更新</span><span class="info-value" id="lastUpdate">-</span></div>
-    <div class="info-item"><span class="info-label">⏰ 次回更新</span><span class="info-value" id="schedNext">-</span></div>
+    <span class="status-text" id="statusBar">待機中…</span>
+    <span class="info-sep">|</span>
+    <span class="info-inline" id="lastUpdate">-</span>
+    <span class="info-sep">→</span>
+    <span class="info-inline" id="schedNext">-</span>
   </div>
 </div>
 
@@ -235,12 +242,20 @@
 
 <div class="dashboard hidden" id="dash-heatmap">
   <div class="summary-row">
-    <div class="stat-card"><div class="value" id="hm-total">-</div><div class="label">対象ワールド数</div></div>
-    <div class="stat-card"><div class="value" id="hm-avg">-</div><div class="label">平均最大占有率</div></div>
-    <div class="stat-card"><div class="value" style="color:#ef4444;" id="hm-max">-</div><div class="label">最高占有率</div></div>
-    <div class="stat-card"><div class="value" style="color:#f39c12;" id="hm-high">-</div><div class="label">強寡占以上</div></div>
+    <div class="stat-card"><div class="value" id="hm-total">-</div><div class="label">ワールド</div></div>
+    <div class="stat-card"><div class="value" id="hm-avg">-</div><div class="label">平均占有率</div></div>
+    <div class="stat-card"><div class="value" style="color:#ef4444;" id="hm-max">-</div><div class="label">最高</div></div>
+    <div class="stat-card"><div class="value" style="color:#f39c12;" id="hm-high">-</div><div class="label">強寡占+</div></div>
   </div>
-  <div class="hm-controls">
+  <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap;">
+    <div class="hm-view-toggle">
+      <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
+      <button class="hm-view-btn" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
+    </div>
+    <span style="font-size:.7rem;color:var(--text-dim);" id="hm-visCount">175件</span>
+    <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
+  </div>
+  <div class="hm-controls collapsed" id="hm-controls">
     <div class="hm-controls-grid" style="grid-template-columns:1fr 1fr;">
       <div class="hm-field">
         <div class="hm-range-row"><span>最小占有率</span><span id="hm-rangeVal">0%</span></div>
@@ -259,14 +274,6 @@
     <div class="hm-legend">
       <div class="hm-legend-row"><span>分散</span><span>独占</span></div>
       <div class="hm-legend-bar"></div>
-    </div>
-    <div class="hm-meta">
-      <span id="hm-visCount">表示件数: 0</span>
-      <span>比率 = 最大占有拠点数 ÷ 21</span>
-      <div class="hm-view-toggle">
-        <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
-        <button class="hm-view-btn" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
-      </div>
     </div>
   </div>
   <div class="hm-grid" id="hm-grid"></div>
@@ -452,7 +459,7 @@ async function loadData(){
     if(fa){document.getElementById("lastUpdate").textContent=fD(new Date(fa));}
     else{const ts=Math.max(lData.timestamp||0,gData.timestamp||0);if(ts>0)document.getElementById("lastUpdate").textContent=fD(new Date(ts*1000));}
     showNextUpdate();
-    ss(`✓ ギルバト ${LD.length}件 / グラバト ${GD.length}件 読み込み完了`,"ok");
+    ss(`✓ ${LD.length} + ${GD.length}件`,"ok");
     hmCurrentData=LD;
     renderL();renderG();switchTab(curTab);
     loadHMHistory();
@@ -607,6 +614,11 @@ function setHMView(mode){
   renderHM();
 }
 
+function toggleHMFilter(){
+  const el=document.getElementById("hm-controls");
+  el.classList.toggle("collapsed");
+}
+
 function renderHM(){
   const grid=document.getElementById("hm-grid");
   const minR=Number(document.getElementById("hm-minRate").value);
@@ -642,7 +654,7 @@ function renderHM(){
     default:fd.sort((a,b)=>a.wid-b.wid);
   }
 
-  document.getElementById("hm-visCount").textContent="表示件数: "+fd.length;
+  document.getElementById("hm-visCount").textContent=fd.length+"件";
 
   if(!fd.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">条件に一致するワールドがありません</div>';return;}
 
@@ -650,7 +662,7 @@ function renderHM(){
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
       return`<article class="hm-tile" style="background:${bg};color:${c};" title="W${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
-        <div class="hm-tile-body"><div class="hm-tile-wid-compact">${d.label}</div><div class="hm-tile-rate">${d.am}</div></div>
+        <div class="hm-tile-body"><div class="hm-tile-wid-compact">${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
       </article>`;
     }).join("");
   }else{
