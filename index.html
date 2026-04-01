@@ -98,6 +98,14 @@
     .castle-cell{white-space:nowrap;}
   }
   /* ヒートマップ */
+  .hm-summary-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:.6rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .hm-summary-table th{padding:.35rem .6rem;text-align:left;font-weight:600;color:var(--text-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);}
+  .hm-summary-table td{padding:.3rem .6rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.72rem;}
+  .hm-summary-table tr:last-child td{border-bottom:none;}
+  .hm-summary-table .hm-st-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:.4rem;vertical-align:middle;}
+  .hm-summary-table .hm-st-name{color:var(--text);}
+  .hm-summary-table .hm-st-count{text-align:right;font-weight:700;}
+  .hm-summary-table .hm-st-pct{text-align:right;color:var(--text-dim);}
   .hm-controls{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.5rem .8rem;margin-bottom:.6rem;}
   .hm-controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;align-items:end;}
   .hm-field label{display:block;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
@@ -106,7 +114,7 @@
   .hm-field input[type="range"]{width:100%;accent-color:var(--accent);}
   .hm-legend{margin-top:.5rem;}
   .hm-legend-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
-  .hm-legend-bar{height:6px;border-radius:99px;background:linear-gradient(90deg,#1d4ed8 0%,#67e8f9 40%,#fde68a 65%,#fb7185 82%,#b91c1c 100%);border:1px solid rgba(255,255,255,.08);}
+  .hm-legend-bar{height:6px;border-radius:99px;background:linear-gradient(90deg,hsl(215 78% 50%) 0%,hsl(179 78% 49%) 17%,hsl(143 78% 47%) 33%,hsl(95 78% 46%) 56%,hsl(48 78% 44%) 78%,hsl(0 78% 42%) 100%);border:1px solid rgba(255,255,255,.08);}
   .hm-meta{display:flex;gap:1rem;margin-top:.4rem;font-size:.7rem;color:var(--text-dim);align-items:center;}
   .hm-view-toggle{display:flex;gap:0;margin-left:auto;}
   .hm-view-btn{font-family:'Noto Sans JP',sans-serif;font-size:.8rem;font-weight:700;padding:.45rem 1rem;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;}
@@ -159,7 +167,7 @@
   .hm-speed-btn{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;padding:.25rem .5rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
   .hm-speed-btn:first-child{border-radius:5px 0 0 5px;} .hm-speed-btn:last-child{border-radius:0 5px 5px 0;}
   .hm-speed-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  #dash-heatmap.hm-playing>.summary-row,#dash-heatmap.hm-playing>.hm-controls{display:none;}
+  #dash-heatmap.hm-playing>.hm-summary-table,#dash-heatmap.hm-playing>.hm-controls{display:none;}
   #dash-heatmap.hm-playing>.hm-date-spacer{height:80px;}
   #dash-heatmap.hm-playing .hm-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
   #dash-heatmap.hm-playing .hm-compact .hm-tile{padding:3px 2px;border-radius:4px;}
@@ -238,12 +246,6 @@
 <!-- 占有ヒートマップ -->
 
 <div class="dashboard hidden" id="dash-heatmap">
-  <div class="summary-row">
-    <div class="stat-card"><div class="value" id="hm-total">-</div><div class="label">ワールド</div></div>
-    <div class="stat-card"><div class="value" id="hm-avg">-</div><div class="label">平均占有率</div></div>
-    <div class="stat-card"><div class="value" style="color:#ef4444;" id="hm-max">-</div><div class="label">最高</div></div>
-    <div class="stat-card"><div class="value" style="color:#f39c12;" id="hm-high">-</div><div class="label">強寡占+</div></div>
-  </div>
   <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap;">
     <div class="hm-view-toggle">
       <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
@@ -252,6 +254,10 @@
     <span style="font-size:.7rem;color:var(--text-dim);" id="hm-visCount">175件</span>
     <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
   </div>
+  <table class="hm-summary-table" id="hm-summary-table">
+    <thead><tr><th>状態</th><th>件数</th><th>構成比</th></tr></thead>
+    <tbody id="hm-summary-body"></tbody>
+  </table>
   <div class="hm-controls collapsed" id="hm-controls">
     <div class="hm-controls-grid" style="grid-template-columns:1fr 1fr;">
       <div class="hm-field">
@@ -620,14 +626,21 @@ function renderHM(){
   const src=hmCurrentData||LD;
   const hmData=src.map(it=>({wid:it.wid||0,label:it._label,am:it._a.am,ad:it._a.ad,ratio:it._a.am/21,pct:it._a.am/21*100}));
 
-  // stats
+  // stats table
   if(hmData.length){
-    const rates=hmData.map(d=>d.ratio);
-    const avg=rates.reduce((a,b)=>a+b,0)/rates.length;
-    document.getElementById("hm-total").textContent=hmData.length;
-    document.getElementById("hm-avg").textContent=(avg*100).toFixed(1)+"%";
-    document.getElementById("hm-max").textContent=(Math.max(...rates)*100).toFixed(1)+"%";
-    document.getElementById("hm-high").textContent=hmData.filter(d=>d.ratio>=.4).length;
+    const total=hmData.length;
+    const cats=[
+      {name:"制覇 (21城)",color:hmColor(1),pred:d=>d.am===21},
+      {name:"独占級 (13-20城)",color:hmColor(17/21),pred:d=>d.am>=13&&d.am<21},
+      {name:"強寡占 (9-12城)",color:hmColor(10/21),pred:d=>d.am>=9&&d.am<=12},
+      {name:"寡占 (6-8城)",color:hmColor(7/21),pred:d=>d.am>=6&&d.am<=8},
+      {name:"分散 (3-5城)",color:hmColor(4/21),pred:d=>d.am<=5},
+    ];
+    const tb=document.getElementById("hm-summary-body");
+    tb.innerHTML=cats.map(c=>{
+      const n=hmData.filter(c.pred).length;
+      return`<tr><td><span class="hm-st-dot" style="background:${c.color}"></span><span class="hm-st-name">${c.name}</span></td><td class="hm-st-count">${n}</td><td class="hm-st-pct">${(n/total*100).toFixed(1)}%</td></tr>`;
+    }).join("")+`<tr style="border-top:1px solid var(--border);"><td style="font-weight:600;color:var(--text-dim);">合計</td><td class="hm-st-count">${total}</td><td class="hm-st-pct">100%</td></tr>`;
   }
 
   // filter & sort
@@ -649,8 +662,8 @@ function renderHM(){
   if(compact){
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="W${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
-        <div class="hm-tile-body"><div class="hm-tile-wid-compact">W${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
+        <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
       </article>`;
     }).join("");
   }else{
