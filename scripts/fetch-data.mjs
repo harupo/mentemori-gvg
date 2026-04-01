@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'fs';
 
 const API = 'https://api.mentemori.icu';
 const SERVER = '1'; // JP
@@ -87,18 +87,6 @@ async function fetchGlobal() {
   if (!wg) throw new Error('wgroups取得失敗');
 
   const grps = wg.data.filter(g => g.globalgvg && String(g.worlds[0]).charAt(0) === SERVER);
-  if (!grps.length) {
-    console.log(`  デバッグ: wgroups total=${wg.data.length}`);
-    if (wg.data.length > 0) {
-      const sample = wg.data[0];
-      console.log(`  デバッグ: サンプル keys=${Object.keys(sample).join(', ')}`);
-      console.log(`  デバッグ: globalgvg=${sample.globalgvg}, worlds=${JSON.stringify(sample.worlds)}`);
-      const withGvg = wg.data.filter(g => g.globalgvg);
-      console.log(`  デバッグ: globalgvg=true は ${withGvg.length}件`);
-      const jpOnly = wg.data.filter(g => String(g.worlds?.[0]).charAt(0) === SERVER);
-      console.log(`  デバッグ: JP(worlds[0]先頭='1') は ${jpOnly.length}件`);
-    }
-  }
   const classes = [1, 2, 3];
   const blocks = [0, 1, 2, 3];
   const tasks = [];
@@ -151,10 +139,9 @@ async function main() {
 
   // 同日(JST)スキップ判定
   try {
-    const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
-    const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
-    if (existingL.fetchedAt && existingG.items?.length > 0) {
-      const prev = new Date(existingL.fetchedAt);
+    const existing = JSON.parse(readFileSync('data/local.json', 'utf-8'));
+    if (existing.timestamp) {
+      const prev = new Date(existing.timestamp * 1000);
       const now = new Date();
       const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
       if (toJSTDate(prev) === toJSTDate(now)) {
@@ -165,58 +152,16 @@ async function main() {
   } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
 
   const local = await fetchLocal();
-  local.fetchedAt = new Date().toISOString();
   writeFileSync('data/local.json', JSON.stringify(local));
   console.log(`  → data/local.json (${(JSON.stringify(local).length / 1024).toFixed(1)} KB)`);
 
   await sleep(2000); // API負荷軽減
 
   const global = await fetchGlobal();
-  global.fetchedAt = new Date().toISOString();
   writeFileSync('data/global.json', JSON.stringify(global));
   console.log(`  → data/global.json (${(JSON.stringify(global).length / 1024).toFixed(1)} KB)`);
 
-  // 履歴保存
-  saveHistory(local, global);
-
   console.log('=== 完了 ===');
-}
-
-function saveHistory(local, global) {
-  const toJSTDate = d => new Date(new Date(d).getTime() + 9 * 3600000).toISOString().slice(0, 10);
-  const today = toJSTDate(local.fetchedAt || new Date().toISOString());
-
-  mkdirSync('data/history/local', { recursive: true });
-  mkdirSync('data/history/global', { recursive: true });
-
-  // index.json 読み込み
-  const indexPath = 'data/history/index.json';
-  let index = { local: [], global: [] };
-  if (existsSync(indexPath)) {
-    try { index = JSON.parse(readFileSync(indexPath, 'utf-8')); } catch {}
-  }
-
-  // local 保存
-  if (local.items?.length > 0) {
-    const lPath = `data/history/local/${today}.json`;
-    writeFileSync(lPath, JSON.stringify(local));
-    if (!index.local.includes(today)) index.local.push(today);
-    console.log(`  → ${lPath}`);
-  }
-
-  // global 保存
-  if (global.items?.length > 0) {
-    const gPath = `data/history/global/${today}.json`;
-    writeFileSync(gPath, JSON.stringify(global));
-    if (!index.global.includes(today)) index.global.push(today);
-    console.log(`  → ${gPath}`);
-  }
-
-  // index.json 保存
-  index.local.sort();
-  index.global.sort();
-  writeFileSync(indexPath, JSON.stringify(index, null, 2));
-  console.log(`  → ${indexPath} (local:${index.local.length}件, global:${index.global.length}件)`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
