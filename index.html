@@ -132,7 +132,7 @@
   .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;line-height:1.2;opacity:.9;}
   .hm-compact .hm-tile-rate{font-size:.65rem;font-weight:700;margin-bottom:0;}
   .hm-compact .hm-tile-sub,.hm-compact .hm-tile-guild,.hm-compact .hm-badge{display:none;}
-  .hm-date-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border);padding:.8rem 1.2rem;z-index:90;box-shadow:0 -4px 20px rgba(0,0,0,.4);}
+  .hm-date-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a26;border-top:2px solid var(--accent);padding:.8rem 1.2rem;z-index:90;box-shadow:0 -4px 20px rgba(0,0,0,.5);}
   .hm-date-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:0 auto;}
   .hm-date-label{font-size:.78rem;color:var(--text-dim);font-weight:600;white-space:nowrap;}
   .hm-date-value{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--text);min-width:6.5em;text-align:center;white-space:nowrap;}
@@ -241,11 +241,7 @@
     <div class="stat-card"><div class="value" style="color:#f39c12;" id="hm-high">-</div><div class="label">強寡占以上</div></div>
   </div>
   <div class="hm-controls">
-    <div class="hm-controls-grid">
-      <div class="hm-field">
-        <label>ワールド検索</label>
-        <input id="hm-search" class="hm-input" type="text" placeholder="例: 127" oninput="renderHM()">
-      </div>
+    <div class="hm-controls-grid" style="grid-template-columns:1fr 1fr;">
       <div class="hm-field">
         <div class="hm-range-row"><span>最小占有率</span><span id="hm-rangeVal">0%</span></div>
         <input id="hm-minRate" type="range" min="0" max="100" step="1" value="0" oninput="renderHM()">
@@ -268,8 +264,8 @@
       <span id="hm-visCount">表示件数: 0</span>
       <span>比率 = 最大占有拠点数 ÷ 21</span>
       <div class="hm-view-toggle">
-        <button class="hm-view-btn" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
-        <button class="hm-view-btn active" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
+        <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
+        <button class="hm-view-btn" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
       </div>
     </div>
   </div>
@@ -289,10 +285,10 @@
     <button class="hm-play-btn" id="hm-play-btn" onclick="hmPlayToggle()">▶ 再生</button>
     <span class="hm-speed-label">速度</span>
     <div class="hm-speed-btns">
-      <button class="hm-speed-btn" onclick="hmSetSpeed(2000)">0.5x</button>
-      <button class="hm-speed-btn active" onclick="hmSetSpeed(1000)">1x</button>
-      <button class="hm-speed-btn" onclick="hmSetSpeed(500)">2x</button>
-      <button class="hm-speed-btn" onclick="hmSetSpeed(250)">4x</button>
+      <button class="hm-speed-btn" onclick="hmSetSpeed(1300)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="hmSetSpeed(650)">1x</button>
+      <button class="hm-speed-btn" onclick="hmSetSpeed(325)">2x</button>
+      <button class="hm-speed-btn" onclick="hmSetSpeed(160)">4x</button>
     </div>
   </div>
 </div>
@@ -312,7 +308,7 @@ const SCHED_HOUR=18,SCHED_MIN=0;
 const DATA_BASE="data/";
 function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
-let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="normal";
+let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact";
 let hmDates=[],hmDateIdx=-1,hmCache={},hmCurrentData=null;
 
 function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;document.getElementById("wf-float").classList.remove("hidden");renderG();}
@@ -563,7 +559,7 @@ async function hmLoadDate(idx){
 function hmDateChange(){hmPlayStop();hmLoadDate(Number(document.getElementById("hm-date-slider").value));}
 function hmDateStep(d){hmPlayStop();hmLoadDate(hmDateIdx+d);}
 
-let hmPlayTimer=null,hmPlaySpeed=1000;
+let hmPlayTimer=null,hmPlaySpeed=650;
 
 function hmPlayToggle(){
   if(hmPlayTimer){hmPlayStop();}
@@ -599,7 +595,7 @@ async function hmPlayTick(){
 function hmSetSpeed(ms){
   hmPlaySpeed=ms;
   document.querySelectorAll(".hm-speed-btn").forEach(b=>{
-    const speeds={"0.5x":2000,"1x":1000,"2x":500,"4x":250};
+    const speeds={"0.5x":1300,"1x":650,"2x":325,"4x":160};
     b.classList.toggle("active",speeds[b.textContent]===ms);
   });
 }
@@ -613,7 +609,6 @@ function setHMView(mode){
 
 function renderHM(){
   const grid=document.getElementById("hm-grid");
-  const q=document.getElementById("hm-search").value.trim().toLowerCase();
   const minR=Number(document.getElementById("hm-minRate").value);
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
@@ -637,7 +632,6 @@ function renderHM(){
 
   // filter & sort
   let fd=hmData.filter(d=>{
-    if(q&&!d.label.includes(q))return false;
     if(d.pct<minR)return false;
     return true;
   });
