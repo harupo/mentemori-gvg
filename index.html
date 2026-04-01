@@ -15,7 +15,7 @@
     --oligo-a:#f39c12;--oligo-b:#74b9ff;--oligo-c:#fd79a8;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg-deep);color:var(--text);min-height:100vh;line-height:1.6;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg-deep);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden;}
   .header{padding:2rem 2rem 1rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101018,var(--bg-deep));}
   .header h1{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#fff,#a0a0d0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .header .sub{color:var(--text-dim);font-size:.85rem;margin-top:.3rem;}
@@ -132,16 +132,18 @@
   .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;line-height:1.2;opacity:.9;}
   .hm-compact .hm-tile-rate{font-size:.65rem;font-weight:700;margin-bottom:0;}
   .hm-compact .hm-tile-sub,.hm-compact .hm-tile-guild,.hm-compact .hm-badge{display:none;}
-  .hm-date-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1.2rem;}
-  .hm-date-row{display:flex;align-items:center;gap:1rem;}
+  .hm-date-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border);padding:.8rem 1.2rem;z-index:90;box-shadow:0 -4px 20px rgba(0,0,0,.4);}
+  .hm-date-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:0 auto;}
   .hm-date-label{font-size:.78rem;color:var(--text-dim);font-weight:600;white-space:nowrap;}
-  .hm-date-value{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:var(--text);min-width:6.5em;text-align:center;}
-  .hm-date-slider{flex:1;accent-color:var(--accent);}
-  .hm-date-nav{display:flex;gap:4px;}
+  .hm-date-value{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--text);min-width:6.5em;text-align:center;white-space:nowrap;}
+  .hm-date-slider{flex:1;accent-color:var(--accent);min-width:0;}
+  .hm-date-nav{display:flex;gap:4px;flex-shrink:0;}
   .hm-date-nav button{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .6rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);border-radius:6px;cursor:pointer;transition:all .15s;}
   .hm-date-nav button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#fff;}
   .hm-date-nav button:disabled{opacity:.3;cursor:not-allowed;}
-  .hm-date-tag{font-size:.7rem;color:var(--text-dim);margin-top:.4rem;font-family:'JetBrains Mono',monospace;}
+  .hm-date-tag{font-size:.68rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;}
+  .hm-play-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:.5rem auto 0;}
+  .hm-date-spacer{height:120px;}
   .hm-play-row{display:flex;align-items:center;gap:.8rem;margin-top:.6rem;}
   .hm-play-btn{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .8rem;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;cursor:pointer;transition:all .15s;min-width:4em;text-align:center;}
   .hm-play-btn:hover{filter:brightness(1.2);}
@@ -152,7 +154,7 @@
   .hm-speed-btn:first-child{border-radius:5px 0 0 5px;} .hm-speed-btn:last-child{border-radius:0 5px 5px 0;}
   .hm-speed-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   #dash-heatmap.hm-playing>.summary-row,#dash-heatmap.hm-playing>.hm-controls{display:none;}
-  #dash-heatmap.hm-playing .hm-play-row{margin-top:0;}
+  #dash-heatmap.hm-playing>.hm-date-spacer{height:80px;}
   #dash-heatmap.hm-playing .hm-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
   #dash-heatmap.hm-playing .hm-compact .hm-tile{padding:3px 2px;border-radius:4px;}
   #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.55rem;}
@@ -232,30 +234,6 @@
 <!-- 占有ヒートマップ -->
 
 <div class="dashboard hidden" id="dash-heatmap">
-  <div class="hm-date-bar">
-    <div class="hm-date-row">
-      <span class="hm-date-label">📅 日付</span>
-      <div class="hm-date-nav">
-        <button id="hm-date-prev" onclick="hmDateStep(-1)">◀</button>
-      </div>
-      <input type="range" class="hm-date-slider" id="hm-date-slider" min="0" max="0" value="0" oninput="hmDateChange()">
-      <div class="hm-date-nav">
-        <button id="hm-date-next" onclick="hmDateStep(1)">▶</button>
-      </div>
-      <span class="hm-date-value" id="hm-date-value">-</span>
-    </div>
-    <div class="hm-date-tag" id="hm-date-tag"></div>
-    <div class="hm-play-row">
-      <button class="hm-play-btn" id="hm-play-btn" onclick="hmPlayToggle()">▶ 再生</button>
-      <span class="hm-speed-label">速度</span>
-      <div class="hm-speed-btns">
-        <button class="hm-speed-btn" onclick="hmSetSpeed(2000)">0.5x</button>
-        <button class="hm-speed-btn active" onclick="hmSetSpeed(1000)">1x</button>
-        <button class="hm-speed-btn" onclick="hmSetSpeed(500)">2x</button>
-        <button class="hm-speed-btn" onclick="hmSetSpeed(250)">4x</button>
-      </div>
-    </div>
-  </div>
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="hm-total">-</div><div class="label">対象ワールド数</div></div>
     <div class="stat-card"><div class="value" id="hm-avg">-</div><div class="label">平均最大占有率</div></div>
@@ -296,6 +274,27 @@
     </div>
   </div>
   <div class="hm-grid" id="hm-grid"></div>
+  <div class="hm-date-spacer"></div>
+</div>
+
+<div class="hm-date-bar hidden" id="hm-date-bar">
+  <div class="hm-date-row">
+    <div class="hm-date-nav"><button id="hm-date-prev" onclick="hmDateStep(-1)">◀</button></div>
+    <input type="range" class="hm-date-slider" id="hm-date-slider" min="0" max="0" value="0" oninput="hmDateChange()">
+    <div class="hm-date-nav"><button id="hm-date-next" onclick="hmDateStep(1)">▶</button></div>
+    <span class="hm-date-value" id="hm-date-value">-</span>
+    <span class="hm-date-tag" id="hm-date-tag"></span>
+  </div>
+  <div class="hm-play-row">
+    <button class="hm-play-btn" id="hm-play-btn" onclick="hmPlayToggle()">▶ 再生</button>
+    <span class="hm-speed-label">速度</span>
+    <div class="hm-speed-btns">
+      <button class="hm-speed-btn" onclick="hmSetSpeed(2000)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="hmSetSpeed(1000)">1x</button>
+      <button class="hm-speed-btn" onclick="hmSetSpeed(500)">2x</button>
+      <button class="hm-speed-btn" onclick="hmSetSpeed(250)">4x</button>
+    </div>
+  </div>
 </div>
 
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
@@ -433,6 +432,7 @@ function switchTab(tab){curTab=tab;
   document.getElementById("dash-local").classList.toggle("hidden",tab!=="local"||!LD.length);
   document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
   document.getElementById("dash-heatmap").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
+  document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
 }
