@@ -128,7 +128,7 @@
   .hm-tile-sub{font-size:.7rem;opacity:.92;}
   .hm-tile-guild{font-size:.68rem;margin-top:.3rem;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   @media(max-width:1024px){.hm-controls-grid{grid-template-columns:1fr;}}
-  @media(max-width:640px){.hm-grid:not(.hm-compact){grid-template-columns:repeat(2,minmax(0,1fr));}.hm-tile{min-height:100px;}.hm-tile-rate{font-size:1.3rem;}}
+  @media(max-width:640px){.hm-grid:not(.hm-compact){grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;}.hm-tile{min-height:80px;padding:.6rem;border-radius:10px;}.hm-tile-wid{font-size:1.1rem;}.hm-tile-rate{font-size:1.1rem;}.hm-tile-body{margin-top:.5rem;}.hm-tile-sub{font-size:.6rem;}.hm-tile-guild{font-size:.55rem;}.hm-badge{font-size:.55rem;padding:.2rem .4rem;}}
   .hm-compact{grid-template-columns:repeat(auto-fill,minmax(48px,1fr))!important;gap:4px!important;}
   .hm-compact .hm-tile{min-height:0;padding:6px 4px;border-radius:6px;text-align:center;box-shadow:none;}
   .hm-compact .hm-tile::after{display:none;}
@@ -184,11 +184,8 @@
 </div>
 <div class="info-bar" id="infoBar">
   <div class="info-row">
-    <span class="status-text" id="statusBar">待機中…</span>
-    <span class="info-sep">|</span>
-    <span class="info-inline" id="lastUpdate">-</span>
-    <span class="info-sep">→</span>
-    <span class="info-inline" id="schedNext">-</span>
+    <span class="status-text" id="statusBar">読み込み中…</span>
+    <span class="info-inline" id="lastUpdate"></span>
   </div>
 </div>
 
@@ -311,7 +308,6 @@ const TC={domination:"tag-domination",monopoly:"tag-monopoly",oligopoly:"tag-oli
 const TL={domination:"制覇",monopoly:"独占",oligopoly:"寡占",contested:"分散"};
 const MF="font-family:'JetBrains Mono',monospace;font-weight:600";
 const CNA={1:"EL",2:"EX",3:"GM"};
-const SCHED_HOUR=18,SCHED_MIN=0;
 const DATA_BASE="data/";
 function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
@@ -456,21 +452,13 @@ async function loadData(){
     initFilters();
     // 最終更新
     const fa=lData.fetchedAt||gData.fetchedAt;
-    if(fa){document.getElementById("lastUpdate").textContent=fD(new Date(fa));}
-    else{const ts=Math.max(lData.timestamp||0,gData.timestamp||0);if(ts>0)document.getElementById("lastUpdate").textContent=fD(new Date(ts*1000));}
-    showNextUpdate();
-    ss(`✓ ${LD.length} + ${GD.length}件`,"ok");
+    if(fa){document.getElementById("lastUpdate").textContent="更新: "+fD(new Date(fa));}
+    else{const ts=Math.max(lData.timestamp||0,gData.timestamp||0);if(ts>0)document.getElementById("lastUpdate").textContent="更新: "+fD(new Date(ts*1000));}
+    ss("✓","ok");
     hmCurrentData=LD;
     renderL();renderG();switchTab(curTab);
     loadHMHistory();
   }catch(e){ss(`✗ ${e.message}`,"err");}
-}
-
-function showNextUpdate(){
-  const el=document.getElementById("schedNext"),now=new Date();
-  const next=new Date(now.getFullYear(),now.getMonth(),now.getDate(),SCHED_HOUR,SCHED_MIN,0,0);
-  if(next<=now)next.setDate(next.getDate()+1);
-  el.textContent=fD(next);
 }
 
 function renderL(){const fd=LD,s=cntS(fd);
@@ -662,7 +650,7 @@ function renderHM(){
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
       return`<article class="hm-tile" style="background:${bg};color:${c};" title="W${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
-        <div class="hm-tile-body"><div class="hm-tile-wid-compact">${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
+        <div class="hm-tile-body"><div class="hm-tile-wid-compact">W${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
       </article>`;
     }).join("");
   }else{
