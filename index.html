@@ -458,11 +458,11 @@
   </div>
   <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.68rem;display:none;gap:.7rem;align-items:center;flex-wrap:wrap;">
     <span style="color:var(--text-dim);font-weight:700">ギルドストック:</span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.18);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">低</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.38);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.58);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">中</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.78);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや高</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,1.0);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#1e1e1e;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">低</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#484848;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#7a7a7a;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">中</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#b0b0b0;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや高</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#e8e8e8;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
     <span style="color:var(--text-dim);opacity:.5;font-size:.65rem">← 3月月平均</span>
   </div>
   <div class="hm-grid" id="hm-grid"></div>
@@ -611,11 +611,11 @@ const STOCK_LEVELS = [
 ];
 // ギルドストック表示バー用カラー
 const STOCK_BAR_LEVELS = [
-  "rgba(255,255,255,0.18)",  // 低: ほぼ透明
-  "rgba(255,255,255,0.38)",  // やや低
-  "rgba(255,255,255,0.58)",  // 中
-  "rgba(255,255,255,0.78)",  // やや高
-  "rgba(255,255,255,1.0)",   // 高: 白（最もくっきり）
+  "#1e1e1e",   // 低: ほぼ黒
+  "#484848",   // やや低: 暗グレー
+  "#7a7a7a",   // 中: グレー
+  "#b0b0b0",   // やや高: 明グレー
+  "#e8e8e8",   // 高: ほぼ白
 ];
 function stockLevel(worldLabel){
   const s = GUILD_STOCK_MAR[parseInt(worldLabel)];
