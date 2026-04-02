@@ -353,10 +353,10 @@
 </div>
 <!-- 採用属性分布 -->
 <div class="dashboard hidden" id="dash-arena">
-  <div class="controls" style="border-bottom:1px solid var(--border);padding:.7rem 2rem;">
-    <label style="color:var(--text-dim);font-size:.8rem">📊 バトリ20位（5キャラ編成）</label>
-    <label style="margin-left:.5rem">ソート:</label>
-    <select id="a-sort" onchange="arenaRender()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">
+  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:nowrap;gap:.6rem;align-items:center;">
+    <label style="color:var(--text-dim);font-size:.78rem;white-space:nowrap;flex-shrink:0">📊 バトリ20位（5キャラ編成）</label>
+    <label style="white-space:nowrap;flex-shrink:0;font-size:.85rem;color:var(--text-dim)">ソート:</label>
+    <select id="a-sort" onchange="arenaRender()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);min-width:0;flex:1;">
       <option value="wid-asc">ワールド 昇順</option>
       <option value="wid-desc">ワールド 降順</option>
       <option value="ai-desc">藍 高い順</option>
