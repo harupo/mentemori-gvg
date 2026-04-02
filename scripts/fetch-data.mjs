@@ -233,21 +233,26 @@ async function main() {
   mkdirSync('data', { recursive: true });
 
   // 同日(JST)スキップ判定
-  // ※ arena.json が存在しない場合は同日でも実行する（初回導入時）
-  try {
-    const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
-    const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
-    const arenaExists = existsSync('data/arena.json');
-    if (existingL.fetchedAt && existingG.items?.length > 0 && arenaExists) {
-      const prev = new Date(existingL.fetchedAt);
-      const now = new Date();
-      const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
-      if (toJSTDate(prev) === toJSTDate(now)) {
-        console.log(`=== スキップ: 同日(JST)のデータ取得済み (${toJSTDate(prev)}) ===`);
-        return;
+  // workflow_dispatch（手動実行）の場合は常にスキップしない
+  const isManual = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
+  if (isManual) {
+    console.log('=== 手動実行: スキップチェックをバイパス ===');
+  } else {
+    try {
+      const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
+      const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
+      const arenaExists = existsSync('data/arena.json');
+      if (existingL.fetchedAt && existingG.items?.length > 0 && arenaExists) {
+        const prev = new Date(existingL.fetchedAt);
+        const now = new Date();
+        const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
+        if (toJSTDate(prev) === toJSTDate(now)) {
+          console.log(`=== スキップ: 同日(JST)のデータ取得済み (${toJSTDate(prev)}) ===`);
+          return;
+        }
       }
-    }
-  } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
+    } catch (_) { /* ファイルなし or パース失敗 → 通常実行 */ }
+  }
 
   const local = await fetchLocal();
   local.fetchedAt = new Date().toISOString();
