@@ -300,10 +300,10 @@
   /* ══ ギルドストック ══ */
   /* 占有ヒートマップタイル下部の活動バー */
   .hm-tile-stock-bar{
-    position:absolute;bottom:0;left:0;right:0;height:5px;border-radius:0 0 14px 14px;
-    opacity:.85;
+    position:absolute;bottom:0;left:0;right:0;height:8px;border-radius:0 0 14px 14px;
+    opacity:.9;
   }
-  .hm-compact .hm-tile-stock-bar{height:3px;border-radius:0 0 6px 6px;}
+  .hm-compact .hm-tile-stock-bar{height:5px;border-radius:0 0 6px 6px;}
   /* ストックヒートマップタイル */
   .stock-tile{
     min-height:90px;border-radius:14px;padding:.8rem;
@@ -1365,6 +1365,10 @@ function renderStock(){
         <div class="stock-tile-compact" style="font-size:.5rem;margin-top:1px">${val}</div>
       </article>`;
     }
+    // 占有データをLD（ギルドバトルデータ）から取得
+    const ldItem = LD.find(d=>d._label===label);
+    const occStr = ldItem ? `${(ldItem._a.am/21*100).toFixed(0)}% (${ldItem._a.am}/21城)` : '';
+    const occLbl = ldItem ? hmLabel(ldItem._a.am/21) : '';
     return `<article class="stock-tile" style="background:${col};cursor:pointer;" onclick="stockJumpToHeatmap('${label}')">
       <div class="stock-tile-top">
         <div><div class="stock-tile-world">World</div><div class="stock-tile-wid">${label}</div></div>
@@ -1372,6 +1376,8 @@ function renderStock(){
       </div>
       <div class="stock-tile-body">
         <div class="stock-tile-val">${val}</div>
+        ${occStr ? `<div style="font-size:.7rem;opacity:.85;margin-top:.25rem">占有 ${occStr}</div>` : ''}
+        ${occLbl ? `<div style="font-size:.62rem;opacity:.7">${occLbl}</div>` : ''}
       </div>
     </article>`;
   }).join('');
