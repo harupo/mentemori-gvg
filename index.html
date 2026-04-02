@@ -386,6 +386,13 @@
     z-index:10;
     position:relative;
   }
+
+  /* 中央拠点ヒートマップ */
+  .hm-center-guild{font-size:.68rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .hm-center-score{font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1.1;}
+  .hm-center-label{font-size:.62rem;opacity:.8;margin-top:.1rem;}
+  .hm-center-compact-score{font-size:.75rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
+  .hm-center-compact-sub{font-size:.55rem;opacity:.85;}
 </style>
 </head>
 <body>
@@ -461,6 +468,7 @@
     <div class="hm-view-toggle">
       <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
       <button class="hm-view-btn" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
+      <button class="hm-view-btn" onclick="setHMView('center')" id="hm-btn-center">🏰 中央拠点</button>
     </div>
     <span style="font-size:.7rem;color:var(--text-dim);" id="hm-visCount">175件</span>
     <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
@@ -1240,6 +1248,7 @@ function setHMView(mode){
   hmView=mode;
   document.getElementById("hm-btn-compact").classList.toggle("active",mode==="compact");
   document.getElementById("hm-btn-normal").classList.toggle("active",mode==="normal");
+  document.getElementById("hm-btn-center").classList.toggle("active",mode==="center");
   // 手動ビュー切替時は戻るボタンを隠す
   if(!window._hmPrevCompact){
     document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
@@ -1252,11 +1261,117 @@ function toggleHMFilter(){
   el.classList.toggle("collapsed");
 }
 
+// ─── 中央拠点ヒートマップ ─────────────────────────────────────
+// 中央5拠点(CastleId 1-5)の最大占有数で色分け
+const CENTER_CASTLES = [1,2,3,4,5];
+const CENTER_LABELS = ['','中央分散','中央拮抗','中央優勢','中央独占','中央制覇'];
+const CENTER_COLORS = [
+  null,
+  'hsl(215,72%,48%)',  // 1/5 分散: 青
+  'hsl(175,72%,40%)',  // 2/5 拮抗: 緑青
+  'hsl(82,72%,38%)',   // 3/5 優勢: 黄緑
+  'hsl(30,90%,48%)',   // 4/5 独占: オレンジ
+  'hsl(0,80%,45%)',    // 5/5 制覇: 赤
+];
+
+function calcCenterScore(d){
+  // co: {1: {guildName:..., guildId:...}, ...}
+  const guildCounts = {};
+  for(const cid of CENTER_CASTLES){
+    const g = d.co[cid];
+    if(!g) continue;
+    const key = g.guildId || g.guildName;
+    guildCounts[key] = (guildCounts[key]||0) + 1;
+  }
+  const max = Object.values(guildCounts).length ? Math.max(...Object.values(guildCounts)) : 0;
+  const topEntry = Object.entries(guildCounts).find(([k,v])=>v===max);
+  const topGuild = topEntry
+    ? (Object.values(d.co).find(g => g && (g.guildId||g.guildName) === topEntry[0])?.guildName || '')
+    : '';
+  return { max, topGuild };
+}
+
+function renderHMCenter(sortBy, minR){
+  const grid = document.getElementById('hm-grid');
+  grid.classList.remove('hm-compact');
+
+  // データ計算
+  let items = LD.map(d => {
+    const { max, topGuild } = calcCenterScore(d);
+    return { wid: d.wid, label: d._label, max, topGuild };
+  });
+
+  // ソート
+  switch(sortBy){
+    case 'wid-desc':  items.sort((a,b)=>b.wid-a.wid); break;
+    case 'rate-desc': items.sort((a,b)=>b.max-a.max||(a.wid-b.wid)); break;
+    case 'rate-asc':  items.sort((a,b)=>a.max-b.max||(a.wid-b.wid)); break;
+    case 'stock-desc': items.sort((a,b)=>(GUILD_STOCK_MAR[parseInt(b.label)]||0)-(GUILD_STOCK_MAR[parseInt(a.label)]||0)); break;
+    case 'stock-asc':  items.sort((a,b)=>(GUILD_STOCK_MAR[parseInt(a.label)]||0)-(GUILD_STOCK_MAR[parseInt(b.label)]||0)); break;
+    case 'combo-desc': {
+      const maxS=238558,minS=42601;
+      items.sort((a,b)=>{
+        const sA=(GUILD_STOCK_MAR[parseInt(a.label)]||minS);
+        const sB=(GUILD_STOCK_MAR[parseInt(b.label)]||minS);
+        const scoreA=a.max/5*0.5+(sA-minS)/(maxS-minS)*0.5;
+        const scoreB=b.max/5*0.5+(sB-minS)/(maxS-minS)*0.5;
+        return scoreB-scoreA;
+      }); break;
+    }
+    default: items.sort((a,b)=>a.wid-b.wid);
+  }
+
+  document.getElementById('hm-visCount').textContent = items.length + '件';
+
+  const compact = hmView === 'compact'; // center時はfalseだがグリッドはcompactにもできる
+  const isCompact = hmView === 'compact';
+
+  // サマリー更新
+  const counts = [0,0,0,0,0,0];
+  items.forEach(it => counts[it.max]++);
+  const tb = document.getElementById('hm-summary-body');
+  if(tb){
+    tb.innerHTML = [
+      {name:'中央制覇（5/5城）', color:CENTER_COLORS[5], pred:5},
+      {name:'中央独占（4/5城）', color:CENTER_COLORS[4], pred:4},
+      {name:'中央優勢（3/5城）', color:CENTER_COLORS[3], pred:3},
+      {name:'中央拮抗（2/5城）', color:CENTER_COLORS[2], pred:2},
+      {name:'中央分散（1/5城）', color:CENTER_COLORS[1], pred:1},
+    ].map(c=>{
+      const n = counts[c.pred]||0;
+      return `<tr><td><span class="hm-st-dot" style="background:${c.color}"></span><span class="hm-st-name">${c.name}</span></td><td class="hm-st-count">${n}</td><td class="hm-st-pct">${(n/items.length*100).toFixed(1)}%</td></tr>`;
+    }).join('')+`<tr style="border-top:1px solid var(--border)"><td style="font-weight:600;color:var(--text-dim)">合計</td><td class="hm-st-count">${items.length}</td><td class="hm-st-pct">100%</td></tr>`;
+  }
+
+  // タイル生成
+  grid.innerHTML = items.map(it => {
+    const bg = CENTER_COLORS[it.max] || '#333';
+    const tc = it.max >= 3 ? '#fff' : '#fff';
+    const lbl = CENTER_LABELS[it.max] || '';
+    const stockBar = hmShowStockBar
+      ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(it.label)}"></div>` : '';
+    return `<article class="hm-tile" style="background:${bg};color:${tc};"
+        onclick="hmJumpToNormal('${it.label}')"
+        title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild}">
+      <div class="hm-tile-top">
+        <div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${it.label}</div></div>
+        <div class="hm-badge">${lbl}</div>
+      </div>
+      <div class="hm-tile-body">
+        <div class="hm-center-score">${it.max}<span style="font-size:.9rem;opacity:.7">/5</span></div>
+        <div class="hm-center-label">${it.topGuild || '(未占有)'}</div>
+      </div>
+      ${stockBar}
+    </article>`;
+  }).join('');
+}
+
 function renderHM(){
   const grid=document.getElementById("hm-grid");
   const minR=Number(document.getElementById("hm-minRate").value);
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
+  if(hmView==="center"){renderHMCenter(sortBy,minR);return;}
   const compact=hmView==="compact";
 
   grid.classList.toggle("hm-compact",compact);
