@@ -296,6 +296,45 @@
   @media(hover:none){
     #a-table .arena-ext-link{opacity:.45;}
   }
+
+  /* ══ ギルドストック ══ */
+  /* 占有ヒートマップタイル下部の活動バー */
+  .hm-tile-stock-bar{
+    position:absolute;bottom:0;left:0;right:0;height:5px;border-radius:0 0 14px 14px;
+    opacity:.85;
+  }
+  .hm-compact .hm-tile-stock-bar{height:3px;border-radius:0 0 6px 6px;}
+  /* ストックヒートマップタイル */
+  .stock-tile{
+    min-height:90px;border-radius:14px;padding:.8rem;
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.22);
+    transition:transform .15s,filter .15s;
+    position:relative;overflow:hidden;cursor:default;color:#fff;
+  }
+  .stock-tile:hover{transform:translateY(-2px);filter:brightness(1.12);}
+  .stock-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 35%);pointer-events:none;}
+  .stock-tile-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
+  .stock-tile-world{font-size:.68rem;opacity:.85;}
+  .stock-tile-wid{font-weight:800;font-size:1.3rem;line-height:1;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+  .stock-tile-body{position:relative;z-index:1;margin-top:.6rem;}
+  .stock-tile-val{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:.2rem;}
+  .stock-tile-lv{font-size:.68rem;opacity:.88;}
+  .stock-tile-badge{font-size:.6rem;padding:.25rem .45rem;border-radius:99px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.1);white-space:nowrap;}
+  /* コンパクト */
+  .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
+  .stock-grid.hm-compact .stock-tile{min-height:0;padding:3px 2px;border-radius:4px;text-align:center;}
+  .stock-grid.hm-compact .stock-tile::after{display:none;}
+  .stock-grid.hm-compact .stock-tile-top,.stock-grid.hm-compact .stock-tile-body{display:none;}
+  .stock-grid.hm-compact .stock-tile-compact{display:block;font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;opacity:.9;}
+  @media(min-width:769px){
+    .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))!important;gap:3px!important;}
+    .stock-grid.hm-compact .stock-tile{padding:5px 3px;}
+    .stock-grid.hm-compact .stock-tile-compact{font-size:.68rem;}
+  }
+  /* ストックタブ summary legend */
+  .stock-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.72rem;align-items:center;}
+  .stock-legend-dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
 </style>
 </head>
 <body>
@@ -307,6 +346,7 @@
   <button class="tab-btn" data-tab="global" onclick="switchTab('global')">🌐 グランドバトル</button>
   <button class="tab-btn" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 占有ヒートマップ</button>
   <button class="tab-btn" data-tab="arena" onclick="switchTab('arena')">🌈 採用属性分布</button>
+  <button class="tab-btn" data-tab="stock" onclick="switchTab('stock')">📦 ギルドストック</button>
 </div>
 <div class="info-bar" id="infoBar">
   <div class="info-row">
@@ -475,6 +515,29 @@
     </div>
   </div>
 </div>
+
+<!-- ギルドストック月次ヒートマップ -->
+<div class="dashboard hidden" id="dash-stock">
+  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:nowrap;gap:.6rem;align-items:center;">
+    <label style="color:var(--text-dim);font-size:.78rem;white-space:nowrap;flex-shrink:0">📦 3月ギルドストック月平均（0除外）</label>
+    <label style="white-space:nowrap;flex-shrink:0;font-size:.85rem;color:var(--text-dim)">ソート:</label>
+    <select id="stock-sort" onchange="renderStock()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);min-width:0;flex:1;">
+      <option value="wid-asc">ワールド 昇順</option>
+      <option value="wid-desc">ワールド 降順</option>
+      <option value="stock-desc">ストック 高い順</option>
+      <option value="stock-asc">ストック 低い順</option>
+    </select>
+    <div class="hm-view-toggle" style="margin-left:auto;flex-shrink:0;">
+      <button class="hm-view-btn active" id="stock-vb-compact" onclick="stockSetView('compact')">一覧</button>
+      <button class="hm-view-btn" id="stock-vb-normal" onclick="stockSetView('normal')">通常</button>
+    </div>
+    <span style="font-size:.7rem;color:var(--text-dim);flex-shrink:0" id="stock-vis-count"></span>
+  </div>
+  <div class="dashboard" style="padding:.8rem 1.5rem .4rem;gap:.6rem;">
+    <div class="stock-legend" id="stock-legend-row"></div>
+  </div>
+  <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 1.5rem 120px;"></div>
+</div>
 <div class="hm-date-bar hidden" id="arena-date-bar">
   <div class="hm-date-row">
     <div class="hm-date-nav"><button id="a-date-prev" onclick="arenaDateStep(-1)">◀</button></div>
@@ -505,6 +568,40 @@
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
 
 <script>
+
+// ギルドストックデータは data/guild_stock.json から動的ロード
+let GUILD_STOCK_MAR = {};
+let STOCK_Q = [71669, 110362, 145180, 167463];
+
+const STOCK_Q = [71669, 110362, 145180, 167463];
+// quintile 0-4 → 色・ラベル
+const STOCK_LEVELS = [
+  {color:"#555566", label:"低"},
+  {color:"#7a5c00", label:"やや低"},
+  {color:"#2a6a2a", label:"中"},
+  {color:"#1a8a4a", label:"やや高"},
+  {color:"#00c46a", label:"高"},
+];
+function stockLevel(worldLabel){
+  const s = GUILD_STOCK_MAR[parseInt(worldLabel)];
+  if(!s) return -1;
+  for(let i=0;i<STOCK_Q.length;i++) if(s<=STOCK_Q[i]) return i;
+  return 4;
+}
+function stockColor(worldLabel){
+  const l=stockLevel(worldLabel);
+  return l<0?"transparent":STOCK_LEVELS[l].color;
+}
+function stockLabel(worldLabel){
+  const l=stockLevel(worldLabel);
+  return l<0?"":STOCK_LEVELS[l].label;
+}
+function stockFmt(worldLabel){
+  const s=GUILD_STOCK_MAR[parseInt(worldLabel)];
+  if(!s) return "データなし";
+  return (s/10000).toFixed(1)+"万";
+}
+
 const MI=[1,2,3,4,5],AI=Array.from({length:21},(_,i)=>i+1);
 const CN={1:"Elite",2:"Expert",3:"Grand Master"};
 const BN={0:"A",1:"B",2:"C",3:"D"};
@@ -647,11 +744,13 @@ function switchTab(tab){
   document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
   document.getElementById("dash-heatmap").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("dash-arena").classList.toggle("hidden",tab!=="arena");
+  document.getElementById("dash-stock").classList.toggle("hidden",tab!=="stock");
   document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaDates.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
   if(tab==="arena")arenaRender();
+  if(tab==="stock")renderStock();
 }
 
 // JSON読み込み
@@ -905,16 +1004,18 @@ function renderHM(){
   if(compact){
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}" onclick="hmShowWorldInTable('${d.label}')">
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad} / ストック:${stockFmt(d.label)}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
+        <div class="hm-tile-stock-bar" style="background:${stockColor(d.label)}"></div>
       </article>`;
     }).join("");
   }else{
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}" onclick="hmShowWorldInTable('${d.label}')">
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad} / ストック:${stockFmt(d.label)}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge">${hmLabel(d.ratio)}</div></div>
         <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div><div class="hm-tile-guild">${d.ad}</div></div>
+        <div class="hm-tile-stock-bar" style="background:${stockColor(d.label)}"></div>
       </article>`;
     }).join("");
   }
@@ -924,6 +1025,23 @@ function renderHM(){
 // ══════════════════════════════════════════════════════
 // 採用属性分布
 // ══════════════════════════════════════════════════════
+
+async function loadGuildStock(){
+  try{
+    const res = await fetch(DATA_BASE + "guild_stock.json");
+    if(!res.ok){ console.warn("guild_stock.json not found:", res.status); return; }
+    const data = await res.json();
+    GUILD_STOCK_MAR = data.items || {};
+    if(data.quintiles){
+      STOCK_Q = [data.quintiles.q20, data.quintiles.q40, data.quintiles.q60, data.quintiles.q80];
+    }
+    console.log("guild_stock.json loaded:", Object.keys(GUILD_STOCK_MAR).length, "worlds");
+    if(curTab === "stock") renderStock();
+  } catch(e){
+    console.warn("guild_stock.json load error:", e);
+  }
+}
+
 async function loadArena(){
   // arenaタブがアクティブなら「読み込み中」を表示
   if(curTab==="arena")document.getElementById("a-grid").innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">読み込み中…</div>';
@@ -1152,6 +1270,71 @@ function arenaRenderTable(items){
   document.getElementById("a-table").innerHTML=head+`<tbody>${body}</tbody>`;
 }
 
+
+
+// ══════════════════════════════════════════════════════
+// ギルドストック月次ヒートマップ
+// ══════════════════════════════════════════════════════
+let _stockView = 'compact';
+
+function stockSetView(v){
+  _stockView = v;
+  ['compact','normal'].forEach(x=>document.getElementById('stock-vb-'+x).classList.toggle('active',x===v));
+  renderStock();
+}
+
+function renderStock(){
+  if(!Object.keys(GUILD_STOCK_MAR).length){
+    document.getElementById('stock-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">読み込み中… / データがありません</div>';
+    return;
+  }
+  // 凡例
+  const legend = document.getElementById('stock-legend-row');
+  legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">活動量:</span>' +
+    STOCK_LEVELS.map((l,i)=>{
+      const lo = i===0 ? 0 : STOCK_Q[i-1];
+      const hi = i<STOCK_Q.length ? STOCK_Q[i] : null;
+      const range = hi ? `~${(hi/10000).toFixed(0)}万` : `${(lo/10000).toFixed(0)}万~`;
+      return `<span style="display:flex;align-items:center;gap:.3rem"><span class="stock-legend-dot" style="background:${l.color}"></span><span style="color:var(--text-dim)">${l.label}(${range})</span></span>`;
+    }).join('');
+
+  // データ準備・ソート
+  let entries = Object.entries(GUILD_STOCK_MAR).map(([k,v])=>({wid:parseInt(k),label:k,stock:v}));
+  const sortBy = document.getElementById('stock-sort').value;
+  if(sortBy==='wid-asc')  entries.sort((a,b)=>a.wid-b.wid);
+  if(sortBy==='wid-desc') entries.sort((a,b)=>b.wid-a.wid);
+  if(sortBy==='stock-desc') entries.sort((a,b)=>b.stock-a.stock);
+  if(sortBy==='stock-asc')  entries.sort((a,b)=>a.stock-b.stock);
+
+  document.getElementById('stock-vis-count').textContent = entries.length + '件';
+
+  const maxStock = Math.max(...entries.map(e=>e.stock));
+  const compact = _stockView === 'compact';
+  const grid = document.getElementById('stock-grid');
+  grid.classList.toggle('hm-compact', compact);
+
+  grid.innerHTML = entries.map(({wid, label, stock})=>{
+    const lv = stockLevel(label);
+    const col = STOCK_LEVELS[lv].color;
+    const lbl = STOCK_LEVELS[lv].label;
+    const val = (stock/10000).toFixed(1)+'万';
+    if(compact){
+      return `<article class="stock-tile" style="background:${col};" title="W${label} / ${val} (${lbl})">
+        <div class="stock-tile-compact">w${label}</div>
+        <div class="stock-tile-compact" style="font-size:.5rem;margin-top:1px">${val}</div>
+      </article>`;
+    }
+    return `<article class="stock-tile" style="background:${col};">
+      <div class="stock-tile-top">
+        <div><div class="stock-tile-world">World</div><div class="stock-tile-wid">${label}</div></div>
+        <div class="stock-tile-badge">${lbl}</div>
+      </div>
+      <div class="stock-tile-body">
+        <div class="stock-tile-val">${val}</div>
+      </div>
+    </article>`;
+  }).join('');
+}
 
 function arenaShowWorldInTable(wid){_arenaFocusWid=wid;
   const prevView=arenaView;
