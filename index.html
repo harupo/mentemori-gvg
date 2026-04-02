@@ -13,6 +13,7 @@
     --border:#2a2a3a;--text:#e0e0ec;--text-dim:#8888a0;--accent:#6c5ce7;
     --domination:#ff6b6b;--monopoly:#e74c3c;--oligopoly:#f39c12;--contested:#2ecc71;
     --oligo-a:#f39c12;--oligo-b:#74b9ff;--oligo-c:#fd79a8;
+    --c-ai:#4a9ded;--c-ku:#ed4a4a;--c-sui:#3de88a;--c-ki:#edcc3d;--c-ten:#c0c0e8;--c-mei:#a84aed;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Noto Sans JP',sans-serif;background:var(--bg-deep);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden;}
@@ -179,6 +180,54 @@
     #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.7rem;}
     #dash-heatmap.hm-playing .hm-compact .hm-tile-rate{font-size:.65rem;}
   }
+
+  /* ── 採用属性分布タブ ─────────────────────────── */
+  .attr-bar{display:flex;height:10px;border-radius:99px;overflow:hidden;margin-bottom:.45rem;}
+  .attr-seg{height:100%;min-width:0;}
+  .attr-seg.ai{background:var(--c-ai);} .attr-seg.ku{background:var(--c-ku);}
+  .attr-seg.sui{background:var(--c-sui);} .attr-seg.ki{background:var(--c-ki);}
+  .attr-seg.ten{background:var(--c-ten);} .attr-seg.mei{background:var(--c-mei);}
+  #dash-arena .summary-row{grid-template-columns:repeat(7,1fr);}
+  #dash-arena .stat-card.ai .value{color:var(--c-ai);}
+  #dash-arena .stat-card.ku .value{color:var(--c-ku);}
+  #dash-arena .stat-card.sui .value{color:var(--c-sui);}
+  #dash-arena .stat-card.ki .value{color:var(--c-ki);}
+  #dash-arena .stat-card.ten .value{color:var(--c-ten);}
+  #dash-arena .stat-card.mei .value{color:var(--c-mei);}
+  .arena-dom-bar-wrap{display:flex;align-items:center;gap:.8rem;margin-bottom:.4rem;flex-wrap:wrap;}
+  .arena-dom-bar{flex:1;min-width:120px;height:8px;border-radius:99px;display:flex;overflow:hidden;}
+  .arena-dom-seg{height:100%;}
+  .arena-dom-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.7rem;}
+  .arena-dom-legend-item{display:flex;align-items:center;gap:.3rem;}
+  .arena-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+  .arena-src-toggle{display:flex;gap:0;}
+  .arena-src-btn{font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:600;padding:.3rem .7rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
+  .arena-src-btn:first-child{border-radius:5px 0 0 5px;} .arena-src-btn:last-child{border-radius:0 5px 5px 0;}
+  .arena-src-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  #dash-arena .hm-tile-dominant{font-size:1.45rem;font-weight:900;line-height:1;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;margin-bottom:.15rem;}
+  #dash-arena .hm-tile-pct{font-size:.68rem;opacity:.85;}
+  #dash-arena .hm-compact .attr-bar{display:none;}
+  #dash-arena .hm-compact .hm-tile-dominant{font-size:.8rem;}
+  #dash-arena .hm-compact .hm-tile-pct{display:none;}
+  #dash-arena .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.65rem;opacity:.85;line-height:1.3;}
+  #dash-arena thead th.ai{color:var(--c-ai);} #dash-arena thead th.ku{color:var(--c-ku);}
+  #dash-arena thead th.sui{color:var(--c-sui);} #dash-arena thead th.ki{color:var(--c-ki);}
+  #dash-arena thead th.ten{color:var(--c-ten);} #dash-arena thead th.mei{color:var(--c-mei);}
+  #dash-arena thead th{text-align:right;cursor:pointer;user-select:none;}
+  #dash-arena thead th:first-child{text-align:left;}
+  #dash-arena thead th:hover{color:var(--text);}
+  #dash-arena thead th.sort-asc::after{content:" ▲";font-size:.65rem;}
+  #dash-arena thead th.sort-desc::after{content:" ▼";font-size:.65rem;}
+  #dash-arena tbody td{text-align:right;}
+  #dash-arena tbody td:first-child{text-align:left;}
+  .td-attrbar-wrap{position:relative;}
+  .td-attrbar{position:absolute;bottom:0;left:0;height:2px;border-radius:0 1px 1px 0;}
+  .td-dom.ai{color:var(--c-ai);font-weight:700;} .td-dom.ku{color:var(--c-ku);font-weight:700;}
+  .td-dom.sui{color:var(--c-sui);font-weight:700;} .td-dom.ki{color:var(--c-ki);font-weight:700;}
+  .td-dom.ten{color:var(--c-ten);font-weight:700;} .td-dom.mei{color:var(--c-mei);font-weight:700;}
+  @media(max-width:768px){
+    #dash-arena .summary-row{grid-template-columns:repeat(4,1fr);}
+  }
 </style>
 </head>
 <body>
@@ -189,6 +238,7 @@
   <button class="tab-btn active" data-tab="local" onclick="switchTab('local')">⚔️ ギルドバトル</button>
   <button class="tab-btn" data-tab="global" onclick="switchTab('global')">🌐 グランドバトル</button>
   <button class="tab-btn" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 占有ヒートマップ</button>
+  <button class="tab-btn" data-tab="arena" onclick="switchTab('arena')">🌈 採用属性分布</button>
 </div>
 <div class="info-bar" id="infoBar">
   <div class="info-row">
@@ -282,6 +332,57 @@
   <div class="hm-grid" id="hm-grid"></div>
   <div class="hm-date-spacer"></div>
 </div>
+<!-- 採用属性分布 -->
+<div class="dashboard hidden" id="dash-arena">
+  <div class="controls" style="border-bottom:1px solid var(--border);padding:.7rem 2rem;">
+    <label>集計対象:</label>
+    <div class="arena-src-toggle">
+      <button class="arena-src-btn active" id="a-src-total"  onclick="arenaSetSrc('total_usage')">全プレイヤー</button>
+      <button class="arena-src-btn"        id="a-src-ranker" onclick="arenaSetSrc('ranker_usage')">上位30名</button>
+    </div>
+    <label style="margin-left:.5rem">ソート:</label>
+    <select id="a-sort" onchange="arenaRender()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">
+      <option value="wid-asc">ワールド 昇順</option>
+      <option value="wid-desc">ワールド 降順</option>
+      <option value="ai-desc">藍 高い順</option>
+      <option value="ku-desc">紅 高い順</option>
+      <option value="sui-desc">翠 高い順</option>
+      <option value="ki-desc">黄 高い順</option>
+      <option value="ten-desc">天 高い順</option>
+      <option value="mei-desc">冥 高い順</option>
+    </select>
+  </div>
+  <div class="dashboard" style="padding:1rem 2rem .5rem;gap:.8rem;">
+    <div class="summary-row">
+      <div class="stat-card"><div class="value" id="a-worlds">-</div><div class="label">Worlds</div></div>
+      <div class="stat-card ai" ><div class="value" id="a-ai" >-</div><div class="label">藍 avg</div></div>
+      <div class="stat-card ku" ><div class="value" id="a-ku" >-</div><div class="label">紅 avg</div></div>
+      <div class="stat-card sui"><div class="value" id="a-sui">-</div><div class="label">翠 avg</div></div>
+      <div class="stat-card ki" ><div class="value" id="a-ki" >-</div><div class="label">黄 avg</div></div>
+      <div class="stat-card ten"><div class="value" id="a-ten">-</div><div class="label">天 avg</div></div>
+      <div class="stat-card mei"><div class="value" id="a-mei">-</div><div class="label">冥 avg</div></div>
+    </div>
+    <div class="arena-dom-bar-wrap">
+      <span style="font-size:.7rem;color:var(--text-dim);font-weight:600;white-space:nowrap;">支配属性:</span>
+      <div class="arena-dom-bar" id="a-dom-bar"></div>
+      <div class="arena-dom-legend" id="a-dom-legend"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;">
+      <div class="hm-view-toggle">
+        <button class="hm-view-btn active" id="a-vb-compact" onclick="arenaSetView('compact')">一覧</button>
+        <button class="hm-view-btn"        id="a-vb-normal"  onclick="arenaSetView('normal')">通常</button>
+        <button class="hm-view-btn"        id="a-vb-table"   onclick="arenaSetView('table')">テーブル</button>
+      </div>
+      <span style="font-size:.7rem;color:var(--text-dim);" id="a-vis-count">-件</span>
+    </div>
+    <div id="a-grid" class="hm-grid hm-compact"></div>
+    <div class="table-card hidden" id="a-table-card">
+      <div class="table-wrap"><table id="a-table"></table></div>
+    </div>
+  </div>
+  <div class="hm-date-spacer"></div>
+</div>
+
 
 <div class="hm-date-bar hidden" id="hm-date-bar">
   <div class="hm-date-row">
@@ -302,6 +403,26 @@
     </div>
   </div>
 </div>
+<div class="hm-date-bar hidden" id="arena-date-bar">
+  <div class="hm-date-row">
+    <div class="hm-date-nav"><button id="a-date-prev" onclick="arenaDateStep(-1)">◀</button></div>
+    <input type="range" class="hm-date-slider" id="a-date-slider" min="0" max="0" value="0" oninput="arenaDateChange()">
+    <div class="hm-date-nav"><button id="a-date-next" onclick="arenaDateStep(1)">▶</button></div>
+    <span class="hm-date-value" id="a-date-value">-</span>
+    <span class="hm-date-tag"   id="a-date-tag"></span>
+  </div>
+  <div class="hm-play-row">
+    <button class="hm-play-btn" id="a-play-btn" onclick="arenaPlayToggle()">▶ 再生</button>
+    <span class="hm-speed-label">速度</span>
+    <div class="hm-speed-btns">
+      <button class="hm-speed-btn" onclick="arenaSetSpeed(1300)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="arenaSetSpeed(650)">1x</button>
+      <button class="hm-speed-btn" onclick="arenaSetSpeed(325)">2x</button>
+      <button class="hm-speed-btn" onclick="arenaSetSpeed(160)">4x</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
 
@@ -319,6 +440,9 @@ function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p
 
 let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact";
 let hmDates=[],hmDateIdx=-1,hmCache={},hmCurrentData=null;
+// 採用属性分布
+const A_ATTRS=['藍','紅','翠','黄','天','冥'],A_KEY={藍:'ai',紅:'ku',翠:'sui',黄:'ki',天:'ten',冥:'mei'},A_COL={藍:'#4a9ded',紅:'#ed4a4a',翠:'#3de88a',黄:'#edcc3d',天:'#c0c0e8',冥:'#a84aed'},A_BG={藍:'hsl(210 65% 16%)',紅:'hsl(0 65% 16%)',翠:'hsl(145 65% 13%)',黄:'hsl(46 65% 16%)',天:'hsl(235 28% 22%)',冥:'hsl(270 55% 18%)'},A_TC={藍:'#cce4ff',紅:'#ffdada',翠:'#ccffe6',黄:'#fff3cc',天:'#eeeef8',冥:'#e8ccff'};
+let arenaAD=[],arenaDates=[],arenaDateIdx=-1,arenaCache={},arenaCurrentData=null,arenaSrc='total_usage',arenaView='compact',arenaPlayTimer=null,arenaPlaySpeed=650;
 
 function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;document.getElementById("wf-float").classList.remove("hidden");renderG();}
 function clearWF(){gWF=null;document.getElementById("wf-float").classList.add("hidden");renderG();}
@@ -433,13 +557,17 @@ function bldFull(tb,items,fG,fS,isGw){
 
 function switchTab(tab){curTab=tab;
   if(tab!=="heatmap"&&hmPlayTimer)hmPlayStop();
+  if(tab!=="arena"&&arenaPlayTimer)arenaPlayStop();
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
   document.getElementById("dash-local").classList.toggle("hidden",tab!=="local"||!LD.length);
   document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
   document.getElementById("dash-heatmap").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
+  document.getElementById("dash-arena").classList.toggle("hidden",tab!=="arena"||!arenaAD.length);
   document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
+  document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaAD.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
+  if(tab==="arena"&&arenaAD.length)arenaRender();
 }
 
 // JSON読み込み
@@ -464,6 +592,7 @@ async function loadData(){
     hmCurrentData=LD;
     renderL();renderG();switchTab(curTab);
     loadHMHistory();
+    loadArena();
   }catch(e){ss(`✗ ${e.message}`,"err");}
 }
 
@@ -675,6 +804,210 @@ function renderHM(){
       </article>`;
     }).join("");
   }
+}
+
+
+// ══════════════════════════════════════════════════════
+// 採用属性分布
+// ══════════════════════════════════════════════════════
+async function loadArena(){
+  try{
+    const res=await fetch(DATA_BASE+"arena.json");
+    if(!res.ok)return;
+    const data=await res.json();
+    arenaAD=arenaParseItems(data,arenaSrc);
+    if(!arenaAD.length)return;
+    // 更新日時を既存info-barに追記
+    if(data.fetchedAt){const el=document.getElementById("lastUpdate");if(el&&!el.textContent.includes("🌈"))el.textContent+=" | 🌈 "+fD(new Date(data.fetchedAt));}
+    if(curTab==="arena")switchTab("arena");
+    loadArenaHistory(data);
+  }catch(e){console.warn("arena.json load failed:",e);}
+}
+
+function arenaParseItems(data,src){
+  return(data.items||[]).map(it=>{
+    const s=it[src]||it.total_usage;
+    if(!s)return null;
+    return{wid:it.wid,label:it.label,pct:s.pct,dominant:s.dominant};
+  }).filter(Boolean);
+}
+
+async function loadArenaHistory(latestData){
+  try{
+    const res=await fetch(DATA_BASE+"history/index.json");
+    if(!res.ok)return;
+    const idx=await res.json();
+    arenaDates=idx.arena||[];
+    if(!arenaDates.length)return;
+    arenaCache[arenaDates[arenaDates.length-1]]=arenaAD;
+    const slider=document.getElementById("a-date-slider");
+    slider.max=arenaDates.length-1;slider.value=arenaDates.length-1;
+    arenaDateIdx=arenaDates.length-1;
+    arenaUpdateUI();
+    if(curTab==="arena")document.getElementById("arena-date-bar").classList.remove("hidden");
+  }catch(e){console.warn("arena history failed:",e);}
+}
+
+async function arenaLoadDate(idx){
+  if(idx<0||idx>=arenaDates.length)return;
+  arenaDateIdx=idx;
+  document.getElementById("a-date-slider").value=idx;
+  arenaUpdateUI();
+  const dateStr=arenaDates[idx];
+  if(!arenaCache[dateStr]){
+    document.getElementById("a-date-tag").textContent="読み込み中…";
+    try{
+      const res=await fetch(`${DATA_BASE}history/arena/${dateStr}.json`);
+      if(!res.ok){document.getElementById("a-date-tag").textContent="データなし";return;}
+      arenaCache[dateStr]=arenaParseItems(await res.json(),arenaSrc);
+    }catch{document.getElementById("a-date-tag").textContent="読み込み失敗";return;}
+    arenaUpdateUI();
+  }
+  arenaCurrentData=(idx===arenaDates.length-1)?null:arenaCache[dateStr];
+  arenaRender();
+}
+
+function arenaUpdateUI(){
+  const d=arenaDates[arenaDateIdx]||"-";
+  document.getElementById("a-date-value").textContent=d;
+  const isLatest=arenaDateIdx===arenaDates.length-1;
+  document.getElementById("a-date-tag").textContent=isLatest?"（最新）":`${arenaDates.length-1-arenaDateIdx}日前`;
+  document.getElementById("a-date-prev").disabled=arenaDateIdx<=0;
+  document.getElementById("a-date-next").disabled=arenaDateIdx>=arenaDates.length-1;
+}
+
+function arenaDateChange(){arenaPlayStop();arenaLoadDate(+document.getElementById("a-date-slider").value);}
+function arenaDateStep(d){arenaPlayStop();arenaLoadDate(arenaDateIdx+d);}
+
+function arenaPlayToggle(){arenaPlayTimer?arenaPlayStop():arenaPlayStart();}
+function arenaPlayStart(){
+  if(arenaDateIdx>=arenaDates.length-1)arenaDateIdx=-1;
+  if(arenaView!=="compact")arenaSetView("compact");
+  const btn=document.getElementById("a-play-btn");
+  btn.textContent="⏸ 停止";btn.classList.add("playing");
+  arenaPlayTimer=true;
+  arenaPlayTick();
+}
+function arenaPlayStop(){
+  if(arenaPlayTimer){clearTimeout(arenaPlayTimer);arenaPlayTimer=null;}
+  const btn=document.getElementById("a-play-btn");
+  btn.textContent="▶ 再生";btn.classList.remove("playing");
+}
+async function arenaPlayTick(){
+  if(arenaDateIdx>=arenaDates.length-1){arenaPlayStop();return;}
+  await arenaLoadDate(arenaDateIdx+1);
+  if(arenaPlayTimer!==null||document.getElementById("a-play-btn").classList.contains("playing")){
+    arenaPlayTimer=setTimeout(arenaPlayTick,arenaPlaySpeed);
+  }
+}
+function arenaSetSpeed(ms){
+  arenaPlaySpeed=ms;
+  document.querySelectorAll("#arena-date-bar .hm-speed-btn").forEach(b=>{
+    const sp={"0.5x":1300,"1x":650,"2x":325,"4x":160};
+    b.classList.toggle("active",sp[b.textContent]===ms);
+  });
+}
+
+function arenaSetSrc(src){
+  arenaSrc=src;
+  document.getElementById("a-src-total").classList.toggle("active",src==="total_usage");
+  document.getElementById("a-src-ranker").classList.toggle("active",src==="ranker_usage");
+  arenaCache={};arenaCurrentData=null;arenaAD=[];
+  loadArena();
+}
+
+function arenaSetView(v){
+  arenaView=v;
+  ["compact","normal","table"].forEach(x=>document.getElementById("a-vb-"+x).classList.toggle("active",x===v));
+  arenaRender();
+}
+
+function arenaRender(){
+  const src=arenaCurrentData||arenaAD;
+  const sorted=arenaSortItems([...src]);
+  document.getElementById("a-vis-count").textContent=sorted.length+"件";
+  arenaUpdateStats(sorted);
+  arenaUpdateDomBar(sorted);
+  if(arenaView==="table")arenaRenderTable(sorted);
+  else arenaRenderGrid(sorted);
+}
+
+function arenaSortItems(items){
+  const s=document.getElementById("a-sort").value;
+  if(s==="wid-asc") return items.sort((a,b)=>a.wid-b.wid);
+  if(s==="wid-desc")return items.sort((a,b)=>b.wid-a.wid);
+  const am={ai:"藍",ku:"紅",sui:"翠",ki:"黄",ten:"天",mei:"冥"};
+  const a=am[s.replace("-desc","")];
+  return items.sort((x,y)=>(y.pct[a]||0)-(x.pct[a]||0));
+}
+
+function arenaUpdateStats(items){
+  document.getElementById("a-worlds").textContent=items.length;
+  const ids={藍:"a-ai",紅:"a-ku",翠:"a-sui",黄:"a-ki",天:"a-ten",冥:"a-mei"};
+  A_ATTRS.forEach(a=>{
+    const avg=items.length?items.reduce((s,d)=>s+(d.pct[a]||0),0)/items.length:0;
+    document.getElementById(ids[a]).textContent=avg.toFixed(1)+"%";
+  });
+}
+
+function arenaUpdateDomBar(items){
+  const cnt=Object.fromEntries(A_ATTRS.map(a=>[a,0]));
+  items.forEach(d=>{if(d.dominant)cnt[d.dominant]++;});
+  const tot=items.length||1;
+  document.getElementById("a-dom-bar").innerHTML=A_ATTRS.map(a=>
+    `<div class="arena-dom-seg" style="flex-basis:${cnt[a]/tot*100}%;background:${A_COL[a]};opacity:.8"></div>`
+  ).join("");
+  document.getElementById("a-dom-legend").innerHTML=A_ATTRS.map(a=>
+    `<span class="arena-dom-legend-item"><span class="arena-dot" style="background:${A_COL[a]}"></span><span style="color:${A_COL[a]};font-weight:700">${a}</span><span style="color:var(--text-dim)">&nbsp;${cnt[a]}W</span></span>`
+  ).join("");
+}
+
+function arenaRenderGrid(items){
+  document.getElementById("a-table-card").classList.add("hidden");
+  document.getElementById("a-grid").style.display="";
+  const grid=document.getElementById("a-grid");
+  const compact=arenaView==="compact";
+  grid.classList.toggle("hm-compact",compact);
+  if(!items.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">データがありません</div>';return;}
+  grid.innerHTML=items.map(d=>{
+    const dom=d.dominant||A_ATTRS[0];
+    const bg=A_BG[dom],tc=A_TC[dom],p=d.pct;
+    if(compact){
+      return`<article class="hm-tile" style="background:${bg};color:${tc};" title="W${d.label} | ${A_ATTRS.map(a=>a+":"+(p[a]||0).toFixed(1)+"%").join(" ")}">
+        <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-dominant">${dom}</div></div></article>`;
+    }
+    const segs=A_ATTRS.map(a=>`<div class="attr-seg ${A_KEY[a]}" style="flex-basis:${(p[a]||0).toFixed(2)}%"></div>`).join("");
+    const top2=[...A_ATTRS].sort((a,b)=>(p[b]||0)-(p[a]||0)).slice(0,2);
+    const sub=top2.map(a=>`<span style="color:${A_COL[a]};font-weight:700">${a}</span> ${(p[a]||0).toFixed(1)}%`).join(' <span style="opacity:.4">/</span> ');
+    return`<article class="hm-tile" style="background:${bg};color:${tc};">
+      <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge" style="color:${A_COL[dom]}">${dom}</div></div>
+      <div class="hm-tile-body"><div class="attr-bar">${segs}</div><div class="hm-tile-dominant" style="color:${A_COL[dom]}">${(p[dom]||0).toFixed(1)}%</div><div class="hm-tile-pct">${sub}</div></div></article>`;
+  }).join("");
+}
+
+function arenaRenderTable(items){
+  document.getElementById("a-grid").style.display="none";
+  document.getElementById("a-table-card").classList.remove("hidden");
+  const maxP=Object.fromEntries(A_ATTRS.map(a=>[a,Math.max(...items.map(d=>d.pct[a]||0),1)]));
+  const s=document.getElementById("a-sort").value;
+  const thW=()=>{const sc=s==="wid-asc"?"sort-asc":s==="wid-desc"?"sort-desc":"";return`<th class="${sc}" onclick="arenaTblSort('wid')">World</th>`;};
+  const thA=a=>{const k=A_KEY[a],sc=s===k+"-desc"?"sort-desc":"";return`<th class="${k} ${sc}" onclick="arenaTblSort('${k}')">${a}</th>`;};
+  const head=`<thead><tr>${thW()}${A_ATTRS.map(thA).join("")}<th>支配</th></tr></thead>`;
+  const body=items.map(d=>{
+    const cells=A_ATTRS.map(a=>{
+      const pv=(d.pct[a]||0),pw=Math.round(pv/maxP[a]*100);
+      return`<td class="td-attrbar-wrap"><div class="td-attrbar" style="width:${pw}%;background:${A_COL[a]}"></div><span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:.8rem">${pv.toFixed(1)}%</span></td>`;
+    }).join("");
+    const dom=d.dominant||"";
+    return`<tr><td style="font-family:'JetBrains Mono',monospace;font-weight:700">w${d.label}</td>${cells}<td><span class="td-dom ${A_KEY[dom]||""}">${dom}</span></td></tr>`;
+  }).join("");
+  document.getElementById("a-table").innerHTML=head+`<tbody>${body}</tbody>`;
+}
+
+function arenaTblSort(col){
+  if(col==="wid"){const cur=document.getElementById("a-sort").value;document.getElementById("a-sort").value=cur==="wid-asc"?"wid-desc":"wid-asc";}
+  else document.getElementById("a-sort").value=col+"-desc";
+  arenaRender();
 }
 
 document.addEventListener("DOMContentLoaded",()=>{loadData();});
