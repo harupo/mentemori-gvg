@@ -383,11 +383,17 @@
       <option value="wid-asc">ワールド 昇順</option>
       <option value="wid-desc">ワールド 降順</option>
       <option value="ai-desc">藍 高い順</option>
+      <option value="ai-asc">藍 低い順</option>
       <option value="ku-desc">紅 高い順</option>
+      <option value="ku-asc">紅 低い順</option>
       <option value="sui-desc">翠 高い順</option>
+      <option value="sui-asc">翠 低い順</option>
       <option value="ki-desc">黄 高い順</option>
+      <option value="ki-asc">黄 低い順</option>
       <option value="ten-desc">天 高い順</option>
+      <option value="ten-asc">天 低い順</option>
       <option value="mei-desc">冥 高い順</option>
+      <option value="mei-asc">冥 低い順</option>
     </select>
   </div>
   <div class="dashboard" style="padding:1rem 2rem .5rem;gap:.8rem;">
@@ -1041,8 +1047,11 @@ function arenaSortItems(items){
   if(s==="wid-asc") return items.sort((a,b)=>a.wid-b.wid);
   if(s==="wid-desc")return items.sort((a,b)=>b.wid-a.wid);
   const am={ai:"藍",ku:"紅",sui:"翠",ki:"黄",ten:"天",mei:"冥"};
-  const a=am[s.replace("-desc","")];
-  return items.sort((x,y)=>(y.pct[a]||0)-(x.pct[a]||0));
+  const isDesc=s.endsWith("-desc");
+  const a=am[s.replace(/-(?:desc|asc)$/,"")];
+  return isDesc
+    ? items.sort((x,y)=>(y.pct[a]||0)-(x.pct[a]||0))
+    : items.sort((x,y)=>(x.pct[a]||0)-(y.pct[a]||0));
 }
 
 function arenaUpdateStats(items){
@@ -1095,7 +1104,7 @@ function arenaRenderTable(items){
   const maxP=Object.fromEntries(A_ATTRS.map(a=>[a,Math.max(...items.map(d=>d.pct[a]||0),1)]));
   const s=document.getElementById("a-sort").value;
   const thW=()=>{const sc=s==="wid-asc"?"sort-asc":s==="wid-desc"?"sort-desc":"";return`<th class="${sc}" onclick="arenaTblSort('wid')">World</th>`;};
-  const thA=a=>{const k=A_KEY[a],sc=s===k+"-desc"?"sort-desc":"";return`<th class="${k} ${sc}" onclick="arenaTblSort('${k}')">${a}</th>`;};
+  const thA=a=>{const k=A_KEY[a],sc=s===k+"-desc"?"sort-desc":s===k+"-asc"?"sort-asc":"";return`<th class="${k} ${sc}" onclick="arenaTblSort('${k}')">${a}</th>`;};
   const head=`<thead><tr>${thW()}${A_ATTRS.map(thA).join("")}<th>支配</th></tr></thead>`;
   const body=items.map(d=>{
     const cells=A_ATTRS.map(a=>{
@@ -1143,8 +1152,15 @@ function arenaBackToGrid(){_arenaFocusWid=null;
   arenaSetView(prev);  // これで戻るボタンも隠れる
 }
 function arenaTblSort(col){
-  if(col==="wid"){const cur=document.getElementById("a-sort").value;document.getElementById("a-sort").value=cur==="wid-asc"?"wid-desc":"wid-asc";}
-  else document.getElementById("a-sort").value=col+"-desc";
+  const sel=document.getElementById("a-sort");
+  const cur=sel.value;
+  if(col==="wid"){
+    sel.value=cur==="wid-asc"?"wid-desc":"wid-asc";
+  } else {
+    // 同じ列を再クリック → desc/asc トグル、別列 → desc から開始
+    if(cur===col+"-desc") sel.value=col+"-asc";
+    else sel.value=col+"-desc";
+  }
   arenaRender();
 }
 
