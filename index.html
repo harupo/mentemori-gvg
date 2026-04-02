@@ -265,6 +265,8 @@
   <div class="info-row">
     <span class="status-text" id="statusBar">読み込み中…</span>
     <span class="info-inline" id="lastUpdate"></span>
+    <span class="info-sep">|</span>
+    <span style="color:var(--text-dim)">毎日18時更新</span>
   </div>
 </div>
 
@@ -844,8 +846,7 @@ async function loadArena(){
     console.log("arena.json loaded: items=",data.items?.length,"fetchedAt=",data.fetchedAt);
     arenaAD=arenaParseItems(data);
     console.log("arenaAD parsed:",arenaAD.length,"worlds");
-    // 更新日時を追記
-    if(data.fetchedAt){const el=document.getElementById("lastUpdate");if(el&&!el.textContent.includes("🌈"))el.textContent+=" | 🌈 "+fD(new Date(data.fetchedAt));}
+    // 採用属性の更新日時は表示しない（毎日18時更新と固定表示）
     if(curTab==="arena")arenaRender();
     loadArenaHistory(data);
   }catch(e){
