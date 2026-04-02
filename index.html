@@ -984,7 +984,7 @@ function hmPlayToggle(){
 function hmJumpToNormal(label){
   window._hmPrevCompact = true;
   window._hmFocusLabel = label;
-  hmSetView('normal');  // 通常ビューに切替
+  setHMView('normal');  // 通常ビューに切替
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       _hmHighlightTile(label);
@@ -1015,7 +1015,7 @@ function hmBackToCompact(){
   window._hmPrevCompact = false;
   document.getElementById('hm-back-compact-btn').classList.add('hidden');
   document.querySelectorAll('.hm-tile-focused').forEach(t=>t.classList.remove('hm-tile-focused'));
-  hmSetView('compact');
+  setHMView('compact');
 }
 
 function hmShowWorldInTable(label){
@@ -1240,6 +1240,10 @@ function setHMView(mode){
   hmView=mode;
   document.getElementById("hm-btn-compact").classList.toggle("active",mode==="compact");
   document.getElementById("hm-btn-normal").classList.toggle("active",mode==="normal");
+  // 手動ビュー切替時は戻るボタンを隠す
+  if(!window._hmPrevCompact){
+    document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
+  }
   renderHM();
 }
 
