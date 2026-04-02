@@ -335,6 +335,15 @@
   /* ストックタブ summary legend */
   .stock-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.72rem;align-items:center;}
   .stock-legend-dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  /* 散布図 */
+  .scatter-wrap{padding:1rem 1.5rem 120px;max-width:900px;margin:0 auto;}
+  .scatter-svg{width:100%;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);}
+  .scatter-quadrant-label{font-size:11px;fill:rgba(255,255,255,.3);font-family:'Noto Sans JP',sans-serif;}
+  .scatter-dot{cursor:pointer;transition:r .1s,opacity .1s;}
+  .scatter-dot:hover{opacity:1 !important;}
+  .scatter-axis-label{font-size:11px;fill:var(--text-dim,#888);font-family:'JetBrains Mono',monospace;}
+  .scatter-tooltip{position:fixed;background:rgba(20,20,32,.95);border:1px solid var(--accent,#6c5ce7);border-radius:8px;padding:.5rem .8rem;font-size:.75rem;pointer-events:none;z-index:200;display:none;color:#fff;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -431,6 +440,9 @@
           <option value="wid-desc">ワールド 降順</option>
           <option value="rate-desc">占有率 高い順</option>
           <option value="rate-asc">占有率 低い順</option>
+          <option value="stock-desc">活動量 高い順</option>
+          <option value="stock-asc">活動量 低い順</option>
+          <option value="combo-desc">占有×活動 高い順</option>
         </select>
       </div>
     </div>
@@ -439,7 +451,7 @@
       <div class="hm-legend-bar"></div>
     </div>
   </div>
-  <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.68rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;">
+  <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.68rem;display:none;gap:.7rem;align-items:center;flex-wrap:wrap;">
     <span style="color:var(--text-dim);font-weight:700">活動バー:</span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#3a3a3a;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">低</span></span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#7a5200;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
@@ -539,12 +551,14 @@
     <div class="hm-view-toggle" style="margin-left:auto;flex-shrink:0;">
       <button class="hm-view-btn active" id="stock-vb-compact" onclick="stockSetView('compact')">一覧</button>
       <button class="hm-view-btn" id="stock-vb-normal" onclick="stockSetView('normal')">通常</button>
+      <button class="hm-view-btn" id="stock-vb-scatter" onclick="stockSetView('scatter')">散布図</button>
     </div>
     <span style="font-size:.7rem;color:var(--text-dim);flex-shrink:0" id="stock-vis-count"></span>
   </div>
   <div class="dashboard" style="padding:.8rem 1.5rem .4rem;gap:.6rem;">
     <div class="stock-legend" id="stock-legend-row"></div>
   </div>
+  <div class="scatter-tooltip" id="scatter-tooltip"></div>
   <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 1.5rem 120px;"></div>
 </div>
 <div class="hm-date-bar hidden" id="arena-date-bar">
@@ -584,11 +598,11 @@ let STOCK_Q = [71669, 110362, 145180, 167463];
 
 // quintile 0-4 → 色・ラベル
 const STOCK_LEVELS = [
-  {color:"#1e3a2a", label:"低"},       // 深い暗緑（低活動）
-  {color:"#1d5c38", label:"やや低"},   // 暗緑
-  {color:"#1a7a46", label:"中"},       // 中緑
-  {color:"#12a05a", label:"やや高"},   // 明緑
-  {color:"#00cc6a", label:"高"},       // 鮮やかな緑（高活動）
+  {color:"#2a1a08", label:"低"},       // 非常に暗いアンバー（低活動）
+  {color:"#5c3800", label:"やや低"},   // 暗アンバー
+  {color:"#9a6200", label:"中"},       // アンバー
+  {color:"#c89400", label:"やや高"},   // 明るいアンバー
+  {color:"#ffd000", label:"高"},       // ゴールド（高活動）
 ];
 // 活動バー用カラー（占有ヒートマップに映えるアンバー系）
 const STOCK_BAR_LEVELS = [
@@ -931,6 +945,128 @@ function hmBackToHeatmap(){
   switchTab('heatmap');
 }
 
+function renderStockScatter(){
+  const grid = document.getElementById('stock-grid');
+  grid.classList.remove('hm-compact');
+
+  // データ: LDとGUILD_STOCK_MARの共通ワールドを使用
+  const points = [];
+  const maxS = 238558, minS = 42601;
+  for(const [label, stock] of Object.entries(GUILD_STOCK_MAR)){
+    const ld = LD.find(d => d._label === label);
+    if(!ld) continue;
+    const occ = ld._a.am / 21 * 100; // 占有率%
+    const lv = stockLevel(label);
+    points.push({ label, stock, occ, am: ld._a.am, lv,
+      col: lv >= 3 ? STOCK_LEVELS[lv].color : STOCK_LEVELS[lv].color });
+  }
+
+  const W=860, H=520, PL=60, PR=20, PT=30, PB=55;
+  const IW=W-PL-PR, IH=H-PT-PB;
+
+  // 軸スケール
+  const maxOcc=Math.max(...points.map(p=>p.occ));
+  const stockRange=maxS-minS;
+
+  function sx(occ){ return PL + occ/Math.max(maxOcc,100)*IW; }
+  function sy(stock){ return PT + IH - (stock-minS)/stockRange*IH; }
+
+  // 中央値（分割線）
+  const medOcc = 100*(LD.reduce((s,d)=>s+d._a.am/21,0)/LD.length);
+  const medStock = (maxS+minS)/2;
+  const mx = sx(medOcc), my = sy(medStock);
+
+  // 象限ラベル
+  const quads = [
+    {x: mx+IW*0.15, y: PT+IH*0.1, t:'寡占×高活動', sub:'競争激しく活発'},
+    {x: PL+IW*0.05, y: PT+IH*0.1, t:'分散×高活動', sub:'多様で活気あり'},
+    {x: mx+IW*0.15, y: PT+IH*0.82, t:'寡占×低活動', sub:'安定制覇'},
+    {x: PL+IW*0.05, y: PT+IH*0.82, t:'分散×低活動', sub:'静かな競争'},
+  ];
+
+  // X軸メモリ
+  const xTicks=[0,25,50,75,100];
+  const yTicks=[50000,100000,150000,200000,250000];
+
+  const dots = points.map(p=>{
+    const col = STOCK_LEVELS[p.lv].color;
+    const bc = p.lv>=3?'rgba(0,0,0,.3)':'rgba(255,255,255,.2)';
+    return `<circle class="scatter-dot" cx="${sx(p.occ).toFixed(1)}" cy="${sy(p.stock).toFixed(1)}"
+      r="7" fill="${col}" fill-opacity="0.88" stroke="${bc}" stroke-width="1"
+      data-label="${p.label}" data-occ="${p.occ.toFixed(1)}" data-stock="${p.stock}"
+      data-am="${p.am}" data-lv="${STOCK_LEVELS[p.lv].label}"
+      onmouseenter="scatterTip(event,this)" onmouseleave="scatterHide()"
+      onclick="stockJumpToHeatmap('${p.label}')"/>`;
+  }).join('');
+
+  const quadSvg = quads.map(q=>
+    `<text class="scatter-quadrant-label" x="${q.x}" y="${q.y}">${q.t}</text>
+     <text class="scatter-quadrant-label" x="${q.x}" y="${q.y+16}" font-size="9">${q.sub}</text>`
+  ).join('');
+
+  const xTickSvg = xTicks.map(v=>
+    `<line x1="${sx(v)}" y1="${PT}" x2="${sx(v)}" y2="${PT+IH}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+     <text class="scatter-axis-label" x="${sx(v)}" y="${PT+IH+16}" text-anchor="middle">${v}%</text>`
+  ).join('');
+
+  const yTickSvg = yTicks.map(v=>
+    `<line x1="${PL}" y1="${sy(v)}" x2="${PL+IW}" y2="${sy(v)}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+     <text class="scatter-axis-label" x="${PL-6}" y="${sy(v)+4}" text-anchor="end">${(v/10000).toFixed(0)}万</text>`
+  ).join('');
+
+  grid.innerHTML = `<div class="scatter-wrap" style="padding:1rem 1rem 120px;width:100%">
+    <svg class="scatter-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      <!-- 背景象限 -->
+      <rect x="${mx}" y="${PT}" width="${PL+IW-mx}" height="${my-PT}" fill="rgba(255,160,0,.04)"/>
+      <rect x="${PL}" y="${PT}" width="${mx-PL}" height="${my-PT}" fill="rgba(100,200,255,.03)"/>
+      <rect x="${mx}" y="${my}" width="${PL+IW-mx}" height="${PT+IH-my}" fill="rgba(255,80,80,.03)"/>
+      <rect x="${PL}" y="${my}" width="${mx-PL}" height="${PT+IH-my}" fill="rgba(100,100,120,.03)"/>
+      <!-- グリッド -->
+      ${xTickSvg}${yTickSvg}
+      <!-- 中央線 -->
+      <line x1="${mx}" y1="${PT}" x2="${mx}" y2="${PT+IH}" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4,3"/>
+      <line x1="${PL}" y1="${my}" x2="${PL+IW}" y2="${my}" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="4,3"/>
+      <!-- 象限ラベル -->
+      ${quadSvg}
+      <!-- 軸ラベル -->
+      <text class="scatter-axis-label" x="${PL+IW/2}" y="${H-8}" text-anchor="middle">← 分散　占有率　制覇 →</text>
+      <text class="scatter-axis-label" x="13" y="${PT+IH/2}" text-anchor="middle" transform="rotate(-90,13,${PT+IH/2})">活動量（万）</text>
+      <!-- ドット -->
+      ${dots}
+    </svg>
+    <div style="margin-top:.6rem;font-size:.72rem;color:var(--text-dim);text-align:center">
+      ● タップ/クリックで占有ヒートマップへジャンプ　点の色 = 活動量レベル（暗=低 / 金=高）
+    </div>
+  </div>`;
+}
+
+function scatterTip(e, el){
+  const t = document.getElementById('scatter-tooltip');
+  t.style.display = 'block';
+  t.innerHTML = `<b>w${el.dataset.label}</b><br>占有率 ${el.dataset.occ}%（${el.dataset.am}/21城）<br>活動量 ${(el.dataset.stock/10000).toFixed(1)}万 [${el.dataset.lv}]`;
+  scatterMove(e);
+  el.addEventListener('mousemove', scatterMove);
+}
+function scatterMove(e){
+  const t = document.getElementById('scatter-tooltip');
+  t.style.left = (e.clientX+12)+'px';
+  t.style.top = (e.clientY-10)+'px';
+}
+function scatterHide(){
+  document.getElementById('scatter-tooltip').style.display='none';
+}
+
+function hmToggleStockBar(){
+  hmShowStockBar = !hmShowStockBar;
+  const btn = document.getElementById('hm-stock-bar-btn');
+  btn.textContent = '📦 活動バー ' + (hmShowStockBar ? 'ON' : 'OFF');
+  btn.style.color = hmShowStockBar ? 'var(--accent)' : 'var(--text-dim)';
+  btn.style.borderColor = hmShowStockBar ? 'var(--accent)' : 'var(--border)';
+  // 凡例の表示/非表示
+  document.getElementById('hm-stock-legend').style.display = hmShowStockBar ? 'flex' : 'none';
+  renderHM();
+}
+
 function stockJumpToHeatmap(label){
   switchTab('heatmap');
   requestAnimationFrame(()=>{
@@ -1035,6 +1171,17 @@ function renderHM(){
     case"wid-desc":fd.sort((a,b)=>b.wid-a.wid);break;
     case"rate-desc":fd.sort((a,b)=>b.ratio-a.ratio||(a.wid-b.wid));break;
     case"rate-asc":fd.sort((a,b)=>a.ratio-b.ratio||(a.wid-b.wid));break;
+    case"stock-desc":fd.sort((a,b)=>(GUILD_STOCK_MAR[parseInt(b.label)]||0)-(GUILD_STOCK_MAR[parseInt(a.label)]||0));break;
+    case"stock-asc":fd.sort((a,b)=>(GUILD_STOCK_MAR[parseInt(a.label)]||0)-(GUILD_STOCK_MAR[parseInt(b.label)]||0));break;
+    case"combo-desc":fd.sort((a,b)=>{
+      // 占有率(0-1) × 活動量の正規化(0-1) の複合スコア
+      const maxS=238558,minS=42601;
+      const sA=(GUILD_STOCK_MAR[parseInt(a.label)]||minS);
+      const sB=(GUILD_STOCK_MAR[parseInt(b.label)]||minS);
+      const scoreA=a.ratio*0.5+(sA-minS)/(maxS-minS)*0.5;
+      const scoreB=b.ratio*0.5+(sB-minS)/(maxS-minS)*0.5;
+      return scoreB-scoreA;
+    });break;
     default:fd.sort((a,b)=>a.wid-b.wid);
   }
 
@@ -1047,7 +1194,7 @@ function renderHM(){
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
       return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad} / ストック:${stockFmt(d.label)}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
-        <div class="hm-tile-stock-bar" style="background:${stockBarColor(d.label)}"></div>
+        ${hmShowStockBar ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(d.label)}"></div>` : ""}
       </article>`;
     }).join("");
   }else{
@@ -1056,7 +1203,7 @@ function renderHM(){
       return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad} / ストック:${stockFmt(d.label)}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge">${hmLabel(d.ratio)}</div></div>
         <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div><div class="hm-tile-guild">${d.ad}</div></div>
-        <div class="hm-tile-stock-bar" style="background:${stockBarColor(d.label)}"></div>
+        ${hmShowStockBar ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(d.label)}"></div>` : ""}
       </article>`;
     }).join("");
   }
@@ -1317,10 +1464,11 @@ function arenaRenderTable(items){
 // ギルドストック月次ヒートマップ
 // ══════════════════════════════════════════════════════
 let _stockView = 'compact';
+let hmShowStockBar = false; // 活動バー デフォルトOFF
 
 function stockSetView(v){
   _stockView = v;
-  ['compact','normal'].forEach(x=>document.getElementById('stock-vb-'+x).classList.toggle('active',x===v));
+  ['compact','normal','scatter'].forEach(x=>document.getElementById('stock-vb-'+x).classList.toggle('active',x===v));
   renderStock();
 }
 
@@ -1329,6 +1477,7 @@ function renderStock(){
     document.getElementById('stock-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">読み込み中… / データがありません</div>';
     return;
   }
+  if(_stockView==='scatter'){renderStockScatter();return;}
   // 凡例
   const legend = document.getElementById('stock-legend-row');
   legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">活動量:</span>' +
@@ -1359,8 +1508,9 @@ function renderStock(){
     const col = STOCK_LEVELS[lv].color;
     const lbl = STOCK_LEVELS[lv].label;
     const val = (stock/10000).toFixed(1)+'万';
+    const tc = lv >= 3 ? '#1a1000' : '#fff'; // 明るい色の時は黒文字
     if(compact){
-      return `<article class="stock-tile" style="background:${col};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToHeatmap('${label}')">
+      return `<article class="stock-tile" style="background:${col};color:${tc};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToHeatmap('${label}')">
         <div class="stock-tile-compact">w${label}</div>
         <div class="stock-tile-compact" style="font-size:.5rem;margin-top:1px">${val}</div>
       </article>`;
@@ -1369,7 +1519,7 @@ function renderStock(){
     const ldItem = LD.find(d=>d._label===label);
     const occStr = ldItem ? `${(ldItem._a.am/21*100).toFixed(0)}% (${ldItem._a.am}/21城)` : '';
     const occLbl = ldItem ? hmLabel(ldItem._a.am/21) : '';
-    return `<article class="stock-tile" style="background:${col};cursor:pointer;" onclick="stockJumpToHeatmap('${label}')">
+    return `<article class="stock-tile" style="background:${col};color:${tc};cursor:pointer;" onclick="stockJumpToHeatmap('${label}')">
       <div class="stock-tile-top">
         <div><div class="stock-tile-world">World</div><div class="stock-tile-wid">${label}</div></div>
         <div class="stock-tile-badge">${lbl}</div>
