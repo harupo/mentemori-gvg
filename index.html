@@ -249,6 +249,25 @@
     display:flex;align-items:center;gap:.4rem;
   }
   .arena-back-btn button:hover{filter:brightness(1.15);}
+
+  /* 占有ヒートマップ → ギルドバトル テーブルジャンプ */
+  #hm-grid .hm-tile{cursor:pointer;}
+  #l-tB tr.hm-row-focus{
+    background:rgba(108,92,231,.18)!important;
+    outline:2px solid var(--accent);
+    outline-offset:-2px;
+  }
+  .hm-back-btn{
+    position:fixed;bottom:130px;right:20px;z-index:95;
+  }
+  .hm-back-btn button{
+    font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:700;
+    padding:.55rem 1.2rem;border-radius:8px;
+    border:1px solid var(--accent);background:var(--accent);color:#fff;
+    cursor:pointer;box-shadow:0 4px 16px rgba(108,92,231,.4);transition:all .15s;
+    display:flex;align-items:center;gap:.4rem;
+  }
+  .hm-back-btn button:hover{filter:brightness(1.15);}
 </style>
 </head>
 <body>
@@ -443,6 +462,9 @@
 </div>
 
 
+<div class="hm-back-btn hidden" id="hm-back-btn">
+  <button onclick="hmBackToHeatmap()">◀ ヒートマップに戻る</button>
+</div>
 <div class="arena-back-btn hidden" id="arena-back-btn">
   <button onclick="arenaBackToGrid()">◀ 一覧に戻る</button>
 </div>
@@ -577,7 +599,13 @@ function bldFull(tb,items,fG,fS,isGw){
     tr.appendChild(tdD);tb.appendChild(tr);}
 }
 
-function switchTab(tab){curTab=tab;
+function switchTab(tab){
+  // ヒートマップ→ギルドバトルジャンプ経由でない場合は戻るボタンを隠す
+  if(tab!=='local'||!window._hmFocusLabel){
+    document.getElementById('hm-back-btn')?.classList.add('hidden');
+  }
+  if(tab!=='heatmap') window._hmFocusLabel=null;
+  curTab=tab;
   if(tab!=="heatmap"&&hmPlayTimer)hmPlayStop();
   if(tab!=="arena"&&arenaPlayTimer)arenaPlayStop();
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
@@ -718,6 +746,36 @@ function hmPlayToggle(){
   else{hmPlayStart();}
 }
 
+function hmShowWorldInTable(label){
+  window._hmPrevView = hmView;      // 元の表示モードを保存
+  window._hmFocusLabel = label;     // フォーカス対象を保存
+  hmPlayStop();
+  switchTab('local');               // ギルドバトルタブに切替
+  // テーブル描画後に対象行をフォーカス
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const rows = document.querySelectorAll('#l-tB tr');
+      rows.forEach(r => r.classList.remove('hm-row-focus'));
+      for(const row of rows){
+        const cell = row.querySelector('td');
+        if(cell && cell.textContent.trim() === label){
+          row.classList.add('hm-row-focus');
+          row.scrollIntoView({behavior:'smooth', block:'center'});
+          break;
+        }
+      }
+      document.getElementById('hm-back-btn').classList.remove('hidden');
+    });
+  });
+}
+
+function hmBackToHeatmap(){
+  document.getElementById('hm-back-btn').classList.add('hidden');
+  // フォーカス解除
+  document.querySelectorAll('#l-tB tr.hm-row-focus').forEach(r=>r.classList.remove('hm-row-focus'));
+  switchTab('heatmap');
+}
+
 function hmPlayStart(){
   if(hmDateIdx>=hmDates.length-1)hmLoadDate(0);
   if(hmView!=="compact")setHMView("compact");
@@ -813,14 +871,14 @@ function renderHM(){
   if(compact){
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
       </article>`;
     }).join("");
   }else{
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}">
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge">${hmLabel(d.ratio)}</div></div>
         <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div><div class="hm-tile-guild">${d.ad}</div></div>
       </article>`;
