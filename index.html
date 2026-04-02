@@ -534,7 +534,6 @@
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#ffffff;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
     <span style="color:var(--text-dim);opacity:.5;font-size:.65rem">← 3月月平均</span>
   </div>
-  <div id="center-debug-info" style="display:none;padding:.3rem 1.5rem;font-size:.7rem;color:#f0a;font-family:monospace;background:rgba(255,0,128,.1);border-top:1px solid rgba(255,0,128,.3)"></div>
   <div class="hm-grid" id="hm-grid"></div>
   <div class="hm-date-spacer"></div>
 </div>
@@ -1330,7 +1329,7 @@ async function loadCenterStreaks(){
   }
   // デバッグ表示
   const dist=Object.values(centerStreaks).reduce((a,v)=>{a[v]=(a[v]||0)+1;return a;},{});
-  const dbg=document.getElementById('center-debug-info');
+  const dbg=document.getElementById('center-debug-info-unused');
   if(dbg)dbg.textContent=`streak dist: ${JSON.stringify(dist)} | today UTC: ${t.toISOString().slice(0,10)} | histories: ${hists.map((h,i)=>dates[i]+':'+(h?'OK':'NG')).join(', ')}`;
   console.log('[streak]',dist,'dates:',dates);
 }
@@ -1369,6 +1368,9 @@ function calcCenterScore(d){
 function renderHMCenter(sortBy, minR){
   const grid = document.getElementById('hm-grid');
   grid.classList.remove('hm-compact');
+  // gridレイアウトを確実に戻す（散布図から戻った場合のリセット）
+  grid.style.display = '';
+  grid.style.padding = '';
 
   // データ計算
   let items = LD.map(d => {
@@ -1466,11 +1468,8 @@ function renderHM(){
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
   if(hmCenterMode){
-    const _dbgDiv = document.getElementById('center-debug-info');
-    if(_dbgDiv) _dbgDiv.style.display = 'block';
     if(!Object.keys(centerStreaks).length){
       // 未計算 → historyを取得してから描画
-      grid.style.display = 'block';
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim)">連続日数を計算中…</div>';
       loadCenterStreaks().then(()=>renderHMCenter(sortBy,minR));
     } else {
