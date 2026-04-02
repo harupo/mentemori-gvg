@@ -268,6 +268,28 @@
     display:flex;align-items:center;gap:.4rem;
   }
   .hm-back-btn button:hover{filter:brightness(1.15);}
+
+  /* arena テーブル: 外部リンクアイコン hover 制御 */
+  #a-table .arena-ext-link{
+    display:inline-flex;align-items:center;justify-content:center;
+    margin-left:.35rem;width:16px;height:16px;
+    font-size:.65rem;font-style:normal;
+    color:var(--text-dim);text-decoration:none;
+    border:1px solid transparent;border-radius:3px;
+    vertical-align:middle;opacity:0;
+    transition:opacity .15s,color .15s;
+    flex-shrink:0;
+  }
+  /* PC: 行ホバー時に表示 */
+  @media(hover:hover){
+    #a-table tbody tr:hover .arena-ext-link{
+      opacity:1;color:var(--accent);border-color:rgba(108,92,231,.35);
+    }
+  }
+  /* タッチ端末: 常時表示（小さめ） */
+  @media(hover:none){
+    #a-table .arena-ext-link{opacity:.45;}
+  }
 </style>
 </head>
 <body>
@@ -1116,10 +1138,9 @@ function arenaRenderTable(items){
     return`<tr class="${isFocused?'arena-row-focus':''}" onclick="arenaShowWorldInTable(${d.wid})" style="cursor:pointer">
       <td style="font-family:'JetBrains Mono',monospace;font-weight:700">
         w${d.label}
-        <a href="https://mentemori.icu/arena.html" target="_blank" rel="noopener"
-           title="mentemori.icuでw${d.label}のバトルリーグを確認（ワールドは手動選択）"
-           onclick="event.stopPropagation()"
-           style="margin-left:.35rem;font-size:.68rem;color:var(--text-dim);text-decoration:none;opacity:.55;vertical-align:middle;">↗</a>
+        <a class="arena-ext-link" href="https://mentemori.icu/arena.html" target="_blank" rel="noopener"
+           title="mentemori.icuでw${d.label}のバトルリーグを確認"
+           onclick="event.stopPropagation()">↗</a>
       </td>${cells}<td><span class="td-dom ${A_KEY[dom]||""}">${dom}</span></td></tr>`;
   }).join("");
   document.getElementById("a-table").innerHTML=head+`<tbody>${body}</tbody>`;
