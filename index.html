@@ -1363,15 +1363,15 @@ function calcCenterScore(d){
   for(const cid of CENTER_CASTLES){
     const g = d.co[cid];
     if(!g) continue;
-    const key = g.guildId || g.guildName;
+    const key = String(g.guildId || g.guildName);
     guildCounts[key] = (guildCounts[key]||0) + 1;
   }
-  const max = Object.values(guildCounts).length ? Math.max(...Object.values(guildCounts)) : 0;
-  const topEntry = Object.entries(guildCounts).find(([k,v])=>v===max);
-  const topGuild = topEntry
-    ? (Object.values(d.co).find(g => g && (g.guildId||g.guildName) === topEntry[0])?.guildName || '')
-    : '';
-  return { max, topGuild };
+  if(!Object.keys(guildCounts).length) return {max:0, topGuildId:null, topGuild:''};
+  const max = Math.max(...Object.values(guildCounts));
+  const topEntry = Object.entries(guildCounts).find(([,v])=>v===max);
+  const topGuildId = topEntry?.[0] || null;
+  const g = Object.values(d.co).find(g => g && String(g.guildId||g.guildName)===topGuildId);
+  return { max, topGuildId, topGuild: g?.guildName || '' };
 }
 
 function renderHMCenter(sortBy, minR){
