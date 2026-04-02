@@ -252,10 +252,24 @@ async function main() {
 
   await sleep(2000);
 
+  // ─── グランドバトル: 前回と同じtimestampなら開催期間外 → スキップ ───
+  let prevGlobalTs = 0;
+  try {
+    const prevG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
+    prevGlobalTs = prevG.timestamp || 0;
+  } catch { /* 初回はスキップ */ }
+
   const global = await fetchGlobal();
-  global.fetchedAt = new Date().toISOString();
-  writeFileSync('data/global.json', JSON.stringify(global));
-  console.log(`  → data/global.json (${(JSON.stringify(global).length / 1024).toFixed(1)} KB)`);
+
+  if (global.items.length > 0 && global.timestamp > 0 && global.timestamp === prevGlobalTs) {
+    console.log(`=== グランドバトル スキップ: 前回と同じtimestamp (${global.timestamp}) ===`);
+    console.log(`    ※ グランドバトル開催期間外の可能性があります`);
+    // global.json は上書きしない（前回のデータを維持）
+  } else {
+    global.fetchedAt = new Date().toISOString();
+    writeFileSync('data/global.json', JSON.stringify(global));
+    console.log(`  → data/global.json (${(JSON.stringify(global).length / 1024).toFixed(1)} KB)`);
+  }
 
   await sleep(2000);
 
