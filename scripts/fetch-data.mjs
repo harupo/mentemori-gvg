@@ -165,6 +165,7 @@ async function fetchGlobal() {
 }
 
 // ═══ バトルリーグ採用属性 ═════════════════════════════════════════
+// /arena/latest を使用: 上位20名 × 5キャラ = 100件の実構成データ
 async function fetchArena() {
   console.log('=== バトルリーグ採用属性 (JP) ===');
   const wr = await fetchJSON(`${API}/worlds`);
@@ -176,49 +177,68 @@ async function fetchArena() {
   console.log(`  ${targets.length} ワールド`);
 
   const items = await runQueue(targets, CONCURRENCY, async (wid) => {
-    const j = await fetchJSON(`${API}/${wid}/weekly/arena/latest`);
-    if (!j?.data) return null;
+    const j = await fetchJSON(`${API}/${wid}/arena/latest`);
+    // data は 20人の配列
+    if (!j?.data || !Array.isArray(j.data) || j.data.length === 0) return null;
 
-    const result = { wid, label: fmtW(wid), timestamp: j.timestamp };
+    const players = j.data; // 最大20人
+    const raw = Object.fromEntries(ATTRS.map(a => [a, 0]));
+    let total = 0;
+    const unmappedIds = {};
 
-    // total_usage と ranker_usage それぞれ処理
-    for (const src of ['total_usage', 'ranker_usage']) {
-      const usage = j.data[src] || [];
-      if (!usage.length) { result[src] = null; continue; }
-
-      const raw = Object.fromEntries(ATTRS.map(a => [a, 0]));
-      let total = 0;
-      for (const item of usage) {
-        const attr = CHAR_MAP[item.CharacterId];
-        if (attr) { raw[attr] += item.UsageRate; total += item.UsageRate; }
+    for (const player of players) {
+      for (const char of (player.UserCharacterInfoList || [])) {
+        const attr = CHAR_MAP[char.CharacterId];
+        if (attr) {
+          raw[attr]++;
+          total++;
+        } else {
+          unmappedIds[char.CharacterId] = (unmappedIds[char.CharacterId] || 0) + 1;
+        }
       }
-      if (total === 0) { result[src] = null; continue; }
-
-      const pct = Object.fromEntries(ATTRS.map(a => [a, raw[a] / total * 100]));
-      const dominant = ATTRS.reduce((a, b) => pct[a] >= pct[b] ? a : b);
-      result[src] = { pct, dominant, total };
     }
 
-    // どちらもnullなら除外
-    if (!result.total_usage && !result.ranker_usage) return null;
-    return result;
+    if (total === 0) return null;
+
+    const pct = Object.fromEntries(ATTRS.map(a => [a, raw[a] / total * 100]));
+    const dominant = ATTRS.reduce((a, b) => pct[a] >= pct[b] ? a : b);
+
+    // 未登録キャラIDをログ
+    const unknownList = Object.entries(unmappedIds).sort((a, b) => b[1] - a[1]);
+    if (unknownList.length > 0) {
+      console.warn(`  WARN World ${wid}: 未登録ID ${unknownList.map(([id,n])=>`${id}(${n})`).join(', ')}`);
+    }
+
+    return {
+      wid,
+      label: fmtW(wid),
+      timestamp: j.timestamp,
+      player_count: players.length,
+      char_count: total,
+      unmapped_count: Object.values(unmappedIds).reduce((s,v)=>s+v,0),
+      pct,
+      dominant,
+    };
   });
 
   items.sort((a, b) => a.wid - b.wid);
   const ts = Math.max(0, ...items.map(i => i.timestamp || 0));
   console.log(`  ${items.length} ワールド取得完了`);
+  console.log(`  合計プレイヤー: ${items.reduce((s,i)=>s+i.player_count,0)}`);
+  console.log(`  合計キャラスロット: ${items.reduce((s,i)=>s+i.char_count,0)}`);
   return { items, timestamp: ts };
 }
-
 // ═══ メイン ════════════════════════════════════════════════════════
 async function main() {
   mkdirSync('data', { recursive: true });
 
   // 同日(JST)スキップ判定
+  // ※ arena.json が存在しない場合は同日でも実行する（初回導入時）
   try {
     const existingL = JSON.parse(readFileSync('data/local.json', 'utf-8'));
     const existingG = JSON.parse(readFileSync('data/global.json', 'utf-8'));
-    if (existingL.fetchedAt && existingG.items?.length > 0) {
+    const arenaExists = existsSync('data/arena.json');
+    if (existingL.fetchedAt && existingG.items?.length > 0 && arenaExists) {
       const prev = new Date(existingL.fetchedAt);
       const now = new Date();
       const toJSTDate = d => new Date(d.getTime() + 9 * 3600000).toISOString().slice(0, 10);
