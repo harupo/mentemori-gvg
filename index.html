@@ -228,6 +228,25 @@
   @media(max-width:768px){
     #dash-arena .summary-row{grid-template-columns:repeat(4,1fr);}
   }
+
+  /* ── アリーナ: カード→テーブル ジャンプ ── */
+  #a-grid .hm-tile{cursor:pointer;}
+  #a-table tbody tr.arena-row-focus{
+    background:rgba(108,92,231,.18)!important;
+    outline:2px solid var(--accent);
+    outline-offset:-2px;
+  }
+  .arena-back-btn{
+    position:fixed;bottom:130px;right:20px;z-index:95;
+  }
+  .arena-back-btn button{
+    font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:700;
+    padding:.55rem 1.2rem;border-radius:8px;
+    border:1px solid var(--accent);background:var(--accent);color:#fff;
+    cursor:pointer;box-shadow:0 4px 16px rgba(108,92,231,.4);transition:all .15s;
+    display:flex;align-items:center;gap:.4rem;
+  }
+  .arena-back-btn button:hover{filter:brightness(1.15);}
 </style>
 </head>
 <body>
@@ -420,6 +439,9 @@
 </div>
 
 
+<div class="arena-back-btn hidden" id="arena-back-btn">
+  <button onclick="arenaBackToGrid()">◀ 一覧に戻る</button>
+</div>
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
 
 <script>
@@ -932,6 +954,8 @@ function arenaSetSrc(src){
 function arenaSetView(v){
   arenaView=v;
   ["compact","normal","table"].forEach(x=>document.getElementById("a-vb-"+x).classList.toggle("active",x===v));
+  // 手動で表示切替したときは戻るボタンを隠す
+  document.getElementById("arena-back-btn").classList.add("hidden");
   arenaRender();
 }
 
@@ -992,13 +1016,13 @@ function arenaRenderGrid(items){
     const dom=d.dominant||A_ATTRS[0];
     const bg=A_BG[dom],tc=A_TC[dom],p=d.pct;
     if(compact){
-      return`<article class="hm-tile" style="background:${bg};color:${tc};" title="W${d.label} | ${A_ATTRS.map(a=>a+":"+(p[a]||0).toFixed(1)+"%").join(" ")}">
+      return`<article class="hm-tile" style="background:${bg};color:${tc};" title="W${d.label} | ${A_ATTRS.map(a=>a+":"+(p[a]||0).toFixed(1)+"%").join(" ")}" onclick="arenaShowWorldInTable(${d.wid})">
         <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-dominant">${dom}</div></div></article>`;
     }
     const segs=A_ATTRS.map(a=>`<div class="attr-seg ${A_KEY[a]}" style="flex-basis:${(p[a]||0).toFixed(2)}%"></div>`).join("");
     const top2=[...A_ATTRS].sort((a,b)=>(p[b]||0)-(p[a]||0)).slice(0,2);
     const sub=top2.map(a=>`<span style="color:${A_COL[a]};font-weight:700">${a}</span> ${(p[a]||0).toFixed(1)}%`).join(' <span style="opacity:.4">/</span> ');
-    return`<article class="hm-tile" style="background:${bg};color:${tc};">
+    return`<article class="hm-tile" style="background:${bg};color:${tc};" onclick="arenaShowWorldInTable(${d.wid})">
       <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge" style="color:${A_COL[dom]}">${dom}</div></div>
       <div class="hm-tile-body"><div class="attr-bar">${segs}</div><div class="hm-tile-dominant" style="color:${A_COL[dom]}">${(p[dom]||0).toFixed(1)}%</div><div class="hm-tile-pct">${sub}</div></div></article>`;
   }).join("");
@@ -1023,6 +1047,32 @@ function arenaRenderTable(items){
   document.getElementById("a-table").innerHTML=head+`<tbody>${body}</tbody>`;
 }
 
+
+function arenaShowWorldInTable(wid){
+  const prevView=arenaView;
+  window._arenaPrevView=prevView;  // 元の表示モードを保存
+  arenaSetView("table");           // テーブル表示に切替（戻るボタンは隠れる）
+  // テーブル描画後に対象行にフォーカス
+  requestAnimationFrame(()=>{
+    const src=arenaCurrentData||arenaAD;
+    const sorted=arenaSortItems([...src]);
+    const idx=sorted.findIndex(d=>d.wid===wid);
+    const rows=document.querySelectorAll("#a-table tbody tr");
+    // 既存のフォーカスをクリア
+    rows.forEach(r=>r.classList.remove("arena-row-focus"));
+    if(idx>=0&&rows[idx]){
+      rows[idx].classList.add("arena-row-focus");
+      rows[idx].scrollIntoView({behavior:"smooth",block:"center"});
+    }
+    // 戻るボタンを表示
+    document.getElementById("arena-back-btn").classList.remove("hidden");
+  });
+}
+
+function arenaBackToGrid(){
+  const prev=window._arenaPrevView||"compact";
+  arenaSetView(prev);  // これで戻るボタンも隠れる
+}
 function arenaTblSort(col){
   if(col==="wid"){const cur=document.getElementById("a-sort").value;document.getElementById("a-sort").value=cur==="wid-asc"?"wid-desc":"wid-asc";}
   else document.getElementById("a-sort").value=col+"-desc";
