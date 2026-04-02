@@ -468,7 +468,7 @@
     <div class="hm-view-toggle">
       <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
       <button class="hm-view-btn" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
-      <button class="hm-view-btn" onclick="setHMView('center')" id="hm-btn-center">🏰 中央拠点</button>
+      <button class="hm-view-btn" onclick="toggleHMCenter()" id="hm-btn-center">🏰 中央拠点</button>
     </div>
     <span style="font-size:.7rem;color:var(--text-dim);" id="hm-visCount">175件</span>
     <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
@@ -722,7 +722,7 @@ const CNA={1:"EL",2:"EX",3:"GM"};
 const DATA_BASE="data/";
 function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
-let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact";
+let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact",hmCenterMode=false;
 let hmDates=[],hmDateIdx=-1,hmCache={},hmCurrentData=null;
 // 採用属性分布
 const A_ATTRS=['藍','紅','翠','黄','天','冥'],A_KEY={藍:'ai',紅:'ku',翠:'sui',黄:'ki',天:'ten',冥:'mei'},A_COL={藍:'#4a9ded',紅:'#ed4a4a',翠:'#3de88a',黄:'#edcc3d',天:'#c0c0e8',冥:'#a84aed'},A_BG={藍:'hsl(210 65% 16%)',紅:'hsl(0 65% 16%)',翠:'hsl(145 65% 13%)',黄:'hsl(46 65% 16%)',天:'hsl(235 28% 22%)',冥:'hsl(270 55% 18%)'},A_TC={藍:'#cce4ff',紅:'#ffdada',翠:'#ccffe6',黄:'#fff3cc',天:'#eeeef8',冥:'#e8ccff'};
@@ -1248,7 +1248,7 @@ function setHMView(mode){
   hmView=mode;
   document.getElementById("hm-btn-compact").classList.toggle("active",mode==="compact");
   document.getElementById("hm-btn-normal").classList.toggle("active",mode==="normal");
-  document.getElementById("hm-btn-center").classList.toggle("active",mode==="center");
+  // hmCenterModeはtoggleHMCenter()で管理
   // 手動ビュー切替時は戻るボタンを隠す
   if(!window._hmPrevCompact){
     document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
@@ -1256,9 +1256,92 @@ function setHMView(mode){
   renderHM();
 }
 
+function toggleHMCenter(){
+  hmCenterMode = !hmCenterMode;
+  const btn = document.getElementById('hm-btn-center');
+  btn.classList.toggle('active', hmCenterMode);
+  renderHM();
+}
+
 function toggleHMFilter(){
   const el=document.getElementById("hm-controls");
   el.classList.toggle("collapsed");
+}
+
+
+// ─── 中央拠点 ストリーク計算 ────────────────────────────────────────
+function calcCenterScoreFromHistory(histItem){
+  // historyのcastlesはstring keyの {guildId, guildName} or null
+  const castles = histItem.castles || {};
+  const guildCounts = {};
+  for(const cid of CENTER_CASTLES){
+    const g = castles[String(cid)];
+    if(!g) continue;
+    const key = String(g.guildId || g.guildName);
+    guildCounts[key] = (guildCounts[key]||0)+1;
+  }
+  if(!Object.keys(guildCounts).length) return {max:0, topGuildId:null, topGuild:''};
+  const max = Math.max(...Object.values(guildCounts));
+  const topEntry = Object.entries(guildCounts).find(([,v])=>v===max);
+  const topGuildId = topEntry?.[0] || null;
+  const g = Object.values(castles).find(g=>g&&String(g.guildId||g.guildName)===topGuildId);
+  return {max, topGuildId, topGuild: g?.guildName || ''};
+}
+
+async function loadCenterStreaks(){
+  // 過去4日分のhistoryを取得（今日はLDから計算済み）
+  const today = new Date();
+  const historyDays = Array.from({length:4},(_,i)=>{
+    const d = new Date(today);
+    d.setDate(d.getDate()-(i+1));
+    return d.toISOString().slice(0,10);
+  });
+
+  // 各日のhistoryを取得
+  const historyData = [null]; // index 0 = today (LDから直接使う)
+  for(const date of historyDays){
+    try{
+      const res = await fetch(`${DATA_BASE}history/local/${date}.json`);
+      if(res.ok){ historyData.push(await res.json()); }
+      else { historyData.push(null); }
+    }catch{ historyData.push(null); }
+  }
+
+  // 各ワールドのストリークを計算
+  centerStreaks = {};
+  for(const d of LD){
+    const label = d._label;
+    // 今日のスコア（LDから）
+    const {max:s0, topGuildId:g0} = calcCenterScore(d);
+
+    // historyからスコア列を作成 [s0, s1, s2, s3, s4]
+    let streak = 1; // 今日は常に1
+    let prevScore = s0;
+    let prevGuildId = g0;
+
+    for(let i=1; i<historyData.length; i++){
+      const hist = historyData[i];
+      if(!hist) break; // ファイルなし→終了
+      const histItem = hist.items?.find(it=>it.label===label);
+      if(!histItem) break;
+
+      const {max:si, topGuildId:gi} = calcCenterScoreFromHistory(histItem);
+
+      // 同じギルドかつ前日（より古い日）のスコアがcurrentのスコア以上
+      // つまり「新しい方が古い方より減っていない」が条件
+      if(gi === prevGuildId && prevScore >= si){
+        // prevScore(i-1日) >= si(i日=より古い) → 時間順にsi→prevScore: 増加or維持 → ストリーク継続
+        streak++;
+        prevScore = si;
+        prevGuildId = gi;
+      } else {
+        break; // ギルド変更 or スコア減少（時間的に古い方が新しい方より多い → 減少）
+      }
+    }
+
+    centerStreaks[label] = Math.min(streak, 99); // 上限
+  }
+  console.log('centerStreaks computed:', Object.keys(centerStreaks).length, 'worlds');
 }
 
 // ─── 中央拠点ヒートマップ ─────────────────────────────────────
@@ -1323,8 +1406,7 @@ function renderHMCenter(sortBy, minR){
 
   document.getElementById('hm-visCount').textContent = items.length + '件';
 
-  const compact = hmView === 'compact'; // center時はfalseだがグリッドはcompactにもできる
-  const isCompact = hmView === 'compact';
+  const compact = hmView === 'compact';
 
   // サマリー更新
   const counts = [0,0,0,0,0,0];
@@ -1344,24 +1426,44 @@ function renderHMCenter(sortBy, minR){
   }
 
   // タイル生成
+  grid.classList.toggle('hm-compact', compact);
+  const stockBarHtml = (label) => hmShowStockBar
+    ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(label)}"></div>` : '';
+
   grid.innerHTML = items.map(it => {
     const bg = CENTER_COLORS[it.max] || '#333';
-    const tc = it.max >= 3 ? '#fff' : '#fff';
+    const tc = '#fff';
     const lbl = CENTER_LABELS[it.max] || '';
-    const stockBar = hmShowStockBar
-      ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(it.label)}"></div>` : '';
+    if(compact){
+      const streakC = centerStreaks[it.label] || 1;
+      const streakTC = streakC >= 5 ? '5+' : `${streakC}d`;
+      return `<article class="hm-tile" style="background:${bg};color:${tc};"
+          onclick="hmJumpToNormal('${it.label}')"
+          title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild} / ${streakC >= 5 ? '5日以上' : streakC+'日'}継続">
+        <div class="hm-tile-body">
+          <div class="hm-tile-wid-compact">w${it.label}</div>
+          <div class="hm-center-compact-score">${it.max}/5 <span style="font-size:.45rem;opacity:.8">${streakTC}</span></div>
+        </div>
+        ${stockBarHtml(it.label)}
+      </article>`;
+    }
+    const streak = centerStreaks[it.label] || 1;
+    const streakTxt = streak >= 5 ? '5日以上' : `${streak}日`;
     return `<article class="hm-tile" style="background:${bg};color:${tc};"
         onclick="hmJumpToNormal('${it.label}')"
-        title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild}">
+        title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild} / ${streakTxt}継続">
       <div class="hm-tile-top">
         <div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${it.label}</div></div>
-        <div class="hm-badge">${lbl}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.15rem">
+          <div class="hm-badge">${lbl}</div>
+          <span style="font-size:.58rem;padding:.1rem .3rem;border-radius:99px;background:rgba(0,0,0,.3);white-space:nowrap">🔥${streakTxt}</span>
+        </div>
       </div>
       <div class="hm-tile-body">
         <div class="hm-center-score">${it.max}<span style="font-size:.9rem;opacity:.7">/5</span></div>
         <div class="hm-center-label">${it.topGuild || '(未占有)'}</div>
       </div>
-      ${stockBar}
+      ${stockBarHtml(it.label)}
     </article>`;
   }).join('');
 }
@@ -1371,7 +1473,7 @@ function renderHM(){
   const minR=Number(document.getElementById("hm-minRate").value);
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
-  if(hmView==="center"){renderHMCenter(sortBy,minR);return;}
+  if(hmCenterMode){renderHMCenter(sortBy,minR);return;}
   const compact=hmView==="compact";
 
   grid.classList.toggle("hm-compact",compact);
@@ -1700,6 +1802,7 @@ function arenaRenderTable(items){
 // ══════════════════════════════════════════════════════
 let _stockView = 'compact';
 let hmShowStockBar = false; // ギルドストック表示 デフォルトOFF
+let centerStreaks = {}; // ワールドラベル→連続日数
 
 function stockSetView(v){
   _stockView = v;
