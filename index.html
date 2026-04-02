@@ -424,8 +424,8 @@
     <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
     <button id="hm-stock-bar-btn" onclick="hmToggleStockBar()"
       style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;padding:.3rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);cursor:pointer;transition:all .15s;margin-left:auto;"
-      title="3月ギルドストック活動量バーの表示切替">
-      📦 活動バー
+      title="ギルドストック表示の切替">
+      📦 ギルドストック表示
     </button>
   </div>
   <table class="hm-summary-table" id="hm-summary-table">
@@ -457,13 +457,13 @@
     </div>
   </div>
   <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.68rem;display:none;gap:.7rem;align-items:center;flex-wrap:wrap;">
-    <span style="color:var(--text-dim);font-weight:700">活動バー:</span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#3a3a3a;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">低</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#7a5200;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#c47a00;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">中</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#e0a800;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">やや高</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#ffd000;border-radius:2px;vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
-    <span style="color:var(--text-dim);opacity:.5;font-size:.65rem">← 3月ギルドストック月平均</span>
+    <span style="color:var(--text-dim);font-weight:700">ギルドストック:</span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.18);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">低</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.38);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.58);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">中</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,0.78);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや高</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:rgba(255,255,255,1.0);border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
+    <span style="color:var(--text-dim);opacity:.5;font-size:.65rem">← 3月月平均</span>
   </div>
   <div class="hm-grid" id="hm-grid"></div>
   <div class="hm-date-spacer"></div>
@@ -603,19 +603,19 @@ let STOCK_Q = [71669, 110362, 145180, 167463];
 
 // quintile 0-4 → 色・ラベル
 const STOCK_LEVELS = [
-  {color:"#2a1a08", label:"低"},       // 非常に暗いアンバー（低活動）
-  {color:"#5c3800", label:"やや低"},   // 暗アンバー
-  {color:"#9a6200", label:"中"},       // アンバー
-  {color:"#c89400", label:"やや高"},   // 明るいアンバー
-  {color:"#ffd000", label:"高"},       // ゴールド（高活動）
+  {color:"#1e1e1e", label:"低"},
+  {color:"#484848", label:"やや低"},
+  {color:"#7a7a7a", label:"中"},
+  {color:"#b0b0b0", label:"やや高"},
+  {color:"#e8e8e8", label:"高"},
 ];
-// 活動バー用カラー（占有ヒートマップに映えるアンバー系）
+// ギルドストック表示バー用カラー
 const STOCK_BAR_LEVELS = [
-  "#3a3a3a",   // 低: 暗グレー（活動少）
-  "#7a5200",   // やや低: 暗アンバー
-  "#c47a00",   // 中: アンバー
-  "#e0a800",   // やや高: ゴールド
-  "#ffd000",   // 高: 明るいゴールド（高活動を際立たせる）
+  "rgba(255,255,255,0.18)",  // 低: ほぼ透明
+  "rgba(255,255,255,0.38)",  // やや低
+  "rgba(255,255,255,0.58)",  // 中
+  "rgba(255,255,255,0.78)",  // やや高
+  "rgba(255,255,255,1.0)",   // 高: 白（最もくっきり）
 ];
 function stockLevel(worldLabel){
   const s = GUILD_STOCK_MAR[parseInt(worldLabel)];
@@ -953,6 +953,9 @@ function hmBackToHeatmap(){
 function renderStockScatter(){
   const grid = document.getElementById('stock-grid');
   grid.classList.remove('hm-compact');
+  // gridレイアウトを無効化してフルwidth表示
+  grid.style.display = 'block';
+  grid.style.padding = '0';
 
   // データ: LDとGUILD_STOCK_MARの共通ワールドを使用
   const points = [];
@@ -1019,8 +1022,8 @@ function renderStockScatter(){
      <text class="scatter-axis-label" x="${PL-6}" y="${sy(v)+4}" text-anchor="end">${(v/10000).toFixed(0)}万</text>`
   ).join('');
 
-  grid.innerHTML = `<div class="scatter-wrap" style="padding:1rem 1rem 120px;width:100%">
-    <svg class="scatter-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  grid.innerHTML = `<div style="padding:.8rem 1.5rem 120px;width:100%;box-sizing:border-box;">
+    <svg style="width:100%;max-width:100%;display:block;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       <!-- 背景象限 -->
       <rect x="${mx}" y="${PT}" width="${PL+IW-mx}" height="${my-PT}" fill="rgba(255,160,0,.04)"/>
       <rect x="${PL}" y="${PT}" width="${mx-PL}" height="${my-PT}" fill="rgba(100,200,255,.03)"/>
@@ -1039,8 +1042,8 @@ function renderStockScatter(){
       <!-- ドット -->
       ${dots}
     </svg>
-    <div style="margin-top:.6rem;font-size:.72rem;color:var(--text-dim);text-align:center">
-      ● タップ/クリックで占有ヒートマップへジャンプ　点の色 = 活動量レベル（暗=低 / 金=高）
+    <div style="margin-top:.5rem;font-size:.72rem;color:var(--text-dim);text-align:center;line-height:1.6">
+      ● クリックで占有ヒートマップへジャンプ &nbsp;|&nbsp; 点の色 = 活動量（暗=低 / 金=高）
     </div>
   </div>`;
 }
@@ -1064,9 +1067,10 @@ function scatterHide(){
 function hmToggleStockBar(){
   hmShowStockBar = !hmShowStockBar;
   const btn = document.getElementById('hm-stock-bar-btn');
-  btn.textContent = '📦 活動バー';
+  btn.textContent = '📦 ギルドストック表示 ' + (hmShowStockBar ? 'ON' : 'OFF');
   btn.style.background = hmShowStockBar ? 'var(--accent)' : 'var(--bg-card)';
-  btn.style.color = hmShowStockBar ? 'var(--accent)' : 'var(--text-dim)';
+  btn.style.background = hmShowStockBar ? 'var(--accent)' : 'var(--bg-card)';
+  btn.style.color = hmShowStockBar ? '#fff' : 'var(--text-dim)';
   btn.style.borderColor = hmShowStockBar ? 'var(--accent)' : 'var(--border)';
   // 凡例の表示/非表示
   document.getElementById('hm-stock-legend').style.display = hmShowStockBar ? 'flex' : 'none';
@@ -1470,7 +1474,7 @@ function arenaRenderTable(items){
 // ギルドストック月次ヒートマップ
 // ══════════════════════════════════════════════════════
 let _stockView = 'compact';
-let hmShowStockBar = false; // 活動バー デフォルトOFF
+let hmShowStockBar = false; // ギルドストック表示 デフォルトOFF
 
 function stockSetView(v){
   _stockView = v;
@@ -1484,11 +1488,16 @@ function renderStock(){
     return;
   }
   if(_stockView==='scatter'){renderStockScatter();return;}
+  // gridレイアウトを戻す
+  const _g = document.getElementById('stock-grid');
+  _g.style.display = '';
+  _g.style.padding = '';
   // 凡例
   const legend = document.getElementById('stock-legend-row');
   legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">活動量:</span>' +
     STOCK_LEVELS.map((l,i)=>{
       const lo = i===0 ? 0 : STOCK_Q[i-1];
+      const dotBorder = i>=3 ? 'border:1px solid #888;' : '';
       const hi = i<STOCK_Q.length ? STOCK_Q[i] : null;
       const range = hi ? `~${(hi/10000).toFixed(1)}万` : `${(lo/10000).toFixed(1)}万~`;
       return `<span style="display:flex;align-items:center;gap:.3rem"><span class="stock-legend-dot" style="background:${l.color}"></span><span style="color:var(--text-dim)">${l.label}(${range})</span></span>`;
@@ -1514,7 +1523,7 @@ function renderStock(){
     const col = STOCK_LEVELS[lv].color;
     const lbl = STOCK_LEVELS[lv].label;
     const val = (stock/10000).toFixed(1)+'万';
-    const tc = lv >= 3 ? '#1a1000' : '#fff'; // 明るい色の時は黒文字
+    const tc = lv >= 3 ? '#111111' : '#ffffff'; // 明るいグレーの時は黒文字
     if(compact){
       return `<article class="stock-tile" style="background:${col};color:${tc};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToHeatmap('${label}')">
         <div class="stock-tile-compact">w${label}</div>
