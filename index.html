@@ -562,12 +562,12 @@ function switchTab(tab){curTab=tab;
   document.getElementById("dash-local").classList.toggle("hidden",tab!=="local"||!LD.length);
   document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
   document.getElementById("dash-heatmap").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
-  document.getElementById("dash-arena").classList.toggle("hidden",tab!=="arena"||!arenaAD.length);
+  document.getElementById("dash-arena").classList.toggle("hidden",tab!=="arena");
   document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
-  document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaAD.length);
+  document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaDates.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
-  if(tab==="arena"&&arenaAD.length)arenaRender();
+  if(tab==="arena")arenaRender();
 }
 
 // JSON読み込み
@@ -811,17 +811,27 @@ function renderHM(){
 // 採用属性分布
 // ══════════════════════════════════════════════════════
 async function loadArena(){
+  // arenaタブがアクティブなら「読み込み中」を表示
+  if(curTab==="arena")document.getElementById("a-grid").innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">読み込み中…</div>';
   try{
     const res=await fetch(DATA_BASE+"arena.json");
-    if(!res.ok)return;
+    if(!res.ok){
+      console.warn("arena.json fetch failed: HTTP",res.status);
+      if(curTab==="arena")document.getElementById("a-grid").innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#e74c3c;">arena.json が見つかりません (HTTP ${res.status})<br><small style="color:var(--text-dim)">GitHub Actions を実行してください</small></div>`;
+      return;
+    }
     const data=await res.json();
+    console.log("arena.json loaded: items=",data.items?.length,"fetchedAt=",data.fetchedAt);
     arenaAD=arenaParseItems(data,arenaSrc);
-    if(!arenaAD.length)return;
-    // 更新日時を既存info-barに追記
+    console.log("arenaAD parsed:",arenaAD.length,"worlds");
+    // 更新日時を追記
     if(data.fetchedAt){const el=document.getElementById("lastUpdate");if(el&&!el.textContent.includes("🌈"))el.textContent+=" | 🌈 "+fD(new Date(data.fetchedAt));}
-    if(curTab==="arena")switchTab("arena");
+    if(curTab==="arena")arenaRender();
     loadArenaHistory(data);
-  }catch(e){console.warn("arena.json load failed:",e);}
+  }catch(e){
+    console.warn("arena.json load failed:",e);
+    if(curTab==="arena")document.getElementById("a-grid").innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</div>`;
+  }
 }
 
 function arenaParseItems(data,src){
@@ -923,6 +933,12 @@ function arenaSetView(v){
 }
 
 function arenaRender(){
+  if(!arenaAD.length){
+    document.getElementById("a-grid").innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">データを読み込み中… または arena.json にデータがありません<br><small>ブラウザの開発者ツール (F12) → Console でエラーを確認してください</small></div>';
+    document.getElementById("a-table-card").classList.add("hidden");
+    document.getElementById("a-vis-count").textContent="0件";
+    return;
+  }
   const src=arenaCurrentData||arenaAD;
   const sorted=arenaSortItems([...src]);
   document.getElementById("a-vis-count").textContent=sorted.length+"件";
