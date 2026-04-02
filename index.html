@@ -422,6 +422,11 @@
     </div>
     <span style="font-size:.7rem;color:var(--text-dim);" id="hm-visCount">175件</span>
     <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
+    <button id="hm-stock-bar-btn" onclick="hmToggleStockBar()"
+      style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;padding:.3rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);cursor:pointer;transition:all .15s;margin-left:auto;"
+      title="3月ギルドストック活動量バーの表示切替">
+      📦 活動バー
+    </button>
   </div>
   <table class="hm-summary-table" id="hm-summary-table">
     <thead><tr><th>状態</th><th>件数</th><th>構成比</th></tr></thead>
@@ -1059,7 +1064,8 @@ function scatterHide(){
 function hmToggleStockBar(){
   hmShowStockBar = !hmShowStockBar;
   const btn = document.getElementById('hm-stock-bar-btn');
-  btn.textContent = '📦 活動バー ' + (hmShowStockBar ? 'ON' : 'OFF');
+  btn.textContent = '📦 活動バー';
+  btn.style.background = hmShowStockBar ? 'var(--accent)' : 'var(--bg-card)';
   btn.style.color = hmShowStockBar ? 'var(--accent)' : 'var(--text-dim)';
   btn.style.borderColor = hmShowStockBar ? 'var(--accent)' : 'var(--border)';
   // 凡例の表示/非表示
