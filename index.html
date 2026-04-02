@@ -234,9 +234,12 @@
   /* ── アリーナ: カード→テーブル ジャンプ ── */
   #a-grid .hm-tile{cursor:pointer;}
   #a-table tbody tr.arena-row-focus{
-    background:rgba(108,92,231,.18)!important;
-    outline:2px solid var(--accent);
-    outline-offset:-2px;
+    background:rgba(108,92,231,.28)!important;
+    box-shadow:inset 3px 0 0 #a78bfa, inset -1px 0 0 rgba(167,139,250,.2);
+    outline:none;
+  }
+  #a-table tbody tr.arena-row-focus td{
+    color:#fff;
   }
   .arena-back-btn{
     position:fixed;bottom:130px;right:20px;z-index:95;
@@ -253,9 +256,12 @@
   /* 占有ヒートマップ → ギルドバトル テーブルジャンプ */
   #hm-grid .hm-tile{cursor:pointer;}
   #l-tB tr.hm-row-focus{
-    background:rgba(108,92,231,.18)!important;
-    outline:2px solid var(--accent);
-    outline-offset:-2px;
+    background:rgba(108,92,231,.28)!important;
+    box-shadow:inset 3px 0 0 #a78bfa, inset -1px 0 0 rgba(167,139,250,.2);
+    outline:none;
+  }
+  #l-tB tr.hm-row-focus td{
+    color:#fff;
   }
   .hm-back-btn{
     position:fixed;bottom:130px;right:20px;z-index:95;
