@@ -487,8 +487,8 @@
           <option value="wid-desc">ワールド 降順</option>
           <option value="rate-desc">占有率 高い順</option>
           <option value="rate-asc">占有率 低い順</option>
-          <option value="stock-desc">活動量 高い順</option>
-          <option value="stock-asc">活動量 低い順</option>
+          <option value="stock-desc">ギルドストック 高い順</option>
+          <option value="stock-asc">ギルドストック 低い順</option>
           <option value="combo-desc">占有×活動 高い順</option>
         </select>
       </div>
@@ -1136,12 +1136,12 @@ function renderStockScatter(){
       ${quadSvg}
       <!-- 軸ラベル -->
       <text class="scatter-axis-label" x="${PL+IW/2}" y="${H-8}" text-anchor="middle">← 分散　占有率　制覇 →</text>
-      <text class="scatter-axis-label" x="13" y="${PT+IH/2}" text-anchor="middle" transform="rotate(-90,13,${PT+IH/2})">活動量（万）</text>
+      <text class="scatter-axis-label" x="13" y="${PT+IH/2}" text-anchor="middle" transform="rotate(-90,13,${PT+IH/2})">ギルドストック（万）</text>
       <!-- ドット -->
       ${dots}
     </svg>
     <div style="margin-top:.5rem;font-size:.72rem;color:var(--text-dim);text-align:center;line-height:1.6">
-      ● クリックで占有ヒートマップへジャンプ &nbsp;|&nbsp; 点の色 = 活動量（暗=低 / 金=高）
+      ● クリックで占有ヒートマップへジャンプ &nbsp;|&nbsp; 点の色 = ギルドストック（暗=低 / 金=高）
     </div>
   </div>`;
 }
@@ -1149,7 +1149,7 @@ function renderStockScatter(){
 function scatterTip(e, el){
   const t = document.getElementById('scatter-tooltip');
   t.style.display = 'block';
-  t.innerHTML = `<b>w${el.dataset.label}</b><br>占有率 ${el.dataset.occ}%（${el.dataset.am}/21城）<br>活動量 ${(el.dataset.stock/10000).toFixed(1)}万 [${el.dataset.lv}]`;
+  t.innerHTML = `<b>w${el.dataset.label}</b><br>占有率 ${el.dataset.occ}%（${el.dataset.am}/21城）<br>ギルドストック ${(el.dataset.stock/10000).toFixed(1)}万 [${el.dataset.lv}]`;
   scatterMove(e);
   el.addEventListener('mousemove', scatterMove);
 }
@@ -1294,7 +1294,7 @@ function renderHM(){
     case"stock-desc":fd.sort((a,b)=>(GUILD_STOCK_MAR[parseInt(b.label)]||0)-(GUILD_STOCK_MAR[parseInt(a.label)]||0));break;
     case"stock-asc":fd.sort((a,b)=>(GUILD_STOCK_MAR[parseInt(a.label)]||0)-(GUILD_STOCK_MAR[parseInt(b.label)]||0));break;
     case"combo-desc":fd.sort((a,b)=>{
-      // 占有率(0-1) × 活動量の正規化(0-1) の複合スコア
+      // 占有率(0-1) × ギルドストック正規化(0-1) の複合スコア
       const maxS=238558,minS=42601;
       const sA=(GUILD_STOCK_MAR[parseInt(a.label)]||minS);
       const sB=(GUILD_STOCK_MAR[parseInt(b.label)]||minS);
@@ -1604,7 +1604,7 @@ function renderStock(){
   _g.style.padding = '';
   // 凡例
   const legend = document.getElementById('stock-legend-row');
-  legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">活動量:</span>' +
+  legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">ギルドストック:</span>' +
     STOCK_LEVELS.map((l,i)=>{
       const lo = i===0 ? 0 : STOCK_Q[i-1];
       const dotBorder = i>=3 ? 'border:1px solid #888;' : '';
