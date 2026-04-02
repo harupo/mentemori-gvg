@@ -138,8 +138,8 @@
   .hm-tile-guild{font-size:.68rem;margin-top:.3rem;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   @media(max-width:1024px){.hm-controls-grid{grid-template-columns:1fr;}}
   @media(max-width:640px){.hm-grid:not(.hm-compact){grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;}.hm-tile{min-height:80px;padding:.6rem;border-radius:10px;}.hm-tile-wid{font-size:1.1rem;}.hm-tile-rate{font-size:1.1rem;}.hm-tile-body{margin-top:.5rem;}.hm-tile-sub{font-size:.6rem;}.hm-tile-guild{font-size:.55rem;}.hm-badge{font-size:.55rem;padding:.2rem .4rem;}}
-  .hm-compact{grid-template-columns:repeat(auto-fill,minmax(48px,1fr))!important;gap:4px!important;}
-  .hm-compact .hm-tile{min-height:0;padding:6px 4px;border-radius:6px;text-align:center;box-shadow:none;}
+  .hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
+  .hm-compact .hm-tile{min-height:0;padding:3px 2px;border-radius:4px;text-align:center;box-shadow:none;}
   .hm-compact .hm-tile::after{display:none;}
   .hm-compact .hm-tile:hover{transform:scale(1.08);}
   .hm-compact .hm-tile-top{display:none;}
@@ -177,6 +177,8 @@
   @media(min-width:769px){
     #dash-heatmap.hm-playing .hm-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))!important;gap:3px!important;}
     #dash-heatmap.hm-playing .hm-compact .hm-tile{padding:6px 4px;border-radius:5px;}
+    .hm-compact{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))!important;gap:3px!important;}
+    .hm-compact .hm-tile{padding:6px 4px;border-radius:5px;}
     #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.7rem;}
     #dash-heatmap.hm-playing .hm-compact .hm-tile-rate{font-size:.65rem;}
   }
@@ -460,7 +462,7 @@ let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact";
 let hmDates=[],hmDateIdx=-1,hmCache={},hmCurrentData=null;
 // 採用属性分布
 const A_ATTRS=['藍','紅','翠','黄','天','冥'],A_KEY={藍:'ai',紅:'ku',翠:'sui',黄:'ki',天:'ten',冥:'mei'},A_COL={藍:'#4a9ded',紅:'#ed4a4a',翠:'#3de88a',黄:'#edcc3d',天:'#c0c0e8',冥:'#a84aed'},A_BG={藍:'hsl(210 65% 16%)',紅:'hsl(0 65% 16%)',翠:'hsl(145 65% 13%)',黄:'hsl(46 65% 16%)',天:'hsl(235 28% 22%)',冥:'hsl(270 55% 18%)'},A_TC={藍:'#cce4ff',紅:'#ffdada',翠:'#ccffe6',黄:'#fff3cc',天:'#eeeef8',冥:'#e8ccff'};
-let arenaAD=[],arenaDates=[],arenaDateIdx=-1,arenaCache={},arenaCurrentData=null,arenaSrc='ranker_usage',arenaView='compact',arenaPlayTimer=null,arenaPlaySpeed=650;
+let arenaAD=[],arenaDates=[],_arenaFocusWid=null,arenaDateIdx=-1,arenaCache={},arenaCurrentData=null,arenaSrc='ranker_usage',arenaView='compact',arenaPlayTimer=null,arenaPlaySpeed=650;
 
 function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;document.getElementById("wf-float").classList.remove("hidden");renderG();}
 function clearWF(){gWF=null;document.getElementById("wf-float").classList.add("hidden");renderG();}
@@ -1042,13 +1044,21 @@ function arenaRenderTable(items){
       return`<td class="td-attrbar-wrap"><div class="td-attrbar" style="width:${pw}%;background:${A_COL[a]}"></div><span style="position:relative;font-family:'JetBrains Mono',monospace;font-size:.8rem">${pv.toFixed(1)}%</span></td>`;
     }).join("");
     const dom=d.dominant||"";
-    return`<tr><td style="font-family:'JetBrains Mono',monospace;font-weight:700">w${d.label}</td>${cells}<td><span class="td-dom ${A_KEY[dom]||""}">${dom}</span></td></tr>`;
+    const isFocused=d.wid===_arenaFocusWid;
+    return`<tr class="${isFocused?'arena-row-focus':''}" onclick="arenaShowWorldInTable(${d.wid})" style="cursor:pointer">
+      <td style="font-family:'JetBrains Mono',monospace;font-weight:700">
+        w${d.label}
+        <a href="https://mentemori.icu/arena.html" target="_blank" rel="noopener"
+           title="mentemori.icuでw${d.label}のバトルリーグを確認（ワールドは手動選択）"
+           onclick="event.stopPropagation()"
+           style="margin-left:.35rem;font-size:.68rem;color:var(--text-dim);text-decoration:none;opacity:.55;vertical-align:middle;">↗</a>
+      </td>${cells}<td><span class="td-dom ${A_KEY[dom]||""}">${dom}</span></td></tr>`;
   }).join("");
   document.getElementById("a-table").innerHTML=head+`<tbody>${body}</tbody>`;
 }
 
 
-function arenaShowWorldInTable(wid){
+function arenaShowWorldInTable(wid){_arenaFocusWid=wid;
   const prevView=arenaView;
   window._arenaPrevView=prevView;  // 元の表示モードを保存
   arenaSetView("table");           // テーブル表示に切替（戻るボタンは隠れる）
@@ -1069,7 +1079,7 @@ function arenaShowWorldInTable(wid){
   });
 }
 
-function arenaBackToGrid(){
+function arenaBackToGrid(){_arenaFocusWid=null;
   const prev=window._arenaPrevView||"compact";
   arenaSetView(prev);  // これで戻るボタンも隠れる
 }
