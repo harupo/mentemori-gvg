@@ -335,11 +335,7 @@
 <!-- 採用属性分布 -->
 <div class="dashboard hidden" id="dash-arena">
   <div class="controls" style="border-bottom:1px solid var(--border);padding:.7rem 2rem;">
-    <label>集計対象:</label>
-    <div class="arena-src-toggle">
-      <button class="arena-src-btn active" id="a-src-total"  onclick="arenaSetSrc('total_usage')">全プレイヤー</button>
-      <button class="arena-src-btn"        id="a-src-ranker" onclick="arenaSetSrc('ranker_usage')">上位30名</button>
-    </div>
+    <label style="color:var(--text-dim);font-size:.8rem">📊 上位20名 × 5キャラ（実構成データ）</label>
     <label style="margin-left:.5rem">ソート:</label>
     <select id="a-sort" onchange="arenaRender()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">
       <option value="wid-asc">ワールド 昇順</option>
@@ -442,7 +438,7 @@ let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact";
 let hmDates=[],hmDateIdx=-1,hmCache={},hmCurrentData=null;
 // 採用属性分布
 const A_ATTRS=['藍','紅','翠','黄','天','冥'],A_KEY={藍:'ai',紅:'ku',翠:'sui',黄:'ki',天:'ten',冥:'mei'},A_COL={藍:'#4a9ded',紅:'#ed4a4a',翠:'#3de88a',黄:'#edcc3d',天:'#c0c0e8',冥:'#a84aed'},A_BG={藍:'hsl(210 65% 16%)',紅:'hsl(0 65% 16%)',翠:'hsl(145 65% 13%)',黄:'hsl(46 65% 16%)',天:'hsl(235 28% 22%)',冥:'hsl(270 55% 18%)'},A_TC={藍:'#cce4ff',紅:'#ffdada',翠:'#ccffe6',黄:'#fff3cc',天:'#eeeef8',冥:'#e8ccff'};
-let arenaAD=[],arenaDates=[],arenaDateIdx=-1,arenaCache={},arenaCurrentData=null,arenaSrc='total_usage',arenaView='compact',arenaPlayTimer=null,arenaPlaySpeed=650;
+let arenaAD=[],arenaDates=[],arenaDateIdx=-1,arenaCache={},arenaCurrentData=null,arenaSrc='ranker_usage',arenaView='compact',arenaPlayTimer=null,arenaPlaySpeed=650;
 
 function setWF(w){gWF=w;document.getElementById("wf-name").textContent=w;document.getElementById("wf-float").classList.remove("hidden");renderG();}
 function clearWF(){gWF=null;document.getElementById("wf-float").classList.add("hidden");renderG();}
@@ -822,7 +818,7 @@ async function loadArena(){
     }
     const data=await res.json();
     console.log("arena.json loaded: items=",data.items?.length,"fetchedAt=",data.fetchedAt);
-    arenaAD=arenaParseItems(data,arenaSrc);
+    arenaAD=arenaParseItems(data);
     console.log("arenaAD parsed:",arenaAD.length,"worlds");
     // 更新日時を追記
     if(data.fetchedAt){const el=document.getElementById("lastUpdate");if(el&&!el.textContent.includes("🌈"))el.textContent+=" | 🌈 "+fD(new Date(data.fetchedAt));}
@@ -834,11 +830,11 @@ async function loadArena(){
   }
 }
 
-function arenaParseItems(data,src){
+function arenaParseItems(data){
   return(data.items||[]).map(it=>{
-    const s=it[src]||it.total_usage;
-    if(!s)return null;
-    return{wid:it.wid,label:it.label,pct:s.pct,dominant:s.dominant};
+    if(!it.pct)return null;
+    return{wid:it.wid,label:it.label,pct:it.pct,dominant:it.dominant,
+           player_count:it.player_count||0,char_count:it.char_count||0};
   }).filter(Boolean);
 }
 
@@ -869,7 +865,7 @@ async function arenaLoadDate(idx){
     try{
       const res=await fetch(`${DATA_BASE}history/arena/${dateStr}.json`);
       if(!res.ok){document.getElementById("a-date-tag").textContent="データなし";return;}
-      arenaCache[dateStr]=arenaParseItems(await res.json(),arenaSrc);
+      arenaCache[dateStr]=arenaParseItems(await res.json());
     }catch{document.getElementById("a-date-tag").textContent="読み込み失敗";return;}
     arenaUpdateUI();
   }
@@ -919,11 +915,9 @@ function arenaSetSpeed(ms){
 }
 
 function arenaSetSrc(src){
-  arenaSrc=src;
-  document.getElementById("a-src-total").classList.toggle("active",src==="total_usage");
-  document.getElementById("a-src-ranker").classList.toggle("active",src==="ranker_usage");
-  arenaCache={};arenaCurrentData=null;arenaAD=[];
-  loadArena();
+  // /arena/latest エンドポイントに移行したため、全プレイヤー/上位30名の区別はなし
+  // ボタンは残すが機能なし（将来の拡張用）
+  console.log("集計対象切替は非対応になりました（/arena/latest に統合）");
 }
 
 function arenaSetView(v){
