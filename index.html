@@ -335,7 +335,7 @@
 <!-- 採用属性分布 -->
 <div class="dashboard hidden" id="dash-arena">
   <div class="controls" style="border-bottom:1px solid var(--border);padding:.7rem 2rem;">
-    <label style="color:var(--text-dim);font-size:.8rem">📊 上位20名 × 5キャラ（実構成データ）</label>
+    <label style="color:var(--text-dim);font-size:.8rem">📊 バトリ20位（5キャラ編成）</label>
     <label style="margin-left:.5rem">ソート:</label>
     <select id="a-sort" onchange="arenaRender()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);">
       <option value="wid-asc">ワールド 昇順</option>
@@ -832,9 +832,18 @@ async function loadArena(){
 
 function arenaParseItems(data){
   return(data.items||[]).map(it=>{
-    if(!it.pct)return null;
-    return{wid:it.wid,label:it.label,pct:it.pct,dominant:it.dominant,
-           player_count:it.player_count||0,char_count:it.char_count||0};
+    // 新フォーマット: pct 直接 (fetch-data.mjs v2 /arena/latest)
+    if(it.pct){
+      return{wid:it.wid,label:it.label,pct:it.pct,dominant:it.dominant,
+             player_count:it.player_count||0,char_count:it.char_count||0};
+    }
+    // 旧フォーマット: total_usage / ranker_usage (fetch-data.mjs v1 /weekly/arena)
+    const s=it.ranker_usage||it.total_usage;
+    if(s?.pct){
+      return{wid:it.wid,label:it.label,pct:s.pct,dominant:s.dominant,
+             player_count:0,char_count:0};
+    }
+    return null;
   }).filter(Boolean);
 }
 
