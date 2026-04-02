@@ -455,6 +455,20 @@
       <div class="hm-legend-row"><span>分散</span><span>独占</span></div>
       <div class="hm-legend-bar"></div>
     </div>
+    <!-- ギルドストック凡例（常時表示） -->
+    <div id="hm-stock-label-row" style="display:flex;align-items:center;gap:.6rem;padding:.3rem 0 .1rem;font-size:.72rem;flex-wrap:wrap;">
+      <span style="color:var(--text-dim);font-weight:600;white-space:nowrap">ギルドストック:</span>
+      <div style="display:flex;gap:0;height:8px;border-radius:4px;overflow:hidden;width:120px;border:1px solid rgba(255,255,255,.12)">
+        <div style="flex:1;background:#1e1e1e"></div>
+        <div style="flex:1;background:#484848"></div>
+        <div style="flex:1;background:#7a7a7a"></div>
+        <div style="flex:1;background:#b0b0b0"></div>
+        <div style="flex:1;background:#ffffff"></div>
+      </div>
+      <span style="color:var(--text-dim);font-size:.68rem">低</span>
+      <span style="color:var(--text-dim);font-size:.68rem;margin-left:-4px">→ 高</span>
+      <span style="color:var(--text-dim);opacity:.5;font-size:.65rem">（3月月平均）</span>
+    </div>
   </div>
   <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.68rem;display:none;gap:.7rem;align-items:center;flex-wrap:wrap;">
     <span style="color:var(--text-dim);font-weight:700">ギルドストック:</span>
@@ -462,7 +476,7 @@
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#484848;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#7a7a7a;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">中</span></span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#b0b0b0;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや高</span></span>
-    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#e8e8e8;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
+    <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#ffffff;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
     <span style="color:var(--text-dim);opacity:.5;font-size:.65rem">← 3月月平均</span>
   </div>
   <div class="hm-grid" id="hm-grid"></div>
@@ -607,7 +621,7 @@ const STOCK_LEVELS = [
   {color:"#484848", label:"やや低"},
   {color:"#7a7a7a", label:"中"},
   {color:"#b0b0b0", label:"やや高"},
-  {color:"#e8e8e8", label:"高"},
+  {color:"#ffffff", label:"高"},
 ];
 // ギルドストック表示バー用カラー
 const STOCK_BAR_LEVELS = [
@@ -615,7 +629,7 @@ const STOCK_BAR_LEVELS = [
   "#484848",   // やや低: 暗グレー
   "#7a7a7a",   // 中: グレー
   "#b0b0b0",   // やや高: 明グレー
-  "#e8e8e8",   // 高: ほぼ白
+  "#ffffff",   // 高: 純白
 ];
 function stockLevel(worldLabel){
   const s = GUILD_STOCK_MAR[parseInt(worldLabel)];
@@ -1100,6 +1114,9 @@ function hmPlayStart(){
   if(hmDateIdx>=hmDates.length-1)hmLoadDate(0);
   if(hmView!=="compact")setHMView("compact");
   document.getElementById("dash-heatmap").classList.add("hm-playing");
+  // 再生中はギルドストックバーを非表示
+  document.querySelectorAll(".hm-tile-stock-bar").forEach(b=>b.style.display="none");
+  document.getElementById("hm-stock-legend").style.display="none";
   const btn=document.getElementById("hm-play-btn");
   btn.textContent="⏸ 停止";btn.classList.add("playing");
   hmPlayTimer=true;
@@ -1110,6 +1127,11 @@ function hmPlayStart(){
 function hmPlayStop(){
   if(hmPlayTimer){clearTimeout(hmPlayTimer);hmPlayTimer=null;}
   document.getElementById("dash-heatmap").classList.remove("hm-playing");
+  // 停止時: ONなら再表示
+  if(hmShowStockBar){
+    document.querySelectorAll(".hm-tile-stock-bar").forEach(b=>b.style.display="");
+    document.getElementById("hm-stock-legend").style.display="flex";
+  }
   const btn=document.getElementById("hm-play-btn");
   btn.textContent="▶ 再生";btn.classList.remove("playing");
 }
