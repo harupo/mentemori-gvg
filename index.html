@@ -1375,27 +1375,40 @@ function calcCenterScoreFromHistory(histItem){
 }
 
 async function loadCenterStreaks(){
+  // GitHub Actionsで事前計算済みのJSONを読むだけ
+  try {
+    const res = await fetch(`${DATA_BASE}center_streaks.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    // { date: "2026-04-03", streaks: { "1": 2, "3": 5, ... } }
+    centerStreaks = data.streaks || {};
+    console.log('[centerStreaks] loaded', Object.keys(centerStreaks).length, 'worlds, date:', data.date);
+  } catch (err) {
+    console.warn('[centerStreaks] fallback to client-side calc:', err.message);
+    // フォールバック: クライアント側で計算（center_streaks.jsonがない場合）
+    await _loadCenterStreaksFallback();
+  }
+}
+
+async function _loadCenterStreaksFallback(){
   const CCIDS=[1,2,3,4,5];
   function scoreLD(d){
     const gc={};
     for(const c of CCIDS){const g=d.co[String(c)]||d.co[c];if(!g)continue;const k=String(g.guildId||g.guildName);gc[k]=(gc[k]||0)+1;}
     const v=Object.values(gc);if(!v.length)return{max:0,gid:null};
-    const m=Math.max(...v);return{max:m,gid:Object.keys(gc).find(k=>gc[k]===m)||null};
+    const max=Math.max(...v);return{max,gid:Object.keys(gc).find(k=>gc[k]===max)||null};
   }
   function scoreHist(item){
-    const cs=item?.castles||{};const gc={};
+    const cs=item.castles||{};const gc={};
     for(const c of CCIDS){const g=cs[String(c)];if(!g)continue;const k=String(g.guildId||g.guildName);gc[k]=(gc[k]||0)+1;}
     const v=Object.values(gc);if(!v.length)return{max:0,gid:null};
-    const m=Math.max(...v);return{max:m,gid:Object.keys(gc).find(k=>gc[k]===m)||null};
+    const max=Math.max(...v);return{max,gid:Object.keys(gc).find(k=>gc[k]===max)||null};
   }
-  // 過去4日分を並列fetch
-  const t=new Date();
-  const dates=Array.from({length:4},(_,i)=>{const d=new Date(t);d.setDate(d.getDate()-(i+1));return d.toISOString().slice(0,10);});
+  const today=new Date();
+  const dates=Array.from({length:4},(_,i)=>{const d=new Date(today);d.setDate(d.getDate()-(i+1));return d.toISOString().slice(0,10);});
   const hists=await Promise.all(dates.map(date=>
-    fetch(`${DATA_BASE}history/local/${date}.json`,{cache:'no-store'})
-      .then(r=>r.ok?r.json():null).catch(()=>null)
+    fetch(`${DATA_BASE}history/local/${date}.json`).then(r=>r.ok?r.json():null).catch(()=>null)
   ));
-  // ストリーク計算
   centerStreaks={};
   for(const d of LD){
     const label=d._label;
@@ -1410,11 +1423,8 @@ async function loadCenterStreaks(){
     }
     centerStreaks[label]=Math.min(streak,99);
   }
-  // デバッグ表示
   const dist=Object.values(centerStreaks).reduce((a,v)=>{a[v]=(a[v]||0)+1;return a;},{});
-  const dbg=document.getElementById('center-debug-info-unused');
-  if(dbg)dbg.textContent=`streak dist: ${JSON.stringify(dist)} | today UTC: ${t.toISOString().slice(0,10)} | histories: ${hists.map((h,i)=>dates[i]+':'+(h?'OK':'NG')).join(', ')}`;
-  console.log('[streak]',dist,'dates:',dates);
+  console.log('[centerStreaks] fallback dist:',dist);
 }
 
 
@@ -1556,8 +1566,15 @@ function renderHM(){
   if(hmCenterMode){
     if(!Object.keys(centerStreaks).length){
       // 未計算 → historyを取得してから描画
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim)">連続日数を計算中…</div>';
-      loadCenterStreaks().then(()=>renderHMCenter(sortBy,minR));
+      grid.style.display = '';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-dim);font-size:.9rem">🏰 連続日数を計算中…<br><span style=\"font-size:.75rem;opacity:.6\">履歴データを取得しています</span></div>';
+      loadCenterStreaks().then(()=>{
+        // 計算完了後、まだcenterModeなら描画
+        if(hmCenterMode) renderHMCenter(sortBy, minR);
+      }).catch(err=>{
+        console.error('streak calc error:', err);
+        if(hmCenterMode) renderHMCenter(sortBy, minR);
+      });
     } else {
       renderHMCenter(sortBy,minR);
     }
