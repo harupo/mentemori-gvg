@@ -1293,83 +1293,46 @@ function calcCenterScoreFromHistory(histItem){
 }
 
 async function loadCenterStreaks(){
-  // 外部関数に依存しない自己完結型の実装
-  const CCIDS = [1,2,3,4,5];
-
-  // スコア計算（LD用）
-  function scoreFromLD(d){
+  const CCIDS=[1,2,3,4,5];
+  function scoreLD(d){
     const gc={};
-    for(const cid of CCIDS){
-      const g=d.co[String(cid)]||d.co[cid];
-      if(!g) continue;
-      const k=String(g.guildId||g.guildName);
-      gc[k]=(gc[k]||0)+1;
-    }
-    const vals=Object.values(gc);
-    if(!vals.length) return {max:0,gid:null};
-    const max=Math.max(...vals);
-    const gid=Object.keys(gc).find(k=>gc[k]===max)||null;
-    return {max,gid};
+    for(const c of CCIDS){const g=d.co[String(c)]||d.co[c];if(!g)continue;const k=String(g.guildId||g.guildName);gc[k]=(gc[k]||0)+1;}
+    const v=Object.values(gc);if(!v.length)return{max:0,gid:null};
+    const m=Math.max(...v);return{max:m,gid:Object.keys(gc).find(k=>gc[k]===m)||null};
   }
-
-  // スコア計算（history用）
-  function scoreFromHist(item){
-    const castles=item.castles||{};
-    const gc={};
-    for(const cid of CCIDS){
-      const g=castles[String(cid)];
-      if(!g) continue;
-      const k=String(g.guildId||g.guildName);
-      gc[k]=(gc[k]||0)+1;
-    }
-    const vals=Object.values(gc);
-    if(!vals.length) return {max:0,gid:null};
-    const max=Math.max(...vals);
-    const gid=Object.keys(gc).find(k=>gc[k]===max)||null;
-    return {max,gid};
+  function scoreHist(item){
+    const cs=item?.castles||{};const gc={};
+    for(const c of CCIDS){const g=cs[String(c)];if(!g)continue;const k=String(g.guildId||g.guildName);gc[k]=(gc[k]||0)+1;}
+    const v=Object.values(gc);if(!v.length)return{max:0,gid:null};
+    const m=Math.max(...v);return{max:m,gid:Object.keys(gc).find(k=>gc[k]===m)||null};
   }
-
-  // 過去4日分のhistoryを取得
-  const today=new Date();
-  const dates=Array.from({length:4},(_,i)=>{
-    const d=new Date(today);
-    d.setDate(d.getDate()-(i+1));
-    return d.toISOString().slice(0,10);
-  });
-
-  const histories=[];
-  for(const date of dates){
-    try{
-      const res=await fetch(`${DATA_BASE}history/local/${date}.json`);
-      histories.push(res.ok ? await res.json() : null);
-    }catch{ histories.push(null); }
-  }
-
-  // 各ワールドのストリーク計算
+  // 過去4日分を並列fetch
+  const t=new Date();
+  const dates=Array.from({length:4},(_,i)=>{const d=new Date(t);d.setDate(d.getDate()-(i+1));return d.toISOString().slice(0,10);});
+  const hists=await Promise.all(dates.map(date=>
+    fetch(`${DATA_BASE}history/local/${date}.json`,{cache:'no-store'})
+      .then(r=>r.ok?r.json():null).catch(()=>null)
+  ));
+  // ストリーク計算
   centerStreaks={};
   for(const d of LD){
     const label=d._label;
-    const {max:s0,gid:g0}=scoreFromLD(d);
-    let streak=1, prevMax=s0, prevGid=g0;
-
-    for(const hist of histories){
-      if(!hist) break;
-      const item=hist.items?.find(it=>it.label===label);
-      if(!item) break;
-      const {max:si,gid:gi}=scoreFromHist(item);
-      if(gi===prevGid && prevMax>=si){
-        streak++;
-        prevMax=si;
-        prevGid=gi;
-      } else break;
+    const{max:s0,gid:g0}=scoreLD(d);
+    let streak=1,pm=s0,pg=g0;
+    for(const h of hists){
+      if(!h)break;
+      const item=h.items?.find(it=>it.label===label);
+      if(!item)break;
+      const{max:si,gid:gi}=scoreHist(item);
+      if(gi===pg&&pm>=si){streak++;pm=si;pg=gi;}else break;
     }
     centerStreaks[label]=Math.min(streak,99);
   }
-  // デバッグ表示（DOM）
-  const _dist = Object.values(centerStreaks).reduce((a,v)=>{a[v]=(a[v]||0)+1;return a;},{});
-  const _dbg = document.getElementById('center-debug-info');
-  if(_dbg) _dbg.textContent = `streak dist: ${JSON.stringify(_dist)} | today UTC: ${new Date().toISOString().slice(0,10)}`;
-  console.log('[centerStreaks] computed:', Object.keys(centerStreaks).length, 'dist:', _dist);
+  // デバッグ表示
+  const dist=Object.values(centerStreaks).reduce((a,v)=>{a[v]=(a[v]||0)+1;return a;},{});
+  const dbg=document.getElementById('center-debug-info');
+  if(dbg)dbg.textContent=`streak dist: ${JSON.stringify(dist)} | today UTC: ${t.toISOString().slice(0,10)} | histories: ${hists.map((h,i)=>dates[i]+':'+(h?'OK':'NG')).join(', ')}`;
+  console.log('[streak]',dist,'dates:',dates);
 }
 
 
@@ -1502,7 +1465,19 @@ function renderHM(){
   const minR=Number(document.getElementById("hm-minRate").value);
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
-  if(hmCenterMode){renderHMCenter(sortBy,minR);return;}
+  if(hmCenterMode){
+    const _dbgDiv = document.getElementById('center-debug-info');
+    if(_dbgDiv) _dbgDiv.style.display = 'block';
+    if(!Object.keys(centerStreaks).length){
+      // 未計算 → historyを取得してから描画
+      grid.style.display = 'block';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim)">連続日数を計算中…</div>';
+      loadCenterStreaks().then(()=>renderHMCenter(sortBy,minR));
+    } else {
+      renderHMCenter(sortBy,minR);
+    }
+    return;
+  }
   const compact=hmView==="compact";
 
   grid.classList.toggle("hm-compact",compact);
