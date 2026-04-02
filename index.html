@@ -119,7 +119,7 @@
 
   /* 統合凡例 */
   .hm-legend-combined{
-    display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;margin-top:.4rem;align-items:center;
+    display:flex;flex-wrap:nowrap;gap:.5rem 1.4rem;margin-top:.4rem;align-items:center;
   }
   .hm-legend-item{
     display:flex;align-items:center;gap:.4rem;min-width:0;
@@ -128,7 +128,7 @@
     font-size:.68rem;color:var(--text-dim);white-space:nowrap;font-weight:600;
   }
   .hm-legend-bar-wrap{
-    display:flex;align-items:center;gap:.3rem;flex:1;min-width:80px;max-width:200px;
+    display:flex;align-items:center;gap:.3rem;flex:1;min-width:60px;max-width:180px;
   }
   .hm-legend-edge{
     font-size:.65rem;color:var(--text-dim);white-space:nowrap;opacity:.8;
@@ -289,7 +289,7 @@
     color:#fff;
   }
   .hm-back-btn{
-    position:fixed;bottom:130px;right:20px;z-index:95;
+    position:fixed;bottom:130px;right:20px;z-index:96;
   }
   .hm-back-btn button{
     font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:700;
@@ -347,7 +347,7 @@
   .stock-tile-lv{font-size:.68rem;opacity:.88;}
   .stock-tile-badge{font-size:.6rem;padding:.25rem .45rem;border-radius:99px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.1);white-space:nowrap;}
   /* コンパクト */
-  .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
+  .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(44px,1fr))!important;gap:2px!important;}
   .stock-grid.hm-compact .stock-tile{min-height:0;padding:3px 2px;border-radius:4px;text-align:center;}
   .stock-grid.hm-compact .stock-tile::after{display:none;}
   .stock-grid.hm-compact .stock-tile-top,.stock-grid.hm-compact .stock-tile-body{display:none;}
@@ -371,13 +371,13 @@
   .scatter-tooltip{position:fixed;background:rgba(20,20,32,.95);border:1px solid var(--accent,#6c5ce7);border-radius:8px;padding:.5rem .8rem;font-size:.75rem;pointer-events:none;z-index:200;display:none;color:#fff;line-height:1.5;}
 
   /* 占有ヒートマップ: 一覧→通常ジャンプ */
-  .hm-back-to-compact{position:fixed;bottom:130px;right:20px;z-index:95;}
+  .hm-back-to-compact{position:fixed;bottom:190px;right:20px;z-index:95;}
   .hm-back-to-compact button{
-    font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:700;
-    padding:.55rem 1.2rem;border-radius:8px;
+    font-family:'Noto Sans JP',sans-serif;font-size:.78rem;font-weight:700;
+    padding:.5rem 1rem;border-radius:8px;
     border:1px solid var(--accent);background:var(--accent);color:#fff;
     cursor:pointer;box-shadow:0 4px 16px rgba(108,92,231,.4);transition:all .15s;
-    display:flex;align-items:center;gap:.4rem;
+    display:flex;align-items:center;gap:.4rem;white-space:nowrap;
   }
   .hm-back-to-compact button:hover{filter:brightness(1.15);}
   /* ハイライトされたタイル */
@@ -396,6 +396,69 @@
   .hm-center-label{font-size:.62rem;opacity:.8;margin-top:.1rem;}
   .hm-center-compact-score{font-size:.75rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
   .hm-center-compact-sub{font-size:.55rem;opacity:.85;}
+
+  @media(max-width:600px){
+    /* ギルドストック表示ボタンを短縮 */
+    #hm-stock-bar-btn::after{content:'';}
+    /* 一覧に戻るボタンを右端に固定 */
+    .hm-back-to-compact{bottom:170px;right:12px;}
+    .hm-back-btn{bottom:110px;}
+    .arena-back-btn{bottom:110px;}
+    /* 中央拠点ビューのタイルを適切なサイズに */
+    .hm-tile .hm-center-score{font-size:1.2rem;}
+    /* ストックタブのソートセレクトを全幅に */
+    #stock-sort{max-width:100%;}
+  }
+
+
+  /* 中央拠点コンパクトビューのグリッド */
+  .hm-center-compact-grid.hm-compact{
+    grid-template-columns:repeat(auto-fill,minmax(52px,1fr))!important;
+    gap:3px!important;
+  }
+  /* 中央拠点コンパクトタイル */
+  .hm-center-compact-tile{
+    padding:4px 3px 6px !important;
+    min-height:0 !important;
+  }
+  .hm-center-compact-inner{
+    display:flex;flex-direction:column;align-items:center;gap:1px;
+  }
+  .hm-center-compact-top{
+    font-size:.6rem;font-weight:700;font-family:'JetBrains Mono',monospace;
+    line-height:1.2;opacity:.9;letter-spacing:-.02em;white-space:nowrap;
+  }
+  .hm-center-compact-fraction{
+    font-size:.68rem;font-weight:800;
+  }
+  .hm-center-compact-streak{
+    font-size:.72rem;font-weight:800;
+    font-family:'JetBrains Mono',monospace;
+    line-height:1;background:rgba(0,0,0,.22);
+    border-radius:3px;padding:1px 3px;
+    letter-spacing:-.01em;
+  }
+  /* 通常ビューのストリークバッジ */
+  .hm-center-streak-badge{
+    font-size:.72rem;font-weight:700;
+    padding:.18rem .45rem;border-radius:99px;
+    background:rgba(0,0,0,.28);white-space:nowrap;
+    line-height:1.2;
+  }
+
+  /* ストックタブ コンパクト1行タイル */
+  .stock-tile-compact-wrap{
+    padding:3px 2px !important;
+    min-height:0 !important;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .stock-tile-compact-line{
+    display:flex;flex-direction:column;align-items:center;
+    gap:0;line-height:1.15;
+    font-family:'JetBrains Mono',monospace;font-weight:700;
+  }
+  .stc-wid{font-size:.58rem;opacity:.85;}
+  .stc-val{font-size:.55rem;opacity:.95;letter-spacing:-.02em;}
 </style>
 </head>
 <body>
@@ -521,7 +584,6 @@
           <div style="height:6px;border-radius:99px;background:linear-gradient(90deg,#1e1e1e,#484848,#7a7a7a,#b0b0b0,#ffffff);border:1px solid rgba(255,255,255,.08);flex:1;"></div>
           <span class="hm-legend-edge">高</span>
         </div>
-        <span style="color:var(--text-dim);opacity:.5;font-size:.6rem;white-space:nowrap">3月月平均</span>
       </div>
     </div>
   </div>
@@ -633,7 +695,7 @@
     <div class="stock-legend" id="stock-legend-row"></div>
   </div>
   <div class="scatter-tooltip" id="scatter-tooltip"></div>
-  <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 1.5rem 120px;"></div>
+  <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 1.2rem 24px;"></div>
 </div>
 <div class="hm-date-bar hidden" id="arena-date-bar">
   <div class="hm-date-row">
@@ -843,11 +905,24 @@ function bldFull(tb,items,fG,fS,isGw){
 }
 
 function switchTab(tab){
-  // ヒートマップ→ギルドバトルジャンプ経由でない場合は戻るボタンを隠す
-  if(tab!=='local'||!window._hmFocusLabel){
+  // フローティングUI を全リセット
+  const resetFloating = () => {
     document.getElementById('hm-back-btn')?.classList.add('hidden');
+    document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
+    document.querySelector('.arena-back-btn')?.classList.add('hidden');
+    document.querySelectorAll('.hm-tile-focused').forEach(t=>{
+      t.classList.remove('hm-tile-focused');
+      t.style.outline=''; t.style.outlineOffset='';
+    });
+    window._hmPrevCompact = false;
+    window._hmFocusLabel = null;
+  };
+  // ヒートマップ→ギルドバトルジャンプ経由の場合は hm-back-btn は残す
+  if(tab==='local' && window._hmFocusLabel){
+    document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
+  } else {
+    resetFloating();
   }
-  if(tab!=='heatmap') window._hmFocusLabel=null;
   curTab=tab;
   if(tab!=="heatmap"&&hmPlayTimer)hmPlayStop();
   if(tab!=="arena"&&arenaPlayTimer)arenaPlayStop();
@@ -993,9 +1068,9 @@ function hmPlayToggle(){
 }
 
 function hmJumpToNormal(label){
-  window._hmPrevCompact = true;
   window._hmFocusLabel = label;
-  setHMView('normal');  // 通常ビューに切替
+  setHMView('normal');  // 通常ビューに切替（_hmPrevCompactはsetHMView後にセット）
+  window._hmPrevCompact = true; // setHMViewが隠した後に再表示フラグをセット
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
       _hmHighlightTile(label);
@@ -1030,10 +1105,12 @@ function hmBackToCompact(){
 }
 
 function hmShowWorldInTable(label){
-  window._hmPrevView = hmView;      // 元の表示モードを保存
-  window._hmFocusLabel = label;     // フォーカス対象を保存
+  window._hmPrevView = hmView;
+  window._hmFocusLabel = label;
   hmPlayStop();
-  switchTab('local');               // ギルドバトルタブに切替
+  // 一覧に戻るボタンが出ていたら隠す（重なり防止）
+  document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
+  switchTab('local');
   // テーブル描画後に対象行をフォーカス
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
@@ -1166,8 +1243,12 @@ function scatterTip(e, el){
 }
 function scatterMove(e){
   const t = document.getElementById('scatter-tooltip');
-  t.style.left = (e.clientX+12)+'px';
-  t.style.top = (e.clientY-10)+'px';
+  const tw = t.offsetWidth || 160;
+  const th = t.offsetHeight || 60;
+  const x = Math.min(e.clientX+12, window.innerWidth-tw-8);
+  const y = Math.max(e.clientY-10, 8);
+  t.style.left = x+'px';
+  t.style.top = Math.min(y, window.innerHeight-th-8)+'px';
 }
 function scatterHide(){
   document.getElementById('scatter-tooltip').style.display='none';
@@ -1251,16 +1332,18 @@ function setHMView(mode){
   hmView=mode;
   document.getElementById("hm-btn-compact").classList.toggle("active",mode==="compact");
   document.getElementById("hm-btn-normal").classList.toggle("active",mode==="normal");
-  // hmCenterModeはtoggleHMCenter()で管理
-  // 手動ビュー切替時は戻るボタンを隠す
-  if(!window._hmPrevCompact){
-    document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
-  }
+  document.getElementById("hm-btn-center")?.classList.toggle("active",mode==="center");
+  // 手動ビュー切替時は戻るボタンを常に隠す
+  document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
+  window._hmPrevCompact = false;
   renderHM();
 }
 
 function toggleHMCenter(){
   hmCenterMode = !hmCenterMode;
+  // ビュー切替時にフローティングボタンをリセット
+  document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
+  window._hmPrevCompact = false;
   const btn = document.getElementById('hm-btn-center');
   btn.classList.toggle('active', hmCenterMode);
   renderHM();
@@ -1371,6 +1454,8 @@ function renderHMCenter(sortBy, minR){
   // gridレイアウトを確実に戻す（散布図から戻った場合のリセット）
   grid.style.display = '';
   grid.style.padding = '';
+  // コンパクト時は中央拠点専用の列幅
+  grid.classList.toggle('hm-center-compact-grid', compact);
 
   // データ計算
   let items = LD.map(d => {
@@ -1431,12 +1516,12 @@ function renderHMCenter(sortBy, minR){
     if(compact){
       const streakC = centerStreaks[it.label] || 1;
       const streakTC = streakC >= 5 ? '5+' : `${streakC}d`;
-      return `<article class="hm-tile" style="background:${bg};color:${tc};"
+      return `<article class="hm-tile hm-center-compact-tile" style="background:${bg};color:${tc};"
           onclick="hmJumpToNormal('${it.label}')"
           title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild} / ${streakC >= 5 ? '5日以上' : streakC+'日'}継続">
-        <div class="hm-tile-body">
-          <div class="hm-tile-wid-compact">w${it.label}</div>
-          <div class="hm-center-compact-score">${it.max}/5 <span style="font-size:.45rem;opacity:.8">${streakTC}</span></div>
+        <div class="hm-center-compact-inner">
+          <div class="hm-center-compact-top">w${it.label} <span class="hm-center-compact-fraction">${it.max}/5</span></div>
+          <div class="hm-center-compact-streak">${streakTC}</div>
         </div>
         ${stockBarHtml(it.label)}
       </article>`;
@@ -1450,12 +1535,12 @@ function renderHMCenter(sortBy, minR){
         <div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${it.label}</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.15rem">
           <div class="hm-badge">${lbl}</div>
-          <span style="font-size:.58rem;padding:.1rem .3rem;border-radius:99px;background:rgba(0,0,0,.3);white-space:nowrap">🔥${streakTxt}</span>
+          <span class="hm-center-streak-badge">🔥${streakTxt}</span>
         </div>
       </div>
       <div class="hm-tile-body">
         <div class="hm-center-score">${it.max}<span style="font-size:.9rem;opacity:.7">/5</span></div>
-        <div class="hm-center-label">${it.topGuild || '(未占有)'}</div>
+        <div class="hm-center-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${it.topGuild || '(未占有)'}</div>
       </div>
       ${stockBarHtml(it.label)}
     </article>`;
@@ -1464,6 +1549,7 @@ function renderHMCenter(sortBy, minR){
 
 function renderHM(){
   const grid=document.getElementById("hm-grid");
+  grid.classList.remove('hm-center-compact-grid'); // 中央拠点専用クラスを除去
   const minR=Number(document.getElementById("hm-minRate").value);
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
@@ -1856,9 +1942,8 @@ function renderStock(){
     const val = (stock/10000).toFixed(1)+'万';
     const tc = lv >= 3 ? '#111111' : '#ffffff'; // 明るいグレーの時は黒文字
     if(compact){
-      return `<article class="stock-tile" style="background:${col};color:${tc};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToHeatmap('${label}')">
-        <div class="stock-tile-compact">w${label}</div>
-        <div class="stock-tile-compact" style="font-size:.5rem;margin-top:1px">${val}</div>
+      return `<article class="stock-tile stock-tile-compact-wrap" style="background:${col};color:${tc};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToHeatmap('${label}')">
+        <div class="stock-tile-compact-line"><span class="stc-wid">w${label}</span><span class="stc-val">${val}</span></div>
       </article>`;
     }
     // 占有データをLD（ギルドバトルデータ）から取得
@@ -1872,8 +1957,8 @@ function renderStock(){
       </div>
       <div class="stock-tile-body">
         <div class="stock-tile-val">${val}</div>
-        ${occStr ? `<div style="font-size:.7rem;opacity:.85;margin-top:.25rem">占有 ${occStr}</div>` : ''}
-        ${occLbl ? `<div style="font-size:.62rem;opacity:.7">${occLbl}</div>` : ''}
+        ${occStr ? `<div style="font-size:.68rem;opacity:.85;margin-top:.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">占有 ${occStr}</div>` : ''}
+        ${occLbl ? `<div style="font-size:.6rem;opacity:.7">${occLbl}</div>` : ''}
       </div>
     </article>`;
   }).join('');
