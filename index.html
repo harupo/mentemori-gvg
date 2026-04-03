@@ -408,6 +408,12 @@
     .hm-tile .hm-center-score{font-size:1.2rem;}
     /* ストックタブのソートセレクトを全幅に */
     #stock-sort{max-width:100%;}
+    /* ストックタブ: コンパクトタイルをより小さく */
+    .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(40px,1fr))!important;gap:2px!important;}
+    .stc-wid{font-size:.52rem;}
+    .stc-val{font-size:.50rem;}
+    /* ストックタブ: 一覧/通常/散布図 ボタンが切れないよう */
+    #stock-vb-scatter{font-size:.72rem;padding:.35rem .5rem;}
   }
 
 
@@ -601,7 +607,7 @@
 </div>
 <!-- 採用属性分布 -->
 <div class="dashboard hidden" id="dash-arena">
-  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:nowrap;gap:.6rem;align-items:center;">
+  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;">
     <label style="color:var(--text-dim);font-size:.78rem;white-space:nowrap;flex-shrink:0">📊 バトリ20位（5キャラ編成）</label>
     <label style="white-space:nowrap;flex-shrink:0;font-size:.85rem;color:var(--text-dim)">ソート:</label>
     <select id="a-sort" onchange="arenaRender()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);min-width:0;flex:1;">
@@ -675,8 +681,8 @@
 
 <!-- ギルドストック月次ヒートマップ -->
 <div class="dashboard hidden" id="dash-stock">
-  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:nowrap;gap:.6rem;align-items:center;">
-    <label style="color:var(--text-dim);font-size:.78rem;white-space:nowrap;flex-shrink:0">📦 2026年3月ギルドストック月平均（0除外）</label>
+  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;">
+    <label style="color:var(--text-dim);font-size:.75rem;flex-shrink:0">📦 2026年3月ギルドストック月平均（0除外）</label>
     <label style="white-space:nowrap;flex-shrink:0;font-size:.85rem;color:var(--text-dim)">ソート:</label>
     <select id="stock-sort" onchange="renderStock()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);min-width:0;flex:1;">
       <option value="wid-asc">ワールド 昇順</option>
@@ -684,7 +690,7 @@
       <option value="stock-desc">ストック 高い順</option>
       <option value="stock-asc">ストック 低い順</option>
     </select>
-    <div class="hm-view-toggle" style="margin-left:auto;flex-shrink:0;">
+    <div class="hm-view-toggle" style="flex-shrink:0;">
       <button class="hm-view-btn active" id="stock-vb-compact" onclick="stockSetView('compact')">一覧</button>
       <button class="hm-view-btn" id="stock-vb-normal" onclick="stockSetView('normal')">通常</button>
       <button class="hm-view-btn" id="stock-vb-scatter" onclick="stockSetView('scatter')">散布図</button>
@@ -695,7 +701,7 @@
     <div class="stock-legend" id="stock-legend-row"></div>
   </div>
   <div class="scatter-tooltip" id="scatter-tooltip"></div>
-  <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 1.2rem 24px;"></div>
+  <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 0 24px;"></div>
 </div>
 <div class="hm-date-bar hidden" id="arena-date-bar">
   <div class="hm-date-row">
