@@ -1460,6 +1460,7 @@ function calcCenterScore(d){
 
 function renderHMCenter(sortBy, minR){
   const grid = document.getElementById('hm-grid');
+  const compact = hmView === 'compact';  // ← 冒頭で定義
   grid.classList.remove('hm-compact');
   // gridレイアウトを確実に戻す（散布図から戻った場合のリセット）
   grid.style.display = '';
@@ -1494,8 +1495,6 @@ function renderHMCenter(sortBy, minR){
   }
 
   document.getElementById('hm-visCount').textContent = items.length + '件';
-
-  const compact = hmView === 'compact';
 
   // サマリー更新
   const counts = [0,0,0,0,0,0];
