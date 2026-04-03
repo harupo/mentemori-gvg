@@ -787,7 +787,7 @@ const CNA={1:"EL",2:"EX",3:"GM"};
 const DATA_BASE="data/";
 function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
-let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact",hmCenterMode=false;
+let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact";
 let hmDates=[],hmDateIdx=-1,hmCache={},hmCurrentData=null;
 // 採用属性分布
 const A_ATTRS=['藍','紅','翠','黄','天','冥'],A_KEY={藍:'ai',紅:'ku',翠:'sui',黄:'ki',天:'ten',冥:'mei'},A_COL={藍:'#4a9ded',紅:'#ed4a4a',翠:'#3de88a',黄:'#edcc3d',天:'#c0c0e8',冥:'#a84aed'},A_BG={藍:'hsl(210 65% 16%)',紅:'hsl(0 65% 16%)',翠:'hsl(145 65% 13%)',黄:'hsl(46 65% 16%)',天:'hsl(235 28% 22%)',冥:'hsl(270 55% 18%)'},A_TC={藍:'#cce4ff',紅:'#ffdada',翠:'#ccffe6',黄:'#fff3cc',天:'#eeeef8',冥:'#e8ccff'};
@@ -1330,23 +1330,19 @@ function hmSetSpeed(ms){
 
 function setHMView(mode){
   hmView=mode;
+  // 3ボタンの排他制御
   document.getElementById("hm-btn-compact").classList.toggle("active",mode==="compact");
   document.getElementById("hm-btn-normal").classList.toggle("active",mode==="normal");
   document.getElementById("hm-btn-center")?.classList.toggle("active",mode==="center");
-  // 手動ビュー切替時は戻るボタンを常に隠す
+  // 戻るボタンをリセット
   document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
   window._hmPrevCompact = false;
   renderHM();
 }
 
 function toggleHMCenter(){
-  hmCenterMode = !hmCenterMode;
-  // ビュー切替時にフローティングボタンをリセット
-  document.getElementById('hm-back-compact-btn')?.classList.add('hidden');
-  window._hmPrevCompact = false;
-  const btn = document.getElementById('hm-btn-center');
-  btn.classList.toggle('active', hmCenterMode);
-  renderHM();
+  // hmViewで一元管理: centerなら一覧へ戻す、それ以外はcenterへ
+  setHMView(hmView === 'center' ? 'compact' : 'center');
 }
 
 function toggleHMFilter(){
@@ -1460,7 +1456,8 @@ function calcCenterScore(d){
 
 function renderHMCenter(sortBy, minR){
   const grid = document.getElementById('hm-grid');
-  const compact = hmView === 'compact';  // ← 冒頭で定義
+  // centerモード時は常にcompact表示（一覧/通常はcenter解除後に有効）
+  const compact = (hmView === 'compact') || (hmView === 'center');
   grid.classList.remove('hm-compact');
   // gridレイアウトを確実に戻す（散布図から戻った場合のリセット）
   grid.style.display = '';
@@ -1558,21 +1555,21 @@ function renderHMCenter(sortBy, minR){
 
 function renderHM(){
   const grid=document.getElementById("hm-grid");
-  grid.classList.remove('hm-center-compact-grid'); // 中央拠点専用クラスを除去
+  // hm-center-compact-gridはrenderHMCenter内で管理
   const minR=Number(document.getElementById("hm-minRate").value);
   document.getElementById("hm-rangeVal").textContent=minR+"%";
   const sortBy=document.getElementById("hm-sort").value;
-  if(hmCenterMode){
+  if(hmView==='center'){
     if(!Object.keys(centerStreaks).length){
       // 未計算 → historyを取得してから描画
       grid.style.display = '';
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-dim);font-size:.9rem">🏰 連続日数を計算中…<br><span style=\"font-size:.75rem;opacity:.6\">履歴データを取得しています</span></div>';
       loadCenterStreaks().then(()=>{
         // 計算完了後、まだcenterModeなら描画
-        if(hmCenterMode) renderHMCenter(sortBy, minR);
+        if(hmView==='center') renderHMCenter(sortBy, minR);
       }).catch(err=>{
         console.error('streak calc error:', err);
-        if(hmCenterMode) renderHMCenter(sortBy, minR);
+        if(hmView==='center') renderHMCenter(sortBy, minR);
       });
     } else {
       renderHMCenter(sortBy,minR);
@@ -1853,8 +1850,8 @@ function arenaUpdateDomBar(items){
 
 function arenaRenderGrid(items){
   document.getElementById("a-table-card").classList.add("hidden");
-  document.getElementById("a-grid").style.display="";
   const grid=document.getElementById("a-grid");
+  grid.style.display="";
   const compact=arenaView==="compact";
   grid.classList.toggle("hm-compact",compact);
   if(!items.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">データがありません</div>';return;}
@@ -1916,15 +1913,15 @@ function stockSetView(v){
 }
 
 function renderStock(){
+  const grid = document.getElementById('stock-grid');
   if(!Object.keys(GUILD_STOCK_MAR).length){
-    document.getElementById('stock-grid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">読み込み中… / データがありません</div>';
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim);">読み込み中… / データがありません</div>';
     return;
   }
   if(_stockView==='scatter'){renderStockScatter();return;}
   // gridレイアウトを戻す
-  const _g = document.getElementById('stock-grid');
-  _g.style.display = '';
-  _g.style.padding = '';
+  grid.style.display = '';
+  grid.style.padding = '';
   // 凡例
   const legend = document.getElementById('stock-legend-row');
   legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">ギルドストック:</span>' +
@@ -1948,7 +1945,6 @@ function renderStock(){
 
   const maxStock = Math.max(...entries.map(e=>e.stock));
   const compact = _stockView === 'compact';
-  const grid = document.getElementById('stock-grid');
   grid.classList.toggle('hm-compact', compact);
 
   grid.innerHTML = entries.map(({wid, label, stock})=>{
