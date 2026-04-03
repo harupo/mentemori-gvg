@@ -146,6 +146,9 @@
   .hm-view-btn{font-family:'Noto Sans JP',sans-serif;font-size:.8rem;font-weight:700;padding:.45rem 1rem;border:2px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
   .hm-view-btn:first-child{border-radius:8px 0 0 8px;} .hm-view-btn:last-child{border-radius:0 8px 8px 0;}
   .hm-view-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  /* .controls button の上書き */
+  .controls .hm-view-btn{background:transparent !important;border-color:var(--border) !important;color:var(--text-dim) !important;border-width:2px;}
+  .controls .hm-view-btn.active{background:var(--accent) !important;border-color:var(--accent) !important;color:#fff !important;}
   .hm-filter-toggle{display:none;font-family:'Noto Sans JP',sans-serif;font-size:.7rem;font-weight:600;padding:.25rem .7rem;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);border-radius:6px;cursor:pointer;}
   .hm-filter-toggle:hover{color:var(--text);border-color:var(--accent);}
   .hm-controls.collapsed{}
@@ -732,6 +735,9 @@
 <div class="arena-back-btn hidden" id="arena-back-btn">
   <button onclick="arenaBackToGrid()">◀ 一覧に戻る</button>
 </div>
+<div class="hm-back-to-compact hidden" id="stock-back-compact-btn" style="bottom:130px;">
+  <button onclick="stockBackToCompact()">◀ 一覧に戻る</button>
+</div>
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
 
 <script>
@@ -745,7 +751,7 @@ const STOCK_LEVELS = [
   {color:"#1e1e1e", label:"低"},
   {color:"#484848", label:"やや低"},
   {color:"#7a7a7a", label:"中"},
-  {color:"#b0b0b0", label:"やや高"},
+  {color:"#d8d8d8", label:"やや高"},
   {color:"#ffffff", label:"高"},
 ];
 // ギルドストック表示バー用カラー
@@ -753,7 +759,7 @@ const STOCK_BAR_LEVELS = [
   "#1e1e1e",   // 低: ほぼ黒
   "#484848",   // やや低: 暗グレー
   "#7a7a7a",   // 中: グレー
-  "#b0b0b0",   // やや高: 明グレー
+  "#d8d8d8",   // やや高: 明グレー
   "#ffffff",   // 高: 純白
 ];
 function stockLevel(worldLabel){
@@ -1275,6 +1281,29 @@ function hmToggleStockBar(){
   // 凡例の表示/非表示
   document.getElementById('hm-stock-legend').style.display = hmShowStockBar ? 'flex' : 'none';
   renderHM();
+}
+
+function stockJumpToNormal(label){
+  // 一覧→通常ビューに切り替えてハイライト
+  const prev = _stockView;
+  stockSetView('normal');
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const tiles = document.querySelectorAll('#stock-grid .stock-tile');
+      for(const tile of tiles){
+        const wid = tile.querySelector('.stock-tile-wid');
+        if(wid && wid.textContent.trim() === label){
+          tile.style.outline = '3px solid #fff';
+          tile.style.outlineOffset = '-2px';
+          tile.scrollIntoView({behavior:'smooth', block:'center'});
+          setTimeout(()=>{ tile.style.outline=''; tile.style.outlineOffset=''; }, 2500);
+          break;
+        }
+      }
+      // 一覧に戻るボタン表示
+      document.getElementById('stock-back-compact-btn')?.classList.remove('hidden');
+    });
+  });
 }
 
 function stockJumpToHeatmap(label){
@@ -1919,6 +1948,11 @@ let _stockView = 'compact';
 let hmShowStockBar = false; // ギルドストック表示 デフォルトOFF
 let centerStreaks = {}; // ワールドラベル→連続日数
 
+function stockBackToCompact(){
+  document.getElementById('stock-back-compact-btn')?.classList.add('hidden');
+  stockSetView('compact');
+}
+
 function stockSetView(v){
   _stockView = v;
   ['compact','normal','scatter'].forEach(x=>document.getElementById('stock-vb-'+x).classList.toggle('active',x===v));
@@ -1960,14 +1994,14 @@ function renderStock(){
   const compact = _stockView === 'compact';
   grid.classList.toggle('hm-compact', compact);
 
-  grid.innerHTML = entries.map(({wid, label, stock})=>{
+  grid.innerHTML = entries.map(({wid, label, stock}, idx)=>{
     const lv = stockLevel(label);
     const col = STOCK_LEVELS[lv].color;
     const lbl = STOCK_LEVELS[lv].label;
     const val = (stock/10000).toFixed(1)+'万';
     const tc = lv >= 3 ? '#111111' : '#ffffff'; // 明るいグレーの時は黒文字
     if(compact){
-      return `<article class="stock-tile stock-tile-compact-wrap" style="background:${col};color:${tc};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToHeatmap('${label}')">
+      return `<article class="stock-tile stock-tile-compact-wrap" style="background:${col};color:${tc};cursor:pointer;" title="W${label} / ${val} (${lbl})" onclick="stockJumpToNormal('${label}')">
         <div class="stock-tile-compact-line"><span class="stc-wid">w${label}</span><span class="stc-val">${val}</span></div>
       </article>`;
     }
@@ -1977,7 +2011,10 @@ function renderStock(){
     const occLbl = ldItem ? hmLabel(ldItem._a.am/21) : '';
     return `<article class="stock-tile" style="background:${col};color:${tc};cursor:pointer;" onclick="stockJumpToHeatmap('${label}')">
       <div class="stock-tile-top">
-        <div><div class="stock-tile-world">World</div><div class="stock-tile-wid">${label}</div></div>
+        <div>
+          <div class="stock-tile-world">World <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;opacity:.7">#${idx+1}</span></div>
+          <div class="stock-tile-wid">${label}</div>
+        </div>
         <div class="stock-tile-badge">${lbl}</div>
       </div>
       <div class="stock-tile-body">
