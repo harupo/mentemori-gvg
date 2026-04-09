@@ -747,24 +747,42 @@
 
 <div class="hm-date-bar hidden" id="local-date-bar">
   <div class="hm-date-row">
-    <span class="hm-date-label">⚔️ 履歴</span>
     <div class="hm-date-nav"><button id="local-date-prev" onclick="localDateStep(-1)">◀</button></div>
     <input type="range" class="hm-date-slider" id="local-date-slider" min="0" max="0" value="0" oninput="localDateChange()">
     <div class="hm-date-nav"><button id="local-date-next" onclick="localDateStep(1)">▶</button></div>
     <span class="hm-date-value" id="local-date-value">-</span>
     <span class="hm-date-tag" id="local-date-tag"></span>
   </div>
+  <div class="hm-play-row">
+    <button class="hm-play-btn" id="local-play-btn" onclick="localPlayToggle()">▶ 再生</button>
+    <span class="hm-speed-label">速度</span>
+    <div class="hm-speed-btns">
+      <button class="hm-speed-btn" onclick="localSetSpeed(1300)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="localSetSpeed(650)">1x</button>
+      <button class="hm-speed-btn" onclick="localSetSpeed(325)">2x</button>
+      <button class="hm-speed-btn" onclick="localSetSpeed(160)">4x</button>
+    </div>
+  </div>
   <div class="hm-date-spacer"></div>
 </div>
 
 <div class="hm-date-bar hidden" id="global-date-bar">
   <div class="hm-date-row">
-    <span class="hm-date-label">🌐 履歴</span>
     <div class="hm-date-nav"><button id="global-date-prev" onclick="globalDateStep(-1)">◀</button></div>
     <input type="range" class="hm-date-slider" id="global-date-slider" min="0" max="0" value="0" oninput="globalDateChange()">
     <div class="hm-date-nav"><button id="global-date-next" onclick="globalDateStep(1)">▶</button></div>
     <span class="hm-date-value" id="global-date-value">-</span>
     <span class="hm-date-tag" id="global-date-tag"></span>
+  </div>
+  <div class="hm-play-row">
+    <button class="hm-play-btn" id="global-play-btn" onclick="globalPlayToggle()">▶ 再生</button>
+    <span class="hm-speed-label">速度</span>
+    <div class="hm-speed-btns">
+      <button class="hm-speed-btn" onclick="globalSetSpeed(1300)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="globalSetSpeed(650)">1x</button>
+      <button class="hm-speed-btn" onclick="globalSetSpeed(325)">2x</button>
+      <button class="hm-speed-btn" onclick="globalSetSpeed(160)">4x</button>
+    </div>
   </div>
   <div class="hm-date-spacer"></div>
 </div>
@@ -1361,6 +1379,63 @@ async function globalLoadDate(idx){
   }
   GD=globalCache[dateStr];
   renderG();
+}
+
+
+// ギルドバトル/グランドバトル 再生制御
+let _localPlayTimer=null, _localSpeed=650;
+let _globalPlayTimer=null, _globalSpeed=650;
+
+function localSetSpeed(ms){
+  _localSpeed=ms;
+  document.querySelectorAll('#local-date-bar .hm-speed-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent===({1300:'0.5x',650:'1x',325:'2x',160:'4x'}[ms]));
+  });
+  if(_localPlayTimer){clearInterval(_localPlayTimer);_localPlayTimer=setInterval(localPlayStep,ms);}
+}
+function localPlayStep(){
+  if(localDateIdx>=localDates.length-1){localPlayStop();return;}
+  localLoadDate(localDateIdx+1);
+}
+function localPlayStop(){
+  if(_localPlayTimer){clearInterval(_localPlayTimer);_localPlayTimer=null;}
+  const btn=document.getElementById('local-play-btn');
+  if(btn)btn.textContent='▶ 再生';
+}
+function localPlayToggle(){
+  if(_localPlayTimer){localPlayStop();}
+  else{
+    if(localDateIdx>=localDates.length-1)localLoadDate(0);
+    _localPlayTimer=setInterval(localPlayStep,_localSpeed);
+    const btn=document.getElementById('local-play-btn');
+    if(btn)btn.textContent='⏸ 停止';
+  }
+}
+
+function globalSetSpeed(ms){
+  _globalSpeed=ms;
+  document.querySelectorAll('#global-date-bar .hm-speed-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent===({1300:'0.5x',650:'1x',325:'2x',160:'4x'}[ms]));
+  });
+  if(_globalPlayTimer){clearInterval(_globalPlayTimer);_globalPlayTimer=setInterval(globalPlayStep,ms);}
+}
+function globalPlayStep(){
+  if(globalDateIdx>=globalDates.length-1){globalPlayStop();return;}
+  globalLoadDate(globalDateIdx+1);
+}
+function globalPlayStop(){
+  if(_globalPlayTimer){clearInterval(_globalPlayTimer);_globalPlayTimer=null;}
+  const btn=document.getElementById('global-play-btn');
+  if(btn)btn.textContent='▶ 再生';
+}
+function globalPlayToggle(){
+  if(_globalPlayTimer){globalPlayStop();}
+  else{
+    if(globalDateIdx>=globalDates.length-1)globalLoadDate(0);
+    _globalPlayTimer=setInterval(globalPlayStep,_globalSpeed);
+    const btn=document.getElementById('global-play-btn');
+    if(btn)btn.textContent='⏸ 停止';
+  }
 }
 
 function localDateChange(){localLoadDate(Number(document.getElementById("local-date-slider").value));}
