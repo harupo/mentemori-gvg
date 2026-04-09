@@ -480,6 +480,7 @@
   <button class="tab-btn" data-tab="heatmap" onclick="switchTab('heatmap')">🔥 占有ヒートマップ</button>
   <button class="tab-btn" data-tab="arena" onclick="switchTab('arena')">🌈 採用属性分布</button>
   <button class="tab-btn" data-tab="stock" onclick="switchTab('stock')">📦 ギルドストック</button>
+  <button class="tab-btn" data-tab="lament" onclick="switchTab('lament')">🎵 ラメント</button>
 </div>
 <div class="info-bar" id="infoBar">
   <div class="info-row">
@@ -705,6 +706,69 @@
   <div class="scatter-tooltip" id="scatter-tooltip"></div>
   <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 0 24px;"></div>
 </div>
+
+<!-- ラメント一覧 -->
+<div class="dashboard hidden" id="dash-lament" style="padding:1rem 1.5rem 3rem;">
+  <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.8rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);">
+    <span style="font-size:.85rem;font-weight:700;color:var(--text-dim);">🎵 ラメント一覧</span>
+    <input id="lament-search" type="text" placeholder="キャラ名・曲名・アーティストで検索…"
+      oninput="renderLament()"
+      style="font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);flex:1;min-width:180px;max-width:320px;">
+    <div style="display:flex;gap:4px;flex-wrap:wrap;" id="lament-attr-btns">
+      <button class="lament-attr-btn active" data-attr="all" onclick="lamentSetAttr('all')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer;">全て</button>
+      <button class="lament-attr-btn" data-attr="藍" onclick="lamentSetAttr('藍')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ai);cursor:pointer;">藍</button>
+      <button class="lament-attr-btn" data-attr="紅" onclick="lamentSetAttr('紅')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ku);cursor:pointer;">紅</button>
+      <button class="lament-attr-btn" data-attr="翠" onclick="lamentSetAttr('翠')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-sui);cursor:pointer;">翠</button>
+      <button class="lament-attr-btn" data-attr="黄" onclick="lamentSetAttr('黄')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ki);cursor:pointer;">黄</button>
+      <button class="lament-attr-btn" data-attr="天" onclick="lamentSetAttr('天')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ten);cursor:pointer;">天</button>
+      <button class="lament-attr-btn" data-attr="冥" onclick="lamentSetAttr('冥')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-mei);cursor:pointer;">冥</button>
+    </div>
+    <span style="font-size:.72rem;color:var(--text-dim);margin-left:auto;" id="lament-count"></span>
+  </div>
+  <div class="table-wrap" style="max-height:calc(100vh - 200px);">
+    <table id="lament-table" style="width:100%;border-collapse:collapse;font-size:.82rem;">
+      <thead>
+        <tr>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="lamentSort('attr')">属性</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="lamentSort('char')">キャラクター</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="lamentSort('ja')">日本語タイトル</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="lamentSort('en')">English Title</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;">アーティスト</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;">MV</th>
+        </tr>
+      </thead>
+      <tbody id="lament-tbody"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:.8rem;font-size:.68rem;color:var(--text-dim);line-height:1.6;">
+    ※ 英語タイトルはYouTube公式MV・CDに基づきます。最新キャラは随時追加予定。
+  </div>
+</div>
+
+<div class="hm-date-bar hidden" id="local-date-bar">
+  <div class="hm-date-row">
+    <span class="hm-date-label">⚔️ 履歴</span>
+    <div class="hm-date-nav"><button id="local-date-prev" onclick="localDateStep(-1)">◀</button></div>
+    <input type="range" class="hm-date-slider" id="local-date-slider" min="0" max="0" value="0" oninput="localDateChange()">
+    <div class="hm-date-nav"><button id="local-date-next" onclick="localDateStep(1)">▶</button></div>
+    <span class="hm-date-value" id="local-date-value">-</span>
+    <span class="hm-date-tag" id="local-date-tag"></span>
+  </div>
+  <div class="hm-date-spacer"></div>
+</div>
+
+<div class="hm-date-bar hidden" id="global-date-bar">
+  <div class="hm-date-row">
+    <span class="hm-date-label">🌐 履歴</span>
+    <div class="hm-date-nav"><button id="global-date-prev" onclick="globalDateStep(-1)">◀</button></div>
+    <input type="range" class="hm-date-slider" id="global-date-slider" min="0" max="0" value="0" oninput="globalDateChange()">
+    <div class="hm-date-nav"><button id="global-date-next" onclick="globalDateStep(1)">▶</button></div>
+    <span class="hm-date-value" id="global-date-value">-</span>
+    <span class="hm-date-tag" id="global-date-tag"></span>
+  </div>
+  <div class="hm-date-spacer"></div>
+</div>
+
 <div class="hm-date-bar hidden" id="arena-date-bar">
   <div class="hm-date-row">
     <div class="hm-date-nav"><button id="a-date-prev" onclick="arenaDateStep(-1)">◀</button></div>
@@ -741,6 +805,210 @@
 <div class="wf-float hidden" id="wf-float"><div class="wf-label"><span id="wf-name"></span>で<br>フィルタ中</div><button onclick="clearWF()">フィルタ解除</button></div>
 
 <script>
+
+// ═══════════════════════════════
+// ラメント一覧データ（キャラクターリスト.xlsx属性準拠）
+// ═══════════════════════════════
+const LAMENT_DATA = [
+  // ── 藍属性 ──────────────────────────────────────────
+  {attr:'藍', char:'モニカ',        ja:'うらぎりもの',            en:'Traitor',                             artist:'rionos',         yt:'https://youtu.be/Qm4WE5Ff1C4'},
+  {attr:'藍', char:'イリア',        ja:'燐光',                   en:'Phosphorescence',                     artist:'Daoko',          yt:'https://youtu.be/jtWi-YekQAc'},
+  {attr:'冥', char:'冥イリア',      ja:'Allure of the Dark',     en:'Allure of the Dark',                  artist:'Daoko',          yt:'', },
+  {attr:'藍', char:'アイリス',      ja:'Twilight',               en:'Twilight',                            artist:'Hakubi',         yt:'https://youtu.be/bUg9QYX7KzI'},
+  {attr:'藍', char:'ロキ',          ja:'believe',                en:'believe',                             artist:'上野優華',        yt:'https://youtu.be/Kz3q8nrSfgg'},
+  {attr:'藍', char:'ソルティーナ',  ja:'くま',                   en:'Bear',                                artist:'コレサワ',        yt:'https://youtu.be/HvKgK8B8oeU'},
+  {attr:'藍', char:'アムレート',    ja:'outcry',                 en:'outcry',                              artist:'あたらよ',        yt:'https://youtu.be/dKSNz3GGr9U'},
+  {attr:'藍', char:'フェンリル',    ja:'宝物はひとつだけあればいい', en:"I Only Need One Treasure",          artist:'鹿乃',           yt:'https://youtu.be/Wf4c6QPYFyE'},
+  {attr:'藍', char:'フローレンス',  ja:'Flag',                   en:'Flag',                                artist:'Wakana',         yt:'https://youtu.be/3E3v-SdxVW0'},
+  {attr:'藍', char:'ソーニャ',      ja:'熱情のエッダ',            en:'Passionate Edda',                     artist:'みゆはん',        yt:'https://youtu.be/8SY-gMKkkNM'},
+  {attr:'藍', char:'モーザ',        ja:'Dokie Doggy Night',      en:'Dokie Doggy Night',                   artist:'+α/あるふぁきゅん。', yt:'https://youtu.be/74Mwmx2TDKo'},
+  {attr:'藍', char:'シヴィ',        ja:'旅人へ',                 en:'To the Traveler',                     artist:'',               yt:''},
+  {attr:'藍', char:'ステラ',        ja:'玩具の呪文',              en:"Toy's Spell",                         artist:'ろん',               yt:''},
+  {attr:'翠', char:'翠ステラ',      ja:'ちっちゃな革命',          en:'Little Revolution',                   artist:'',               yt:''},
+  {attr:'藍', char:'エイル',        ja:'Twilight Crack',         en:'Twilight Crack',                      artist:'Eye',            yt:'https://youtu.be/XfQdFRRxsMg'},
+  {attr:'藍', char:'エヴリン',      ja:'Prism',                  en:'Prism',                               artist:'',               yt:''},
+  {attr:'藍', char:'ギルウィアル',  ja:'疎ましい芸術',            en:'Despised Art',                        artist:'Lucia',               yt:''},
+  {attr:'藍', char:'フェーネ',      ja:'By My Side',             en:'By My Side',                          artist:'大塚理乃',               yt:''},
+  {attr:'藍', char:'ミナシュマリ',  ja:'Fox Hunt',               en:'Fox Hunt',                            artist:'こはならむ',               yt:''},
+  {attr:'藍', char:'セルリア',      ja:'ハナコトバ',              en:'Language of Flowers',                 artist:'',               yt:''},
+  {attr:'藍', char:'リズ',          ja:'Song of Wind',           en:'Song of Wind',                        artist:'田村ゆかり',               yt:''},
+  {attr:'藍', char:'ユリーカ',      ja:'Beyond the Journey',     en:'Beyond the Journey',                  artist:'',               yt:''},
+  // ── 藍属性（バリアント）─────────────────────────────
+  {attr:'藍', char:'夏ニーナ',      ja:'きみがいる夏',            en:'Summer with You',                     artist:'芹澤優',          yt:''},
+  {attr:'藍', char:'藍トロポン',    ja:"I Wish",                 en:'I Wish',                              artist:'maimie',          yt:''},
+  {attr:'藍', char:'団長コルディ',  ja:'Step Right Up',          en:'Step Right Up',                       artist:'春奈るな',        yt:''},
+  // ── 紅属性 ──────────────────────────────────────────
+  {attr:'紅', char:'シャーロット',  ja:'Clockwise',              en:'Clockwise',                           artist:'松田彩花',        yt:'https://youtu.be/NWv94LJc7wg'},
+  {attr:'紅', char:'アリアンロッド',ja:'モノクローム',            en:'Monochrome',                          artist:'ChouCho',         yt:'https://youtu.be/eCFuHnrYWZI'},
+  {attr:'紅', char:'テオドラ',      ja:'まっすぐ',               en:'Straight',                            artist:'清浦夏実(TWEEDEES)', yt:'https://youtu.be/chPG7zEJiIA'},
+  {attr:'紅', char:'ペトラ',        ja:'角',                     en:'Horn',                                artist:'新妻聖子',        yt:'https://youtu.be/KqolGPWPV5c'},
+  {attr:'紅', char:'サブリナ',      ja:'Call My Name',           en:'Call My Name',                        artist:'佐々木恵梨',      yt:'https://youtu.be/HqrLvPDjzzg'},
+  {attr:'紅', char:'フレイシア',    ja:'さよなら',               en:'Goodbye',                             artist:'井上苑子',        yt:'https://youtu.be/CmJCome-P4o'},
+  {attr:'紅', char:'アモール',      ja:'Étoile',                 en:'Étoile',                              artist:'霜月はるか',      yt:'https://youtu.be/3-wM0rDCqTA'},
+  {attr:'紅', char:'リーン',        ja:'篝火',                   en:'Bonfire',                             artist:'konoco',          yt:'https://youtu.be/JrMvOI0rw-o'},
+  {attr:'紅', char:'ベル',          ja:'怒涛',                   en:'Fury',                                artist:'96猫',            yt:'https://youtu.be/mRVi4SLs_sM'},
+  {attr:'紅', char:'ディアン',      ja:'君への帰り道',            en:'The Way Home to You',                 artist:'ナミヒラアユコ',  yt:'https://youtu.be/zSpOxjeXoX8'},
+  {attr:'紅', char:'ソフィア',      ja:'傘はささなくてもいい',    en:"You Don't Need to Open Your Umbrella", artist:'',              yt:''},
+  {attr:'紅', char:'シフォン',      ja:'なくしもの',             en:'Lost Things',                         artist:'',               yt:''},
+  {attr:'紅', char:'アーティ',      ja:'Never Ends',             en:'Never Ends',                          artist:'',               yt:''},
+  {attr:'紅', char:'プリシラ',      ja:'幻月環',                 en:'Phantom Moon Ring',                   artist:'wawa',               yt:''},
+  {attr:'紅', char:'モルガナ',      ja:'Seek Light',             en:'Seek Light',                          artist:'成家ひかる',               yt:'https://youtu.be/eXUNbs_Krq8'},
+  {attr:'紅', char:'マチルダ',      ja:'光の海',                 en:'Ocean of Light',                      artist:'釘宮理恵',               yt:''},
+  {attr:'紅', char:'ルシール',      ja:'Ruby',                   en:'Ruby',                                artist:'',               yt:''},
+  {attr:'紅', char:'アルトリア',    ja:'Warrior (Radio Edit)',   en:'Warrior (Radio Edit)',                artist:'',               yt:''},
+  {attr:'紅', char:'リーベ',        ja:'涙の国',                 en:'Land of Tears',                       artist:'',               yt:''},
+  {attr:'紅', char:'フラック',      ja:'Rise and Smile',         en:'Rise and Smile',                      artist:'',               yt:''},
+  // ── 紅属性（バリアント）─────────────────────────────
+  {attr:'紅', char:'夏コルディ',    ja:'ユリアザミ',             en:'Thistle',                             artist:'春奈るな',        yt:''},
+  {attr:'紅', char:'冬ソルティーナ',ja:'くま',                   en:'Bear',                                artist:'コレサワ',        yt:''},
+  {attr:'紅', char:'春シズ',        ja:'花の終わり',             en:"Flowers' End",                        artist:'如月愛里',        yt:''},
+  {attr:'紅', char:'アイシェ',      ja:'Regret',                 en:'Regret',                              artist:'',               yt:''},
+  {attr:'紅', char:'リリコット',    ja:'Elegy',                  en:'Elegy',                               artist:'Sooda',          yt:'https://youtu.be/73kzL1qC7n4'},
+  // ── 翠属性 ──────────────────────────────────────────
+  {attr:'翠', char:'シズ',          ja:'花の跡',                 en:'After the Flowers',                   artist:'如月愛里',        yt:'https://youtu.be/U7ubbREX240'},
+  {attr:'翠', char:'ザラ',          ja:'drowsiness',             en:'drowsiness',                          artist:'ヲタみん',        yt:'https://youtu.be/OZJxnEh7RwE'},
+  {attr:'翠', char:'ロザリー',      ja:'ラメント',               en:'Lament',                              artist:'山本彩',          yt:'https://youtu.be/iWMUX8mP6bc'},
+  {attr:'翠', char:'リブラ',        ja:'真昼、空にオリオン',      en:'Orion at Noon',                       artist:'ENA',            yt:'https://youtu.be/K72uPVLDxcI'},
+  {attr:'翠', char:'アイビー',      ja:'まっかっか',             en:'Red as Blood',                        artist:'葉月ゆら',        yt:'https://youtu.be/ZXA3x_hSrWk'},
+  {attr:'翠', char:'マーリン',      ja:'Fly Away',               en:'Fly Away',                            artist:'礼衣 (fromツユ)', yt:'https://youtu.be/8FwoXSje9EA'},
+  {attr:'藍', char:'藍マーリン',    ja:'Magic!',                 en:'Magic!',                              artist:'礼衣 (fromツユ)', yt:''},
+  {attr:'翠', char:'コベル',        ja:'ひかる星',               en:'Shining Star',                        artist:'',               yt:''},
+  {attr:'翠', char:'コルディ',      ja:'BLUE ROSE',              en:'BLUE ROSE',                           artist:'春奈るな',        yt:'https://youtu.be/tKQTkzrBeRk'},
+  {attr:'翠', char:'ニーナ',        ja:'困惑星旅行',             en:'Confusing Planet Trip',               artist:'芹澤優',          yt:'https://youtu.be/GcPRc0ArsU4'},
+  {attr:'翠', char:'メルティーユ',  ja:'世界中のすてきを',        en:'All the Lovely Things in the World',  artist:'西明日香',        yt:'https://youtu.be/1w5zmCLLBT0'},
+  {attr:'翠', char:'ルーク',        ja:'Lone Star',              en:'Lone Star',                           artist:'平原綾香',        yt:'https://youtu.be/Dj2rLHzX4Zk'},
+  {attr:'翠', char:'レア',          ja:'Fine Day',               en:'Fine Day',                            artist:'',               yt:''},
+  {attr:'翠', char:'クラウディア',  ja:'Own Way',                en:'Own Way',                             artist:'SERRA',               yt:''},
+  {attr:'翠', char:'フィアー',      ja:'Ash Pile',               en:'Ash Pile',                            artist:'天音',            yt:''},
+  {attr:'翠', char:'ユニ',          ja:'Remedy',                 en:'Remedy',                              artist:'花澤里都夢',               yt:''},
+  {attr:'翠', char:'ミラ',          ja:'Stuffed',                en:'Stuffed',                             artist:'甲田まひる',     yt:'https://youtu.be/Se0-SoNS2zU'},
+  {attr:'翠', char:'アレクサンドラ',ja:'アマガスミ',              en:'Hazy Rain',                           artist:'久保琴音',               yt:''},
+  {attr:'翠', char:'ティリー',      ja:'Tears',                  en:'Tears',                               artist:'',               yt:''},
+  {attr:'翠', char:'ポーラ',        ja:'Unfulfilled',            en:'Unfulfilled',                         artist:'',               yt:''},
+  {attr:'翠', char:'D.D.',          ja:'Dummy',                  en:'Dummy',                               artist:'',               yt:''},
+  {attr:'翠', char:'ユルディズ',    ja:'Killing Me or Kissing Me', en:'Killing Me or Kissing Me',          artist:'',               yt:''},
+  // ── 翠属性（バリアント）─────────────────────────────
+  {attr:'翠', char:'夏サブリナ',    ja:'鼓動ふたつ鳴る前に',      en:'Before Two Heartbeats',               artist:'佐々木恵梨',      yt:''},
+  {attr:'翠', char:'翠ルナリンド',  ja:'あたたかな雪の日',        en:'A Warm Snowy Day',                    artist:'本渡楓',          yt:''},
+  // ── 黄属性 ──────────────────────────────────────────
+  {attr:'黄', char:'ガルム',        ja:'ポコ・ア・ポコ',          en:'Poco a Poco',                         artist:'ひかり',          yt:'https://youtu.be/be7fIr-bk8w'},
+  {attr:'黄', char:'スクルド',      ja:'Falling Down',           en:'Falling Down',                        artist:'mahina',          yt:'https://youtu.be/AXXsv_nqFDQ'},
+  {attr:'黄', char:'チェルナ',      ja:'CRYING BLUE',            en:'CRYING BLUE',                         artist:'小林真奈',        yt:'https://youtu.be/8YEsFAnqoiU'},
+  {attr:'黄', char:'ソテイラ',      ja:'時の狭間に流転するマカロン', en:'Macaron Drifting Through Time',    artist:'大原ゆい子',      yt:'https://youtu.be/sZDjOsVaX5g'},
+  {attr:'黄', char:'ミミ',          ja:'12じの鐘がなる',          en:'The Clock Strikes 12',                artist:'市ノ瀬加那',      yt:'https://youtu.be/dCR6c07NMrM'},
+  {attr:'黄', char:'トロポン',      ja:"Liar's Lie",             en:"Liar's Lie",                          artist:'maimie',          yt:'https://youtu.be/YE2Y0QYTnk4'},
+  {attr:'黄', char:'ハトホル',      ja:'黄昏の踊り場',            en:'Twilight Landing',                    artist:'柘榴-zakuro-',   yt:'https://youtu.be/Xf65ojG93kw'},
+  {attr:'黄', char:'オリヴィエ',    ja:'Pray',                   en:'Pray',                                artist:'MARiA',           yt:'https://youtu.be/kh-zfD1u0Ks'},
+  {attr:'黄', char:'プリマヴェーラ',ja:'リバーブ',               en:'Reverb',                              artist:'ダズビー',        yt:'https://youtu.be/bNDXaSg-Ofc'},
+  {attr:'黄', char:'カロル',        ja:'僕は僕でも僕じゃないかも', en:"Maybe I'm Not Really Me",            artist:'くろくも',        yt:'https://youtu.be/YmZnaYysaI8'},
+  {attr:'黄', char:'ウィーラ',      ja:'うたかた',               en:'Foam',                                artist:'',               yt:''},
+  {attr:'黄', char:'リシェス',      ja:'Asking for the Moon',    en:'Asking for the Moon',                 artist:'',               yt:''},
+  {attr:'黄', char:'タマ',          ja:'Trick',                  en:'Trick',                               artist:'青妃らめ',        yt:'https://youtu.be/qDymW-zEmaU'},
+  {attr:'黄', char:'アサヒ',        ja:'No Name',                en:'No Name',                             artist:'Es',               yt:''},
+  {attr:'黄', char:'ルスティカ',    ja:'One Last Song',          en:'One Last Song',                       artist:'',               yt:''},
+  {attr:'黄', char:'ポプリ',        ja:'Echoes',                 en:'Echoes',                              artist:'',               yt:''},
+  {attr:'黄', char:'ミフリ',        ja:'ゆびきり',               en:'Pinky Promise',                       artist:'',               yt:''},
+  {attr:'黄', char:'モワノー',      ja:'Off Script',             en:'Off Script',                          artist:'',               yt:''},
+  // ── 黄属性（バリアント）─────────────────────────────
+  {attr:'黄', char:'黄アイリス',    ja:'Soumatou',               en:'Soumatou',                            artist:'',               yt:''},
+  {attr:'黄', char:'夏モーザ',      ja:'Summer Flash',           en:'Summer Flash',                        artist:'',               yt:''},
+  {attr:'黄', char:'聖アモール',    ja:'présent',                en:'présent',                             artist:'霜月はるか',      yt:''},
+  {attr:'黄', char:'黄フェンリル',  ja:'数え切れないくらいの',    en:'Countless Treasures',                 artist:'鹿乃',            yt:'https://youtu.be/RzXwd50xjd8'},
+  {attr:'黄', char:'夏アムレート',  ja:'realize',                en:'realize',                             artist:'あたらよ',        yt:''},
+  {attr:'黄', char:'メルラン',      ja:'Spark(Radio Edit)',      en:'Spark(Radio Edit)',                   artist:'',               yt:''},
+  {attr:'黄', char:'トリクシー',    ja:'ことりばなし',           en:'Little Bird Story',                   artist:'かんのん',        yt:''},
+  // ── 天属性 ──────────────────────────────────────────
+  {attr:'天', char:'ナターシャ',    ja:'X. THE FLOWER',          en:'X. THE FLOWER',                       artist:'小倉唯',          yt:'https://youtu.be/NxlMz77RW18',  qlipha:true},
+  {attr:'天', char:'フォルティナ',  ja:'VI. THE SWORD ff',       en:'VI. THE SWORD ff',                    artist:'ゆかな',          yt:'',                              qlipha:true},
+  {attr:'天', char:'ケルベロス',    ja:'IV. THE THUNDER',        en:'IV. THE THUNDER',                     artist:'',               yt:'',                              qlipha:true},
+  {attr:'天', char:'ルサールカ',    ja:'III. THE RAIN',          en:'III. THE RAIN',                       artist:'',               yt:'',                              qlipha:true},
+  {attr:'天', char:'エルフリンデ',  ja:'I. THE LANCE',           en:'I. THE LANCE',                        artist:'',               yt:'',                              qlipha:true},
+  {attr:'天', char:'アイネ',        ja:'泡の音',                 en:'Sound of Bubbles',                    artist:'',               yt:''},
+  {attr:'天', char:'メリア',        ja:'XIII. THE BUD',          en:'XIII. THE BUD',                       artist:'',               yt:'',                              qlipha:true},
+  {attr:'天', char:'アイリーン',    ja:'ShyなDestiny',           en:'Shy Destiny',                         artist:'',               yt:''},
+  {attr:'天', char:'ルミカ',        ja:'lumière',                en:'lumière',                             artist:'天音かなた',     yt:''},
+  // ── 天属性（バリアント）─────────────────────────────
+  {attr:'天', char:'天ロザリー',    ja:'残影',                   en:'Afterimage',                          artist:'山本彩',          yt:''},
+  {attr:'天', char:'天A.A.',        ja:'the trust',              en:'the trust',                           artist:'茅原実里',        yt:'',                              },
+  {attr:'冥', char:'冥ナターシャ', ja:'the bouquet', en:'the bouquet',                          artist:'小倉唯',          yt:'', },
+  {attr:'冥', char:'冥ケルベロス', ja:'the light',  en:'the light',                            artist:'',               yt:''},
+  // ── 冥属性 ──────────────────────────────────────────
+  {attr:'天', char:'リヴェリア',    ja:'XV. THE SAND',           en:'XV. THE SAND',                        artist:'山根綺',         yt:'https://youtu.be/RSAUs3fnPOw',     },
+  {attr:'冥', char:'ルナリンド',    ja:'IX. THE ICE',            en:'IX. THE ICE',                         artist:'本渡楓',          yt:'https://youtu.be/OuL8uWl9gjY',  qlipha:true},
+  {attr:'冥', char:'ヴァルリーデ',  ja:'VIII. THE FIRE',         en:'VIII. THE FIRE',                      artist:'田中理恵',        yt:'https://youtu.be/CHWP4ALGyCE',  qlipha:true},
+  {attr:'冥', char:'A.A.',          ja:'VII. THE RUST',          en:'VII. THE RUST',                       artist:'茅原実里',        yt:'https://youtu.be/mFdxKYSbgJY',  qlipha:true},
+  {attr:'冥', char:'オフィーリア',  ja:'V. THE CRYSTAL',         en:'V. THE CRYSTAL',                      artist:'',               yt:'',                              qlipha:true},
+  {attr:'冥', char:'アームストロング',ja:'II. THE SOUL',          en:'II. THE SOUL',                        artist:'',               yt:'',                              qlipha:true},
+  {attr:'冥', char:'パラデア',      ja:'XI. THE JUSTICE',        en:'XI. THE JUSTICE',                     artist:'',               yt:'',                              qlipha:true},
+  {attr:'冥', char:'カグヤ',        ja:'XII. 夢幻',              en:'XII. Phantom Dream',                  artist:'',               yt:'',                              qlipha:true},
+  {attr:'冥', char:'ネブラ',        ja:'XIV. THE BUBBLE',        en:'XIV. THE BUBBLE',                     artist:'',               yt:'',                              },
+  {attr:'冥', char:'レジーナ',      ja:'頬に降る涙',             en:'Tears Falling on My Cheek',           artist:'',               yt:''},
+  {attr:'冥', char:'カーミラ',      ja:'Sweet Bite',             en:'Sweet Bite',                          artist:'',               yt:''},
+  // ── 冥属性（バリアント）─────────────────────────────
+];
+
+let _lamentAttr = 'all';
+let _lamentSortKey = 'attr';
+let _lamentSortDir = 1;
+
+const ATTR_COL = {藍:'var(--c-ai)',紅:'var(--c-ku)',翠:'var(--c-sui)',黄:'var(--c-ki)',天:'var(--c-ten)',冥:'var(--c-mei)'};
+
+function lamentSetAttr(attr){
+  _lamentAttr = attr;
+  document.querySelectorAll('.lament-attr-btn').forEach(b=>{
+    const isActive = b.dataset.attr === attr;
+    b.style.background = isActive ? 'var(--accent)' : 'var(--bg-card)';
+    b.style.color = isActive ? '#fff' : (ATTR_COL[b.dataset.attr] || 'var(--text-dim)');
+    b.style.borderColor = isActive ? 'var(--accent)' : 'var(--border)';
+  });
+  renderLament();
+}
+
+function lamentSort(key){
+  if(_lamentSortKey === key) _lamentSortDir *= -1;
+  else { _lamentSortKey = key; _lamentSortDir = 1; }
+  renderLament();
+}
+
+function renderLament(){
+  const q = (document.getElementById('lament-search')?.value || '').toLowerCase();
+  const ATTR_ORDER = {藍:0,紅:1,翠:2,黄:3,天:4,冥:5};
+  let data = LAMENT_DATA.filter(d=>{
+    if(_lamentAttr !== 'all' && d.attr !== _lamentAttr) return false;
+    if(q && !d.char.toLowerCase().includes(q) && !d.ja.toLowerCase().includes(q)
+         && !d.en.toLowerCase().includes(q) && !d.artist.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const sk = _lamentSortKey, sd = _lamentSortDir;
+  data.sort((a,b)=>{
+    if(sk==='attr')  return (ATTR_ORDER[a.attr]-ATTR_ORDER[b.attr])*sd || a.char.localeCompare(b.char,'ja')*sd;
+    if(sk==='char')  return a.char.localeCompare(b.char,'ja')*sd;
+    if(sk==='ja')    return a.ja.localeCompare(b.ja,'ja')*sd;
+    if(sk==='en')    return a.en.localeCompare(b.en,'en')*sd;
+    return 0;
+  });
+  document.getElementById('lament-count').textContent = data.length + '件';
+  const tbody = document.getElementById('lament-tbody');
+  tbody.innerHTML = data.map(d=>{
+    const col = ATTR_COL[d.attr] || 'var(--text)';
+    const qlTag = d.qlipha ? '<span style="font-size:.6rem;padding:.1rem .3rem;border-radius:3px;background:rgba(168,74,237,.25);color:#c0a0ef;margin-left:.3rem;">クリファ</span>' : '';
+    const ytBtn = d.yt ? `<a href="${d.yt}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+      style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#ff0000;color:#fff;font-size:.65rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.65rem;">—</span>';
+    return `<tr style="cursor:default;" onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;">
+        <span style="font-size:.78rem;font-weight:700;color:${col};">${d.attr}</span>
+      </td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-weight:600;font-size:.82rem;">
+        ${d.char}${qlTag}
+      </td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.78rem;">${d.ja}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-dim);">${d.en}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.78rem;color:var(--text-dim);">${d.artist}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;">${ytBtn}</td>
+    </tr>`;
+  }).join('');
+}
+
 
 // ギルドストックデータは data/guild_stock.json から動的ロード
 let GUILD_STOCK_MAR = {};
@@ -948,12 +1216,16 @@ function switchTab(tab){
   document.getElementById("dash-heatmap").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("dash-arena").classList.toggle("hidden",tab!=="arena");
   document.getElementById("dash-stock").classList.toggle("hidden",tab!=="stock");
+  document.getElementById("dash-lament").classList.toggle("hidden",tab!=="lament");
+  document.getElementById("local-date-bar").classList.toggle("hidden",tab!=="local");
+  document.getElementById("global-date-bar").classList.toggle("hidden",tab!=="global");
   document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaDates.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
   if(tab==="arena")arenaRender();
   if(tab==="stock")renderStock();
+  if(tab==="lament")renderLament();
 }
 
 // JSON読み込み
@@ -1025,6 +1297,77 @@ function parseLocalItems(data){
   return items;
 }
 
+
+// ═══════════════════════════════
+// ギルドバトル/グランドバトル 履歴
+// ═══════════════════════════════
+let localDates=[], localDateIdx=0, localCache={};
+let globalDates=[], globalDateIdx=0, globalCache={};
+
+function localDateUpdateUI(){
+  const d=localDates[localDateIdx]||"-";
+  document.getElementById("local-date-value").textContent=d;
+  const isLatest=localDateIdx===localDates.length-1;
+  document.getElementById("local-date-tag").textContent=isLatest?"（最新）":`${localDates.length-1-localDateIdx}日前`;
+  document.getElementById("local-date-prev").disabled=localDateIdx<=0;
+  document.getElementById("local-date-next").disabled=localDateIdx>=localDates.length-1;
+}
+
+function globalDateUpdateUI(){
+  const d=globalDates[globalDateIdx]||"-";
+  document.getElementById("global-date-value").textContent=d;
+  const isLatest=globalDateIdx===globalDates.length-1;
+  document.getElementById("global-date-tag").textContent=isLatest?"（最新）":`${globalDates.length-1-globalDateIdx}日前`;
+  document.getElementById("global-date-prev").disabled=globalDateIdx<=0;
+  document.getElementById("global-date-next").disabled=globalDateIdx>=globalDates.length-1;
+}
+
+async function localLoadDate(idx){
+  if(idx<0||idx>=localDates.length)return;
+  localDateIdx=idx;
+  document.getElementById("local-date-slider").value=idx;
+  localDateUpdateUI();
+  const dateStr=localDates[idx];
+  if(!localCache[dateStr]){
+    try{
+      document.getElementById("local-date-tag").textContent="読み込み中…";
+      const res=await fetch(`${DATA_BASE}history/local/${dateStr}.json`);
+      if(!res.ok){document.getElementById("local-date-tag").textContent="データなし";return;}
+      localCache[dateStr]=parseLocalItems(await res.json());
+    }catch(e){document.getElementById("local-date-tag").textContent="読み込み失敗";return;}
+    localDateUpdateUI();
+  }
+  LD=localCache[dateStr];
+  renderL();
+}
+
+async function globalLoadDate(idx){
+  if(idx<0||idx>=globalDates.length)return;
+  globalDateIdx=idx;
+  document.getElementById("global-date-slider").value=idx;
+  globalDateUpdateUI();
+  const dateStr=globalDates[idx];
+  if(!globalCache[dateStr]){
+    try{
+      document.getElementById("global-date-tag").textContent="読み込み中…";
+      const res=await fetch(`${DATA_BASE}history/global/${dateStr}.json`);
+      if(!res.ok){document.getElementById("global-date-tag").textContent="データなし";return;}
+      const data=await res.json();
+      const items=[];
+      for(const it of data.items){const co={};for(const[k,v]of Object.entries(it.castles))co[parseInt(k)]=v;const r={co,_label:it.label,_gid:it.gid,_cls:it.cls,_blk:it.blk,_sn:it.sn,_wds:it.wds};r._a=az(co);items.push(r);}
+      globalCache[dateStr]=items;
+    }catch(e){document.getElementById("global-date-tag").textContent="読み込み失敗";return;}
+    globalDateUpdateUI();
+  }
+  GD=globalCache[dateStr];
+  renderG();
+}
+
+function localDateChange(){localLoadDate(Number(document.getElementById("local-date-slider").value));}
+function globalDateChange(){globalLoadDate(Number(document.getElementById("global-date-slider").value));}
+function localDateStep(d){localLoadDate(localDateIdx+d);}
+function globalDateStep(d){globalLoadDate(globalDateIdx+d);}
+
 async function loadHMHistory(){
   try{
     const res=await fetch(DATA_BASE+"history/index.json");
@@ -1041,6 +1384,22 @@ async function loadHMHistory(){
     slider.value=hmDates.length-1;
     hmDateIdx=hmDates.length-1;
     hmUpdateUI();
+    // ギルドバトル履歴スライダー
+    localDates=idx.local||[];
+    if(localDates.length){
+      localCache[localDates[localDates.length-1]]=LD.slice();
+      const ls=document.getElementById("local-date-slider");
+      ls.max=localDates.length-1; ls.value=localDates.length-1;
+      localDateIdx=localDates.length-1; localDateUpdateUI();
+    }
+    // グランドバトル履歴スライダー
+    globalDates=idx.global||[];
+    if(globalDates.length){
+      globalCache[globalDates[globalDates.length-1]]=GD.slice();
+      const gs=document.getElementById("global-date-slider");
+      gs.max=globalDates.length-1; gs.value=globalDates.length-1;
+      globalDateIdx=globalDates.length-1; globalDateUpdateUI();
+    }
   }catch(e){console.warn("history index load failed:",e);}
 }
 
