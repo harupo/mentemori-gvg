@@ -86,6 +86,7 @@
   .wf-float button{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;font-weight:600;padding:.4rem 1rem;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:all .15s;}
   .wf-float button:hover{filter:brightness(1.2);}
   @media(max-width:768px){
+    .hm-date-spacer{height:90px;}
     .header{padding:.5rem 1rem .3rem;} .header h1{font-size:1rem;}
     .tab-btn{padding:.6rem .8rem;font-size:.78rem;}
     .info-row{padding:.3rem 1rem;font-size:.65rem;}
@@ -175,7 +176,7 @@
   .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;line-height:1.2;opacity:.9;}
   .hm-compact .hm-tile-rate{font-size:.65rem;font-weight:700;margin-bottom:0;}
   .hm-compact .hm-tile-sub,.hm-compact .hm-tile-guild,.hm-compact .hm-badge{display:none;}
-  .hm-date-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a26;border-top:2px solid var(--accent);padding:.8rem 1.2rem;z-index:90;box-shadow:0 -4px 20px rgba(0,0,0,.5);}
+  .hm-date-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a26;border-top:2px solid var(--accent);padding:.6rem 1.2rem;z-index:90;box-shadow:0 -4px 20px rgba(0,0,0,.5);}
   .hm-date-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:0 auto;}
   .hm-date-label{font-size:.78rem;color:var(--text-dim);font-weight:600;white-space:nowrap;}
   .hm-date-value{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--text);min-width:6.5em;text-align:center;white-space:nowrap;}
@@ -186,7 +187,7 @@
   .hm-date-nav button:disabled{opacity:.3;cursor:not-allowed;}
   .hm-date-tag{font-size:.68rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;}
   .hm-play-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:.5rem auto 0;}
-  .hm-date-spacer{height:120px;}
+  .hm-date-spacer{height:70px;}
   .hm-play-row{display:flex;align-items:center;gap:.8rem;margin-top:.6rem;}
   .hm-play-btn{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .8rem;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;cursor:pointer;transition:all .15s;min-width:4em;text-align:center;}
   .hm-play-btn:hover{filter:brightness(1.2);}
@@ -468,6 +469,20 @@
   }
   .stc-wid{font-size:.58rem;opacity:.85;}
   .stc-val{font-size:.55rem;opacity:.95;letter-spacing:-.02em;}
+
+  /* ── 履歴バー モバイル対応 ── */
+  @media(max-width:768px){
+    .hm-date-bar{padding:.4rem .8rem;}
+    .hm-date-row{flex-wrap:wrap;gap:.4rem;}
+    .hm-date-slider{min-width:0;order:2;width:100%;flex:1 1 120px;}
+    .hm-date-nav{order:1;flex-shrink:0;}
+    .hm-date-nav:last-of-type{order:3;}
+    .hm-date-value{order:4;font-size:.75rem;min-width:5.5em;}
+    .hm-date-tag{order:5;font-size:.62rem;}
+    .hm-play-btn{order:6;padding:.25rem .5rem;font-size:.7rem;min-width:2.5em;margin-left:0 !important;}
+    .hm-speed-btns{order:7;margin-left:0 !important;}
+    .hm-speed-btn{font-size:.62rem;padding:.2rem .35rem;}
+  }
 </style>
 </head>
 <body>
@@ -493,7 +508,7 @@
 
 <!-- ギルドバトル -->
 
-<div class="dashboard hidden" id="dash-local">
+<div class="dashboard hidden" id="dash-local" style="padding-bottom:70px;">
   <div class="summary-row">
     <div class="stat-card"><div class="value" id="l-total">-</div><div class="label">ワールド数</div></div>
     <div class="stat-card domination"><div class="value" id="l-dom">-</div><div class="rate" id="l-dom-rate"></div><div class="label">制覇(21城)</div></div>
@@ -514,7 +529,7 @@
 
 <!-- グランドバトル -->
 
-<div class="dashboard hidden" id="dash-global">
+<div class="dashboard hidden" id="dash-global" style="padding-bottom:70px;">
   <div class="global-filter-bar">
     <label>ワールド</label><input type="text" id="gf-world" placeholder="例: 127" oninput="renderG()" style="width:80px;">
     <label>クラス</label><select id="gf-cls" onchange="renderG()"><option value="all">全て</option></select>
@@ -539,7 +554,7 @@
 
 <!-- 占有ヒートマップ -->
 
-<div class="dashboard hidden" id="dash-heatmap">
+<div class="dashboard hidden" id="dash-heatmap" style="padding-bottom:70px;">
   <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;flex-wrap:wrap;">
     <div class="hm-view-toggle">
       <button class="hm-view-btn active" onclick="setHMView('compact')" id="hm-btn-compact">一覧</button>
@@ -605,9 +620,7 @@
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#b0b0b0;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや高</span></span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#ffffff;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">高</span></span>
   </div>
-  <div class="hm-grid" id="hm-grid"></div>
-  <div class="hm-date-spacer"></div>
-</div>
+  <div class="hm-grid" id="hm-grid"></div></div>
 <!-- 採用属性分布 -->
 <div class="dashboard hidden" id="dash-arena">
   <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;">
@@ -658,7 +671,6 @@
       <div class="table-wrap"><table id="a-table"></table></div>
     </div>
   </div>
-  <div class="hm-date-spacer"></div>
 </div>
 
 
@@ -669,42 +681,14 @@
     <div class="hm-date-nav"><button id="hm-date-next" onclick="hmDateStep(1)">▶</button></div>
     <span class="hm-date-value" id="hm-date-value">-</span>
     <span class="hm-date-tag" id="hm-date-tag"></span>
-  </div>
-  <div class="hm-play-row">
-    <button class="hm-play-btn" id="hm-play-btn" onclick="hmPlayToggle()">▶ 再生</button>
-    <span class="hm-speed-label">速度</span>
-    <div class="hm-speed-btns">
+    <button class="hm-play-btn" id="hm-play-btn" onclick="hmPlayToggle()" style="margin-left:.4rem;">▶</button>
+    <div class="hm-speed-btns" style="margin-left:.2rem;">
       <button class="hm-speed-btn" onclick="hmSetSpeed(1300)">0.5x</button>
       <button class="hm-speed-btn active" onclick="hmSetSpeed(650)">1x</button>
       <button class="hm-speed-btn" onclick="hmSetSpeed(325)">2x</button>
       <button class="hm-speed-btn" onclick="hmSetSpeed(160)">4x</button>
     </div>
   </div>
-</div>
-
-<!-- ギルドストック月次ヒートマップ -->
-<div class="dashboard hidden" id="dash-stock">
-  <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;">
-    <label style="color:var(--text-dim);font-size:.75rem;flex-shrink:0">📦 2026年3月ギルドストック月平均（0除外）</label>
-    <label style="white-space:nowrap;flex-shrink:0;font-size:.85rem;color:var(--text-dim)">ソート:</label>
-    <select id="stock-sort" onchange="renderStock()" style="font-family:'Noto Sans JP',sans-serif;font-size:.85rem;padding:.4rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);min-width:0;flex:1;">
-      <option value="wid-asc">ワールド 昇順</option>
-      <option value="wid-desc">ワールド 降順</option>
-      <option value="stock-desc">ストック 高い順</option>
-      <option value="stock-asc">ストック 低い順</option>
-    </select>
-    <div class="hm-view-toggle" style="flex-shrink:0;">
-      <button class="hm-view-btn active" id="stock-vb-compact" onclick="stockSetView('compact')">一覧</button>
-      <button class="hm-view-btn" id="stock-vb-normal" onclick="stockSetView('normal')">通常</button>
-      <button class="hm-view-btn" id="stock-vb-scatter" onclick="stockSetView('scatter')">散布図</button>
-    </div>
-    <span style="font-size:.7rem;color:var(--text-dim);flex-shrink:0" id="stock-vis-count"></span>
-  </div>
-  <div class="dashboard" style="padding:.8rem 1.5rem .4rem;gap:.6rem;">
-    <div class="stock-legend" id="stock-legend-row"></div>
-  </div>
-  <div class="scatter-tooltip" id="scatter-tooltip"></div>
-  <div class="hm-grid stock-grid hm-compact" id="stock-grid" style="padding:0 0 24px;"></div>
 </div>
 
 <!-- ラメント一覧 -->
@@ -734,7 +718,8 @@
           <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="lamentSort('ja')">日本語タイトル</th>
           <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="lamentSort('en')">English Title</th>
           <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;">アーティスト</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;">MV</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;">MV 日</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;">MV EN</th>
         </tr>
       </thead>
       <tbody id="lament-tbody"></tbody>
@@ -752,18 +737,14 @@
     <div class="hm-date-nav"><button id="local-date-next" onclick="localDateStep(1)">▶</button></div>
     <span class="hm-date-value" id="local-date-value">-</span>
     <span class="hm-date-tag" id="local-date-tag"></span>
-  </div>
-  <div class="hm-play-row">
-    <button class="hm-play-btn" id="local-play-btn" onclick="localPlayToggle()">▶ 再生</button>
-    <span class="hm-speed-label">速度</span>
-    <div class="hm-speed-btns">
+    <button class="hm-play-btn" id="local-play-btn" onclick="localPlayToggle()" style="margin-left:.4rem;">▶</button>
+    <div class="hm-speed-btns" style="margin-left:.2rem;">
       <button class="hm-speed-btn" onclick="localSetSpeed(1300)">0.5x</button>
       <button class="hm-speed-btn active" onclick="localSetSpeed(650)">1x</button>
       <button class="hm-speed-btn" onclick="localSetSpeed(325)">2x</button>
       <button class="hm-speed-btn" onclick="localSetSpeed(160)">4x</button>
     </div>
   </div>
-  <div class="hm-date-spacer"></div>
 </div>
 
 <div class="hm-date-bar hidden" id="global-date-bar">
@@ -773,19 +754,14 @@
     <div class="hm-date-nav"><button id="global-date-next" onclick="globalDateStep(1)">▶</button></div>
     <span class="hm-date-value" id="global-date-value">-</span>
     <span class="hm-date-tag" id="global-date-tag"></span>
-  </div>
-  <div class="hm-play-row">
-    <button class="hm-play-btn" id="global-play-btn" onclick="globalPlayToggle()">▶ 再生</button>
-    <span class="hm-speed-label">速度</span>
-    <div class="hm-speed-btns">
+    <button class="hm-play-btn" id="global-play-btn" onclick="globalPlayToggle()" style="margin-left:.4rem;">▶</button>
+    <div class="hm-speed-btns" style="margin-left:.2rem;">
       <button class="hm-speed-btn" onclick="globalSetSpeed(1300)">0.5x</button>
       <button class="hm-speed-btn active" onclick="globalSetSpeed(650)">1x</button>
       <button class="hm-speed-btn" onclick="globalSetSpeed(325)">2x</button>
       <button class="hm-speed-btn" onclick="globalSetSpeed(160)">4x</button>
     </div>
-  </div>
-  <div class="hm-date-spacer"></div>
-</div>
+  </div></div>
 
 <div class="hm-date-bar hidden" id="arena-date-bar">
   <div class="hm-date-row">
@@ -829,139 +805,139 @@
 // ═══════════════════════════════
 const LAMENT_DATA = [
   // ── 藍属性 ──────────────────────────────────────────
-  {attr:'藍', char:'モニカ',        ja:'うらぎりもの',            en:'Traitor',                             artist:'rionos',         yt:'https://youtu.be/Qm4WE5Ff1C4'},
-  {attr:'藍', char:'イリア',        ja:'燐光',                   en:'Phosphorescence',                     artist:'Daoko',          yt:'https://youtu.be/jtWi-YekQAc'},
-  {attr:'冥', char:'冥イリア',      ja:'Allure of the Dark',     en:'Allure of the Dark',                  artist:'Daoko',          yt:'', },
-  {attr:'藍', char:'アイリス',      ja:'Twilight',               en:'Twilight',                            artist:'Hakubi',         yt:'https://youtu.be/bUg9QYX7KzI'},
-  {attr:'藍', char:'ロキ',          ja:'believe',                en:'believe',                             artist:'上野優華',        yt:'https://youtu.be/Kz3q8nrSfgg'},
-  {attr:'藍', char:'ソルティーナ',  ja:'くま',                   en:'Bear',                                artist:'コレサワ',        yt:'https://youtu.be/HvKgK8B8oeU'},
-  {attr:'藍', char:'アムレート',    ja:'outcry',                 en:'outcry',                              artist:'あたらよ',        yt:'https://youtu.be/dKSNz3GGr9U'},
-  {attr:'藍', char:'フェンリル',    ja:'宝物はひとつだけあればいい', en:"I Only Need One Treasure",          artist:'鹿乃',           yt:'https://youtu.be/Wf4c6QPYFyE'},
-  {attr:'藍', char:'フローレンス',  ja:'Flag',                   en:'Flag',                                artist:'Wakana',         yt:'https://youtu.be/3E3v-SdxVW0'},
-  {attr:'藍', char:'ソーニャ',      ja:'熱情のエッダ',            en:'Passionate Edda',                     artist:'みゆはん',        yt:'https://youtu.be/8SY-gMKkkNM'},
-  {attr:'藍', char:'モーザ',        ja:'Dokie Doggy Night',      en:'Dokie Doggy Night',                   artist:'+α/あるふぁきゅん。', yt:'https://youtu.be/74Mwmx2TDKo'},
-  {attr:'藍', char:'シヴィ',        ja:'旅人へ',                 en:'To the Traveler',                     artist:'',               yt:''},
-  {attr:'藍', char:'ステラ',        ja:'玩具の呪文',              en:"Toy's Spell",                         artist:'ろん',               yt:''},
-  {attr:'翠', char:'翠ステラ',      ja:'ちっちゃな革命',          en:'Little Revolution',                   artist:'',               yt:''},
-  {attr:'藍', char:'エイル',        ja:'Twilight Crack',         en:'Twilight Crack',                      artist:'Eye',            yt:'https://youtu.be/XfQdFRRxsMg'},
-  {attr:'藍', char:'エヴリン',      ja:'Prism',                  en:'Prism',                               artist:'',               yt:''},
-  {attr:'藍', char:'ギルウィアル',  ja:'疎ましい芸術',            en:'Despised Art',                        artist:'Lucia',               yt:''},
-  {attr:'藍', char:'フェーネ',      ja:'By My Side',             en:'By My Side',                          artist:'大塚理乃',               yt:''},
-  {attr:'藍', char:'ミナシュマリ',  ja:'Fox Hunt',               en:'Fox Hunt',                            artist:'こはならむ',               yt:''},
-  {attr:'藍', char:'セルリア',      ja:'ハナコトバ',              en:'Language of Flowers',                 artist:'',               yt:''},
-  {attr:'藍', char:'リズ',          ja:'Song of Wind',           en:'Song of Wind',                        artist:'田村ゆかり',               yt:''},
-  {attr:'藍', char:'ユリーカ',      ja:'Beyond the Journey',     en:'Beyond the Journey',                  artist:'',               yt:''},
+  {attr:'藍', char:'モニカ',        ja:'うらぎりもの',            en:'Traitor',                             artist:'rionos',         yt:'https://youtu.be/Qm4WE5Ff1C4', yt_en:'https://youtu.be/EuKrRPyNlcs'},
+  {attr:'藍', char:'イリア',        ja:'燐光',                   en:'Phosphorescence',                     artist:'Daoko',          yt:'https://youtu.be/jtWi-YekQAc', yt_en:'https://youtu.be/IzXB0GI75vY'},
+  {attr:'冥', char:'冥イリア',      ja:'Allure of the Dark',     en:'Allure of the Dark',                  artist:'Daoko',          yt:'', yt_en:'https://youtu.be/gu7T0D50wFk', },
+  {attr:'藍', char:'アイリス',      ja:'Twilight',               en:'Twilight',                            artist:'Hakubi',         yt:'https://youtu.be/bUg9QYX7KzI', yt_en:'https://youtu.be/tEOCTijgGF0'},
+  {attr:'藍', char:'ロキ',          ja:'believe',                en:'believe',                             artist:'上野優華',        yt:'https://youtu.be/Kz3q8nrSfgg', yt_en:''},
+  {attr:'藍', char:'ソルティーナ',  ja:'くま',                   en:'Bear',                                artist:'コレサワ',        yt:'https://youtu.be/HvKgK8B8oeU', yt_en:''},
+  {attr:'藍', char:'アムレート',    ja:'outcry',                 en:'outcry',                              artist:'あたらよ',        yt:'https://youtu.be/dKSNz3GGr9U', yt_en:'https://youtu.be/ZxpFRuQ_vRo'},
+  {attr:'藍', char:'フェンリル',    ja:'宝物はひとつだけあればいい', en:"I Only Need One Treasure",          artist:'鹿乃',           yt:'https://youtu.be/Wf4c6QPYFyE', yt_en:'https://youtu.be/gJbHVIZLEEY'},
+  {attr:'藍', char:'フローレンス',  ja:'Flag',                   en:'Flag',                                artist:'Wakana',         yt:'https://youtu.be/3E3v-SdxVW0', yt_en:'https://youtu.be/HtcKJSKNluU'},
+  {attr:'藍', char:'ソーニャ',      ja:'熱情のエッダ',            en:'Passionate Edda',                     artist:'みゆはん',        yt:'https://youtu.be/8SY-gMKkkNM', yt_en:'https://youtu.be/bNmHv-yAzaA'},
+  {attr:'藍', char:'モーザ',        ja:'Dokie Doggy Night',      en:'Dokie Doggy Night',                   artist:'+α/あるふぁきゅん。', yt:'https://youtu.be/74Mwmx2TDKo', yt_en:'https://youtu.be/tBjZ3f8SRMQ'},
+  {attr:'藍', char:'シヴィ',        ja:'旅人へ',                 en:'To the Traveler',                     artist:'',               yt:'https://youtu.be/H1MjRSTI_Gc', yt_en:''},
+  {attr:'藍', char:'ステラ',        ja:'玩具の呪文',              en:"Toy's Spell",                         artist:'ろん',               yt:'', yt_en:''},
+  {attr:'翠', char:'翠ステラ',      ja:'ちっちゃな革命',          en:'Little Revolution',                   artist:'',               yt:'', yt_en:''},
+  {attr:'藍', char:'エイル',        ja:'Twilight Crack',         en:'Twilight Crack',                      artist:'Eye',            yt:'https://youtu.be/XfQdFRRxsMg', yt_en:''},
+  {attr:'藍', char:'エヴリン',      ja:'Prism',                  en:'Prism',                               artist:'',               yt:'', yt_en:''},
+  {attr:'藍', char:'ギルウィアル',  ja:'疎ましい芸術',            en:'Despised Art',                        artist:'Lucia',               yt:'', yt_en:''},
+  {attr:'藍', char:'フェーネ',      ja:'By My Side',             en:'By My Side',                          artist:'大塚理乃',               yt:'', yt_en:''},
+  {attr:'藍', char:'ミナシュマリ',  ja:'Fox Hunt',               en:'Fox Hunt',                            artist:'こはならむ',               yt:'', yt_en:''},
+  {attr:'藍', char:'セルリア',      ja:'ハナコトバ',              en:'Language of Flowers',                 artist:'',               yt:'', yt_en:''},
+  {attr:'藍', char:'リズ',          ja:'Song of Wind',           en:'Song of Wind',                        artist:'田村ゆかり',               yt:'', yt_en:''},
+  {attr:'藍', char:'ユリーカ',      ja:'Beyond the Journey',     en:'Beyond the Journey',                  artist:'',               yt:'', yt_en:''},
   // ── 藍属性（バリアント）─────────────────────────────
-  {attr:'藍', char:'夏ニーナ',      ja:'きみがいる夏',            en:'Summer with You',                     artist:'芹澤優',          yt:''},
-  {attr:'藍', char:'藍トロポン',    ja:"I Wish",                 en:'I Wish',                              artist:'maimie',          yt:''},
-  {attr:'藍', char:'団長コルディ',  ja:'Step Right Up',          en:'Step Right Up',                       artist:'春奈るな',        yt:''},
+  {attr:'藍', char:'夏ニーナ',      ja:'きみがいる夏',            en:'Summer with You',                     artist:'芹澤優',          yt:'', yt_en:'https://youtu.be/gBmSb25QJXQ'},
+  {attr:'藍', char:'藍トロポン',    ja:"I Wish",                 en:'I Wish',                              artist:'maimie',          yt:'', yt_en:''},
+  {attr:'藍', char:'団長コルディ',  ja:'Step Right Up',          en:'Step Right Up',                       artist:'春奈るな',        yt:'', yt_en:''},
   // ── 紅属性 ──────────────────────────────────────────
-  {attr:'紅', char:'シャーロット',  ja:'Clockwise',              en:'Clockwise',                           artist:'松田彩花',        yt:'https://youtu.be/NWv94LJc7wg'},
-  {attr:'紅', char:'アリアンロッド',ja:'モノクローム',            en:'Monochrome',                          artist:'ChouCho',         yt:'https://youtu.be/eCFuHnrYWZI'},
-  {attr:'紅', char:'テオドラ',      ja:'まっすぐ',               en:'Straight',                            artist:'清浦夏実(TWEEDEES)', yt:'https://youtu.be/chPG7zEJiIA'},
-  {attr:'紅', char:'ペトラ',        ja:'角',                     en:'Horn',                                artist:'新妻聖子',        yt:'https://youtu.be/KqolGPWPV5c'},
-  {attr:'紅', char:'サブリナ',      ja:'Call My Name',           en:'Call My Name',                        artist:'佐々木恵梨',      yt:'https://youtu.be/HqrLvPDjzzg'},
-  {attr:'紅', char:'フレイシア',    ja:'さよなら',               en:'Goodbye',                             artist:'井上苑子',        yt:'https://youtu.be/CmJCome-P4o'},
-  {attr:'紅', char:'アモール',      ja:'Étoile',                 en:'Étoile',                              artist:'霜月はるか',      yt:'https://youtu.be/3-wM0rDCqTA'},
-  {attr:'紅', char:'リーン',        ja:'篝火',                   en:'Bonfire',                             artist:'konoco',          yt:'https://youtu.be/JrMvOI0rw-o'},
-  {attr:'紅', char:'ベル',          ja:'怒涛',                   en:'Fury',                                artist:'96猫',            yt:'https://youtu.be/mRVi4SLs_sM'},
-  {attr:'紅', char:'ディアン',      ja:'君への帰り道',            en:'The Way Home to You',                 artist:'ナミヒラアユコ',  yt:'https://youtu.be/zSpOxjeXoX8'},
-  {attr:'紅', char:'ソフィア',      ja:'傘はささなくてもいい',    en:"You Don't Need to Open Your Umbrella", artist:'',              yt:''},
-  {attr:'紅', char:'シフォン',      ja:'なくしもの',             en:'Lost Things',                         artist:'',               yt:''},
-  {attr:'紅', char:'アーティ',      ja:'Never Ends',             en:'Never Ends',                          artist:'',               yt:''},
-  {attr:'紅', char:'プリシラ',      ja:'幻月環',                 en:'Phantom Moon Ring',                   artist:'wawa',               yt:''},
-  {attr:'紅', char:'モルガナ',      ja:'Seek Light',             en:'Seek Light',                          artist:'成家ひかる',               yt:'https://youtu.be/eXUNbs_Krq8'},
-  {attr:'紅', char:'マチルダ',      ja:'光の海',                 en:'Ocean of Light',                      artist:'釘宮理恵',               yt:''},
-  {attr:'紅', char:'ルシール',      ja:'Ruby',                   en:'Ruby',                                artist:'',               yt:''},
-  {attr:'紅', char:'アルトリア',    ja:'Warrior (Radio Edit)',   en:'Warrior (Radio Edit)',                artist:'',               yt:''},
-  {attr:'紅', char:'リーベ',        ja:'涙の国',                 en:'Land of Tears',                       artist:'',               yt:''},
-  {attr:'紅', char:'フラック',      ja:'Rise and Smile',         en:'Rise and Smile',                      artist:'',               yt:''},
+  {attr:'紅', char:'シャーロット',  ja:'Clockwise',              en:'Clockwise',                           artist:'松田彩花',        yt:'https://youtu.be/NWv94LJc7wg', yt_en:''},
+  {attr:'紅', char:'アリアンロッド',ja:'モノクローム',            en:'Monochrome',                          artist:'ChouCho',         yt:'https://youtu.be/eCFuHnrYWZI', yt_en:'https://youtu.be/TY8UOLvpbe0'},
+  {attr:'紅', char:'テオドラ',      ja:'まっすぐ',               en:'Straight',                            artist:'清浦夏実(TWEEDEES)', yt:'https://youtu.be/chPG7zEJiIA', yt_en:''},
+  {attr:'紅', char:'ペトラ',        ja:'角',                     en:'Horn',                                artist:'新妻聖子',        yt:'https://youtu.be/KqolGPWPV5c', yt_en:''},
+  {attr:'紅', char:'サブリナ',      ja:'Call My Name',           en:'Call My Name',                        artist:'佐々木恵梨',      yt:'https://youtu.be/HqrLvPDjzzg', yt_en:'https://youtu.be/GJTrOaqpx4Y'},
+  {attr:'紅', char:'フレイシア',    ja:'さよなら',               en:'Goodbye',                             artist:'井上苑子',        yt:'https://youtu.be/CmJCome-P4o', yt_en:'https://youtu.be/4Z9xi6oRGyA'},
+  {attr:'紅', char:'アモール',      ja:'Étoile',                 en:'Étoile',                              artist:'霜月はるか',      yt:'https://youtu.be/3-wM0rDCqTA', yt_en:'https://youtu.be/ygEHW9kfmyA'},
+  {attr:'紅', char:'リーン',        ja:'篝火',                   en:'Bonfire',                             artist:'konoco',          yt:'https://youtu.be/JrMvOI0rw-o', yt_en:''},
+  {attr:'紅', char:'ベル',          ja:'怒涛',                   en:'Fury',                                artist:'96猫',            yt:'https://youtu.be/mRVi4SLs_sM', yt_en:'https://youtu.be/sGm8pO9Z5OY'},
+  {attr:'紅', char:'ディアン',      ja:'君への帰り道',            en:'The Way Home to You',                 artist:'ナミヒラアユコ',  yt:'https://youtu.be/zSpOxjeXoX8', yt_en:'https://youtu.be/d2LsJvuCsxQ'},
+  {attr:'紅', char:'ソフィア',      ja:'傘はささなくてもいい',    en:"You Don't Need to Open Your Umbrella", artist:'',              yt:'https://youtu.be/J_Ym8cYJjME', yt_en:'https://youtu.be/dzxHTVjBbQM'},
+  {attr:'紅', char:'シフォン',      ja:'なくしもの',             en:'Lost Things',                         artist:'',               yt:'', yt_en:''},
+  {attr:'紅', char:'アーティ',      ja:'Never Ends',             en:'Never Ends',                          artist:'',               yt:'', yt_en:''},
+  {attr:'紅', char:'プリシラ',      ja:'幻月環',                 en:'Phantom Moon Ring',                   artist:'wawa',               yt:'', yt_en:''},
+  {attr:'紅', char:'モルガナ',      ja:'Seek Light',             en:'Seek Light',                          artist:'成家ひかる',               yt:'https://youtu.be/eXUNbs_Krq8', yt_en:''},
+  {attr:'紅', char:'マチルダ',      ja:'光の海',                 en:'Ocean of Light',                      artist:'釘宮理恵',               yt:'', yt_en:''},
+  {attr:'紅', char:'ルシール',      ja:'Ruby',                   en:'Ruby',                                artist:'',               yt:'', yt_en:''},
+  {attr:'紅', char:'アルトリア',    ja:'Warrior (Radio Edit)',   en:'Warrior (Radio Edit)',                artist:'',               yt:'', yt_en:''},
+  {attr:'紅', char:'リーベ',        ja:'涙の国',                 en:'Land of Tears',                       artist:'',               yt:'', yt_en:''},
+  {attr:'紅', char:'フラック',      ja:'Rise and Smile',         en:'Rise and Smile',                      artist:'',               yt:'', yt_en:''},
   // ── 紅属性（バリアント）─────────────────────────────
-  {attr:'紅', char:'夏コルディ',    ja:'ユリアザミ',             en:'Thistle',                             artist:'春奈るな',        yt:''},
-  {attr:'紅', char:'冬ソルティーナ',ja:'くま',                   en:'Bear',                                artist:'コレサワ',        yt:''},
-  {attr:'紅', char:'春シズ',        ja:'花の終わり',             en:"Flowers' End",                        artist:'如月愛里',        yt:''},
-  {attr:'紅', char:'アイシェ',      ja:'Regret',                 en:'Regret',                              artist:'',               yt:''},
-  {attr:'紅', char:'リリコット',    ja:'Elegy',                  en:'Elegy',                               artist:'Sooda',          yt:'https://youtu.be/73kzL1qC7n4'},
+  {attr:'紅', char:'夏コルディ',    ja:'ユリアザミ',             en:'Thistle',                             artist:'春奈るな',        yt:'', yt_en:'https://youtu.be/l8tGAyFouYY'},
+  {attr:'紅', char:'冬ソルティーナ',ja:'くま',                   en:'Bear',                                artist:'コレサワ',        yt:'', yt_en:''},
+  {attr:'紅', char:'春シズ',        ja:'花の終わり',             en:"Flowers' End",                        artist:'如月愛里',        yt:'', yt_en:''},
+  {attr:'紅', char:'アイシェ',      ja:'Regret',                 en:'Regret',                              artist:'',               yt:'', yt_en:''},
+  {attr:'紅', char:'リリコット',    ja:'Elegy',                  en:'Elegy',                               artist:'Sooda',          yt:'https://youtu.be/73kzL1qC7n4', yt_en:''},
   // ── 翠属性 ──────────────────────────────────────────
-  {attr:'翠', char:'シズ',          ja:'花の跡',                 en:'After the Flowers',                   artist:'如月愛里',        yt:'https://youtu.be/U7ubbREX240'},
-  {attr:'翠', char:'ザラ',          ja:'drowsiness',             en:'drowsiness',                          artist:'ヲタみん',        yt:'https://youtu.be/OZJxnEh7RwE'},
-  {attr:'翠', char:'ロザリー',      ja:'ラメント',               en:'Lament',                              artist:'山本彩',          yt:'https://youtu.be/iWMUX8mP6bc'},
-  {attr:'翠', char:'リブラ',        ja:'真昼、空にオリオン',      en:'Orion at Noon',                       artist:'ENA',            yt:'https://youtu.be/K72uPVLDxcI'},
-  {attr:'翠', char:'アイビー',      ja:'まっかっか',             en:'Red as Blood',                        artist:'葉月ゆら',        yt:'https://youtu.be/ZXA3x_hSrWk'},
-  {attr:'翠', char:'マーリン',      ja:'Fly Away',               en:'Fly Away',                            artist:'礼衣 (fromツユ)', yt:'https://youtu.be/8FwoXSje9EA'},
-  {attr:'藍', char:'藍マーリン',    ja:'Magic!',                 en:'Magic!',                              artist:'礼衣 (fromツユ)', yt:''},
-  {attr:'翠', char:'コベル',        ja:'ひかる星',               en:'Shining Star',                        artist:'',               yt:''},
-  {attr:'翠', char:'コルディ',      ja:'BLUE ROSE',              en:'BLUE ROSE',                           artist:'春奈るな',        yt:'https://youtu.be/tKQTkzrBeRk'},
-  {attr:'翠', char:'ニーナ',        ja:'困惑星旅行',             en:'Confusing Planet Trip',               artist:'芹澤優',          yt:'https://youtu.be/GcPRc0ArsU4'},
-  {attr:'翠', char:'メルティーユ',  ja:'世界中のすてきを',        en:'All the Lovely Things in the World',  artist:'西明日香',        yt:'https://youtu.be/1w5zmCLLBT0'},
-  {attr:'翠', char:'ルーク',        ja:'Lone Star',              en:'Lone Star',                           artist:'平原綾香',        yt:'https://youtu.be/Dj2rLHzX4Zk'},
-  {attr:'翠', char:'レア',          ja:'Fine Day',               en:'Fine Day',                            artist:'',               yt:''},
-  {attr:'翠', char:'クラウディア',  ja:'Own Way',                en:'Own Way',                             artist:'SERRA',               yt:''},
-  {attr:'翠', char:'フィアー',      ja:'Ash Pile',               en:'Ash Pile',                            artist:'天音',            yt:''},
-  {attr:'翠', char:'ユニ',          ja:'Remedy',                 en:'Remedy',                              artist:'花澤里都夢',               yt:''},
-  {attr:'翠', char:'ミラ',          ja:'Stuffed',                en:'Stuffed',                             artist:'甲田まひる',     yt:'https://youtu.be/Se0-SoNS2zU'},
-  {attr:'翠', char:'アレクサンドラ',ja:'アマガスミ',              en:'Hazy Rain',                           artist:'久保琴音',               yt:''},
-  {attr:'翠', char:'ティリー',      ja:'Tears',                  en:'Tears',                               artist:'',               yt:''},
-  {attr:'翠', char:'ポーラ',        ja:'Unfulfilled',            en:'Unfulfilled',                         artist:'',               yt:''},
-  {attr:'翠', char:'D.D.',          ja:'Dummy',                  en:'Dummy',                               artist:'',               yt:''},
-  {attr:'翠', char:'ユルディズ',    ja:'Killing Me or Kissing Me', en:'Killing Me or Kissing Me',          artist:'',               yt:''},
+  {attr:'翠', char:'シズ',          ja:'花の跡',                 en:'After the Flowers',                   artist:'如月愛里',        yt:'https://youtu.be/U7ubbREX240', yt_en:'https://youtu.be/oXZp-MHCJFQ'},
+  {attr:'翠', char:'ザラ',          ja:'drowsiness',             en:'drowsiness',                          artist:'ヲタみん',        yt:'https://youtu.be/OZJxnEh7RwE', yt_en:'https://youtu.be/k_d6KCNjVFI'},
+  {attr:'翠', char:'ロザリー',      ja:'ラメント',               en:'Lament',                              artist:'山本彩',          yt:'https://youtu.be/iWMUX8mP6bc', yt_en:'https://youtu.be/u0KdTdYbwCQ'},
+  {attr:'翠', char:'リブラ',        ja:'真昼、空にオリオン',      en:'Orion at Noon',                       artist:'ENA',            yt:'https://youtu.be/K72uPVLDxcI', yt_en:'https://youtu.be/yBJf_gMiTek'},
+  {attr:'翠', char:'アイビー',      ja:'まっかっか',             en:'Red as Blood',                        artist:'葉月ゆら',        yt:'https://youtu.be/ZXA3x_hSrWk', yt_en:'https://youtu.be/NXtN3D0CRhc'},
+  {attr:'翠', char:'マーリン',      ja:'Fly Away',               en:'Fly Away',                            artist:'礼衣 (fromツユ)', yt:'https://youtu.be/8FwoXSje9EA', yt_en:'https://youtu.be/ZfijL3bDNuo'},
+  {attr:'藍', char:'藍マーリン',    ja:'Magic!',                 en:'Magic!',                              artist:'礼衣 (fromツユ)', yt:'', yt_en:''},
+  {attr:'翠', char:'コベル',        ja:'ひかる星',               en:'Shining Star',                        artist:'',               yt:'', yt_en:''},
+  {attr:'翠', char:'コルディ',      ja:'BLUE ROSE',              en:'BLUE ROSE',                           artist:'春奈るな',        yt:'https://youtu.be/tKQTkzrBeRk', yt_en:'https://youtu.be/k7sWclZQyMQ'},
+  {attr:'翠', char:'ニーナ',        ja:'困惑星旅行',             en:'Confusing Planet Trip',               artist:'芹澤優',          yt:'https://youtu.be/GcPRc0ArsU4', yt_en:'https://youtu.be/VWcMeRBqDq0'},
+  {attr:'翠', char:'メルティーユ',  ja:'世界中のすてきを',        en:'All the Lovely Things in the World',  artist:'西明日香',        yt:'https://youtu.be/1w5zmCLLBT0', yt_en:'https://youtu.be/FiOnLzs7Rpo'},
+  {attr:'翠', char:'ルーク',        ja:'Lone Star',              en:'Lone Star',                           artist:'平原綾香',        yt:'https://youtu.be/Dj2rLHzX4Zk', yt_en:'https://youtu.be/Gb1hq0OJpEE'},
+  {attr:'翠', char:'レア',          ja:'Fine Day',               en:'Fine Day',                            artist:'',               yt:'', yt_en:''},
+  {attr:'翠', char:'クラウディア',  ja:'Own Way',                en:'Own Way',                             artist:'SERRA',               yt:'', yt_en:''},
+  {attr:'翠', char:'フィアー',      ja:'Ash Pile',               en:'Ash Pile',                            artist:'天音',            yt:'https://youtu.be/czXpS9A-HsM', yt_en:'https://youtu.be/PGbnj6gMM6c'},
+  {attr:'翠', char:'ユニ',          ja:'Remedy',                 en:'Remedy',                              artist:'花澤里都夢',               yt:'', yt_en:''},
+  {attr:'翠', char:'ミラ',          ja:'Stuffed',                en:'Stuffed',                             artist:'甲田まひる',     yt:'https://youtu.be/Se0-SoNS2zU', yt_en:''},
+  {attr:'翠', char:'アレクサンドラ',ja:'アマガスミ',              en:'Hazy Rain',                           artist:'久保琴音',               yt:'', yt_en:'https://youtu.be/HyGwJpeLQwc'},
+  {attr:'翠', char:'ティリー',      ja:'Tears',                  en:'Tears',                               artist:'',               yt:'', yt_en:''},
+  {attr:'翠', char:'ポーラ',        ja:'Unfulfilled',            en:'Unfulfilled',                         artist:'',               yt:'', yt_en:''},
+  {attr:'翠', char:'D.D.',          ja:'Dummy',                  en:'Dummy',                               artist:'',               yt:'', yt_en:''},
+  {attr:'翠', char:'ユルディズ',    ja:'Killing Me or Kissing Me', en:'Killing Me or Kissing Me',          artist:'',               yt:'', yt_en:''},
   // ── 翠属性（バリアント）─────────────────────────────
-  {attr:'翠', char:'夏サブリナ',    ja:'鼓動ふたつ鳴る前に',      en:'Before Two Heartbeats',               artist:'佐々木恵梨',      yt:''},
-  {attr:'翠', char:'翠ルナリンド',  ja:'あたたかな雪の日',        en:'A Warm Snowy Day',                    artist:'本渡楓',          yt:''},
+  {attr:'翠', char:'夏サブリナ',    ja:'鼓動ふたつ鳴る前に',      en:'Before Two Heartbeats',               artist:'佐々木恵梨',      yt:'', yt_en:''},
+  {attr:'翠', char:'翠ルナリンド',  ja:'あたたかな雪の日',        en:'A Warm Snowy Day',                    artist:'本渡楓',          yt:'', yt_en:''},
   // ── 黄属性 ──────────────────────────────────────────
-  {attr:'黄', char:'ガルム',        ja:'ポコ・ア・ポコ',          en:'Poco a Poco',                         artist:'ひかり',          yt:'https://youtu.be/be7fIr-bk8w'},
-  {attr:'黄', char:'スクルド',      ja:'Falling Down',           en:'Falling Down',                        artist:'mahina',          yt:'https://youtu.be/AXXsv_nqFDQ'},
-  {attr:'黄', char:'チェルナ',      ja:'CRYING BLUE',            en:'CRYING BLUE',                         artist:'小林真奈',        yt:'https://youtu.be/8YEsFAnqoiU'},
-  {attr:'黄', char:'ソテイラ',      ja:'時の狭間に流転するマカロン', en:'Macaron Drifting Through Time',    artist:'大原ゆい子',      yt:'https://youtu.be/sZDjOsVaX5g'},
-  {attr:'黄', char:'ミミ',          ja:'12じの鐘がなる',          en:'The Clock Strikes 12',                artist:'市ノ瀬加那',      yt:'https://youtu.be/dCR6c07NMrM'},
-  {attr:'黄', char:'トロポン',      ja:"Liar's Lie",             en:"Liar's Lie",                          artist:'maimie',          yt:'https://youtu.be/YE2Y0QYTnk4'},
-  {attr:'黄', char:'ハトホル',      ja:'黄昏の踊り場',            en:'Twilight Landing',                    artist:'柘榴-zakuro-',   yt:'https://youtu.be/Xf65ojG93kw'},
-  {attr:'黄', char:'オリヴィエ',    ja:'Pray',                   en:'Pray',                                artist:'MARiA',           yt:'https://youtu.be/kh-zfD1u0Ks'},
-  {attr:'黄', char:'プリマヴェーラ',ja:'リバーブ',               en:'Reverb',                              artist:'ダズビー',        yt:'https://youtu.be/bNDXaSg-Ofc'},
-  {attr:'黄', char:'カロル',        ja:'僕は僕でも僕じゃないかも', en:"Maybe I'm Not Really Me",            artist:'くろくも',        yt:'https://youtu.be/YmZnaYysaI8'},
-  {attr:'黄', char:'ウィーラ',      ja:'うたかた',               en:'Foam',                                artist:'',               yt:''},
-  {attr:'黄', char:'リシェス',      ja:'Asking for the Moon',    en:'Asking for the Moon',                 artist:'',               yt:''},
-  {attr:'黄', char:'タマ',          ja:'Trick',                  en:'Trick',                               artist:'青妃らめ',        yt:'https://youtu.be/qDymW-zEmaU'},
-  {attr:'黄', char:'アサヒ',        ja:'No Name',                en:'No Name',                             artist:'Es',               yt:''},
-  {attr:'黄', char:'ルスティカ',    ja:'One Last Song',          en:'One Last Song',                       artist:'',               yt:''},
-  {attr:'黄', char:'ポプリ',        ja:'Echoes',                 en:'Echoes',                              artist:'',               yt:''},
-  {attr:'黄', char:'ミフリ',        ja:'ゆびきり',               en:'Pinky Promise',                       artist:'',               yt:''},
-  {attr:'黄', char:'モワノー',      ja:'Off Script',             en:'Off Script',                          artist:'',               yt:''},
+  {attr:'黄', char:'ガルム',        ja:'ポコ・ア・ポコ',          en:'Poco a Poco',                         artist:'ひかり',          yt:'https://youtu.be/be7fIr-bk8w', yt_en:'https://youtu.be/a1OKKy-7gP8'},
+  {attr:'黄', char:'スクルド',      ja:'Falling Down',           en:'Falling Down',                        artist:'mahina',          yt:'https://youtu.be/AXXsv_nqFDQ', yt_en:'https://youtu.be/6NrUJB5RQYU'},
+  {attr:'黄', char:'チェルナ',      ja:'CRYING BLUE',            en:'CRYING BLUE',                         artist:'小林真奈',        yt:'https://youtu.be/8YEsFAnqoiU', yt_en:'https://youtu.be/GC1VQgQaF-g'},
+  {attr:'黄', char:'ソテイラ',      ja:'時の狭間に流転するマカロン', en:'Macaron Drifting Through Time',    artist:'大原ゆい子',      yt:'https://youtu.be/sZDjOsVaX5g', yt_en:'https://youtu.be/e25Q4kJ0ib0'},
+  {attr:'黄', char:'ミミ',          ja:'12じの鐘がなる',          en:'The Clock Strikes 12',                artist:'市ノ瀬加那',      yt:'https://youtu.be/dCR6c07NMrM', yt_en:'https://youtu.be/G2n7JoPQx7U'},
+  {attr:'黄', char:'トロポン',      ja:"Liar's Lie",             en:"Liar's Lie",                          artist:'maimie',          yt:'https://youtu.be/YE2Y0QYTnk4', yt_en:'https://youtu.be/GidU1bhAyLs'},
+  {attr:'黄', char:'ハトホル',      ja:'黄昏の踊り場',            en:'Twilight Landing',                    artist:'柘榴-zakuro-',   yt:'https://youtu.be/Xf65ojG93kw', yt_en:'https://youtu.be/DCa9pQjobcM'},
+  {attr:'黄', char:'オリヴィエ',    ja:'Pray',                   en:'Pray',                                artist:'MARiA',           yt:'https://youtu.be/kh-zfD1u0Ks', yt_en:'https://youtu.be/Wwy8gOjO-6g'},
+  {attr:'黄', char:'プリマヴェーラ',ja:'リバーブ',               en:'Reverb',                              artist:'ダズビー',        yt:'https://youtu.be/bNDXaSg-Ofc', yt_en:''},
+  {attr:'黄', char:'カロル',        ja:'僕は僕でも僕じゃないかも', en:"Maybe I'm Not Really Me",            artist:'くろくも',        yt:'https://youtu.be/YmZnaYysaI8', yt_en:'https://youtu.be/zOdq0ERG8lg'},
+  {attr:'黄', char:'ウィーラ',      ja:'うたかた',               en:'Foam',                                artist:'',               yt:'', yt_en:'https://youtu.be/G9BTLvh0bkg'},
+  {attr:'黄', char:'リシェス',      ja:'Asking for the Moon',    en:'Asking for the Moon',                 artist:'',               yt:'', yt_en:'https://youtu.be/NIDdHMRDZbQ'},
+  {attr:'黄', char:'タマ',          ja:'Trick',                  en:'Trick',                               artist:'青妃らめ',        yt:'https://youtu.be/qDymW-zEmaU', yt_en:''},
+  {attr:'黄', char:'アサヒ',        ja:'No Name',                en:'No Name',                             artist:'Es',               yt:'', yt_en:''},
+  {attr:'黄', char:'ルスティカ',    ja:'One Last Song',          en:'One Last Song',                       artist:'',               yt:'', yt_en:''},
+  {attr:'黄', char:'ポプリ',        ja:'Echoes',                 en:'Echoes',                              artist:'',               yt:'', yt_en:''},
+  {attr:'黄', char:'ミフリ',        ja:'ゆびきり',               en:'Pinky Promise',                       artist:'',               yt:'', yt_en:'https://youtu.be/F7pPpFd34G0'},
+  {attr:'黄', char:'モワノー',      ja:'Off Script',             en:'Off Script',                          artist:'',               yt:'', yt_en:''},
   // ── 黄属性（バリアント）─────────────────────────────
-  {attr:'黄', char:'黄アイリス',    ja:'Soumatou',               en:'Soumatou',                            artist:'',               yt:''},
-  {attr:'黄', char:'夏モーザ',      ja:'Summer Flash',           en:'Summer Flash',                        artist:'',               yt:''},
-  {attr:'黄', char:'聖アモール',    ja:'présent',                en:'présent',                             artist:'霜月はるか',      yt:''},
-  {attr:'黄', char:'黄フェンリル',  ja:'数え切れないくらいの',    en:'Countless Treasures',                 artist:'鹿乃',            yt:'https://youtu.be/RzXwd50xjd8'},
-  {attr:'黄', char:'夏アムレート',  ja:'realize',                en:'realize',                             artist:'あたらよ',        yt:''},
-  {attr:'黄', char:'メルラン',      ja:'Spark(Radio Edit)',      en:'Spark(Radio Edit)',                   artist:'',               yt:''},
-  {attr:'黄', char:'トリクシー',    ja:'ことりばなし',           en:'Little Bird Story',                   artist:'かんのん',        yt:''},
+  {attr:'黄', char:'黄アイリス',    ja:'Soumatou',               en:'Soumatou',                            artist:'',               yt:'', yt_en:''},
+  {attr:'黄', char:'夏モーザ',      ja:'Summer Flash',           en:'Summer Flash',                        artist:'',               yt:'', yt_en:''},
+  {attr:'黄', char:'聖アモール',    ja:'présent',                en:'présent',                             artist:'霜月はるか',      yt:'', yt_en:''},
+  {attr:'黄', char:'黄フェンリル',  ja:'数え切れないくらいの',    en:'Countless Treasures',                 artist:'鹿乃',            yt:'https://youtu.be/RzXwd50xjd8', yt_en:''},
+  {attr:'黄', char:'夏アムレート',  ja:'realize',                en:'realize',                             artist:'あたらよ',        yt:'', yt_en:''},
+  {attr:'黄', char:'メルラン',      ja:'Spark(Radio Edit)',      en:'Spark(Radio Edit)',                   artist:'',               yt:'', yt_en:''},
+  {attr:'黄', char:'トリクシー',    ja:'ことりばなし',           en:'Little Bird Story',                   artist:'かんのん',        yt:'', yt_en:''},
   // ── 天属性 ──────────────────────────────────────────
-  {attr:'天', char:'ナターシャ',    ja:'X. THE FLOWER',          en:'X. THE FLOWER',                       artist:'小倉唯',          yt:'https://youtu.be/NxlMz77RW18',  qlipha:true},
-  {attr:'天', char:'フォルティナ',  ja:'VI. THE SWORD ff',       en:'VI. THE SWORD ff',                    artist:'ゆかな',          yt:'',                              qlipha:true},
-  {attr:'天', char:'ケルベロス',    ja:'IV. THE THUNDER',        en:'IV. THE THUNDER',                     artist:'',               yt:'',                              qlipha:true},
-  {attr:'天', char:'ルサールカ',    ja:'III. THE RAIN',          en:'III. THE RAIN',                       artist:'',               yt:'',                              qlipha:true},
-  {attr:'天', char:'エルフリンデ',  ja:'I. THE LANCE',           en:'I. THE LANCE',                        artist:'',               yt:'',                              qlipha:true},
-  {attr:'天', char:'アイネ',        ja:'泡の音',                 en:'Sound of Bubbles',                    artist:'',               yt:''},
-  {attr:'天', char:'メリア',        ja:'XIII. THE BUD',          en:'XIII. THE BUD',                       artist:'',               yt:'',                              qlipha:true},
-  {attr:'天', char:'アイリーン',    ja:'ShyなDestiny',           en:'Shy Destiny',                         artist:'',               yt:''},
-  {attr:'天', char:'ルミカ',        ja:'lumière',                en:'lumière',                             artist:'天音かなた',     yt:''},
+  {attr:'天', char:'ナターシャ',    ja:'X. THE FLOWER',          en:'X. THE FLOWER',                       artist:'小倉唯',          yt:'https://youtu.be/NxlMz77RW18', yt_en:'',  qlipha:true},
+  {attr:'天', char:'フォルティナ',  ja:'VI. THE SWORD ff',       en:'VI. THE SWORD ff',                    artist:'ゆかな',          yt:'', yt_en:'',                              qlipha:true},
+  {attr:'天', char:'ケルベロス',    ja:'IV. THE THUNDER',        en:'IV. THE THUNDER',                     artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'天', char:'ルサールカ',    ja:'III. THE RAIN',          en:'III. THE RAIN',                       artist:'',               yt:'', yt_en:'https://youtu.be/vCAJ-oe9iwM',                              qlipha:true},
+  {attr:'天', char:'エルフリンデ',  ja:'I. THE LANCE',           en:'I. THE LANCE',                        artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'天', char:'アイネ',        ja:'泡の音',                 en:'Sound of Bubbles',                    artist:'',               yt:'', yt_en:'https://youtu.be/QhgT_7sRXfo'},
+  {attr:'天', char:'メリア',        ja:'XIII. THE BUD',          en:'XIII. THE BUD',                       artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'天', char:'アイリーン',    ja:'ShyなDestiny',           en:'Shy Destiny',                         artist:'',               yt:'', yt_en:''},
+  {attr:'天', char:'ルミカ',        ja:'lumière',                en:'lumière',                             artist:'天音かなた',     yt:'', yt_en:''},
   // ── 天属性（バリアント）─────────────────────────────
-  {attr:'天', char:'天ロザリー',    ja:'残影',                   en:'Afterimage',                          artist:'山本彩',          yt:''},
-  {attr:'天', char:'天A.A.',        ja:'the trust',              en:'the trust',                           artist:'茅原実里',        yt:'',                              },
-  {attr:'冥', char:'冥ナターシャ', ja:'the bouquet', en:'the bouquet',                          artist:'小倉唯',          yt:'', },
-  {attr:'冥', char:'冥ケルベロス', ja:'the light',  en:'the light',                            artist:'',               yt:''},
+  {attr:'天', char:'天ロザリー',    ja:'残影',                   en:'Afterimage',                          artist:'山本彩',          yt:'https://youtu.be/XPVqNeaplAg', yt_en:''},
+  {attr:'天', char:'天A.A.',        ja:'the trust',              en:'the trust',                           artist:'茅原実里',        yt:'', yt_en:'',                              },
+  {attr:'冥', char:'冥ナターシャ', ja:'the bouquet', en:'the bouquet',                          artist:'小倉唯',          yt:'', yt_en:'', },
+  {attr:'冥', char:'冥ケルベロス', ja:'the light',  en:'the light',                            artist:'',               yt:'', yt_en:''},
   // ── 冥属性 ──────────────────────────────────────────
-  {attr:'天', char:'リヴェリア',    ja:'XV. THE SAND',           en:'XV. THE SAND',                        artist:'山根綺',         yt:'https://youtu.be/RSAUs3fnPOw',     },
-  {attr:'冥', char:'ルナリンド',    ja:'IX. THE ICE',            en:'IX. THE ICE',                         artist:'本渡楓',          yt:'https://youtu.be/OuL8uWl9gjY',  qlipha:true},
-  {attr:'冥', char:'ヴァルリーデ',  ja:'VIII. THE FIRE',         en:'VIII. THE FIRE',                      artist:'田中理恵',        yt:'https://youtu.be/CHWP4ALGyCE',  qlipha:true},
-  {attr:'冥', char:'A.A.',          ja:'VII. THE RUST',          en:'VII. THE RUST',                       artist:'茅原実里',        yt:'https://youtu.be/mFdxKYSbgJY',  qlipha:true},
-  {attr:'冥', char:'オフィーリア',  ja:'V. THE CRYSTAL',         en:'V. THE CRYSTAL',                      artist:'',               yt:'',                              qlipha:true},
-  {attr:'冥', char:'アームストロング',ja:'II. THE SOUL',          en:'II. THE SOUL',                        artist:'',               yt:'',                              qlipha:true},
-  {attr:'冥', char:'パラデア',      ja:'XI. THE JUSTICE',        en:'XI. THE JUSTICE',                     artist:'',               yt:'',                              qlipha:true},
-  {attr:'冥', char:'カグヤ',        ja:'XII. 夢幻',              en:'XII. Phantom Dream',                  artist:'',               yt:'',                              qlipha:true},
-  {attr:'冥', char:'ネブラ',        ja:'XIV. THE BUBBLE',        en:'XIV. THE BUBBLE',                     artist:'',               yt:'',                              },
-  {attr:'冥', char:'レジーナ',      ja:'頬に降る涙',             en:'Tears Falling on My Cheek',           artist:'',               yt:''},
-  {attr:'冥', char:'カーミラ',      ja:'Sweet Bite',             en:'Sweet Bite',                          artist:'',               yt:''},
+  {attr:'天', char:'リヴェリア',    ja:'XV. THE SAND',           en:'XV. THE SAND',                        artist:'山根綺',         yt:'https://youtu.be/RSAUs3fnPOw', yt_en:'',     },
+  {attr:'冥', char:'ルナリンド',    ja:'IX. THE ICE',            en:'IX. THE ICE',                         artist:'本渡楓',          yt:'https://youtu.be/OuL8uWl9gjY', yt_en:'',  qlipha:true},
+  {attr:'冥', char:'ヴァルリーデ',  ja:'VIII. THE FIRE',         en:'VIII. THE FIRE',                      artist:'田中理恵',        yt:'https://youtu.be/CHWP4ALGyCE', yt_en:'',  qlipha:true},
+  {attr:'冥', char:'A.A.',          ja:'VII. THE RUST',          en:'VII. THE RUST',                       artist:'茅原実里',        yt:'https://youtu.be/mFdxKYSbgJY', yt_en:'https://youtu.be/FX15rPuTE4Y',  qlipha:true},
+  {attr:'冥', char:'オフィーリア',  ja:'V. THE CRYSTAL',         en:'V. THE CRYSTAL',                      artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'冥', char:'アームストロング',ja:'II. THE SOUL',          en:'II. THE SOUL',                        artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'冥', char:'パラデア',      ja:'XI. THE JUSTICE',        en:'XI. THE JUSTICE',                     artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'冥', char:'カグヤ',        ja:'XII. 夢幻',              en:'XII. Phantom Dream',                  artist:'',               yt:'', yt_en:'',                              qlipha:true},
+  {attr:'冥', char:'ネブラ',        ja:'XIV. THE BUBBLE',        en:'XIV. THE BUBBLE',                     artist:'',               yt:'', yt_en:'',                              },
+  {attr:'冥', char:'レジーナ',      ja:'頬に降る涙',             en:'Tears Falling on My Cheek',           artist:'',               yt:'', yt_en:''},
+  {attr:'冥', char:'カーミラ',      ja:'Sweet Bite',             en:'Sweet Bite',                          artist:'',               yt:'', yt_en:''},
   // ── 冥属性（バリアント）─────────────────────────────
 ];
 
@@ -1010,8 +986,10 @@ function renderLament(){
   tbody.innerHTML = data.map(d=>{
     const col = ATTR_COL[d.attr] || 'var(--text)';
     const qlTag = d.qlipha ? '<span style="font-size:.6rem;padding:.1rem .3rem;border-radius:3px;background:rgba(168,74,237,.25);color:#c0a0ef;margin-left:.3rem;">クリファ</span>' : '';
-    const ytBtn = d.yt ? `<a href="${d.yt}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+    const ytJpBtn = d.yt ? `<a href="${d.yt}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
       style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#ff0000;color:#fff;font-size:.65rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.65rem;">—</span>';
+    const ytEnBtn = d.yt_en ? `<a href="${d.yt_en}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+      style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#1565c0;color:#fff;font-size:.65rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.65rem;">—</span>';
     return `<tr style="cursor:default;" onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;">
         <span style="font-size:.78rem;font-weight:700;color:${col};">${d.attr}</span>
@@ -1022,7 +1000,8 @@ function renderLament(){
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.78rem;">${d.ja}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-dim);">${d.en}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.78rem;color:var(--text-dim);">${d.artist}</td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;">${ytBtn}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;">${ytJpBtn}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;">${ytEnBtn}</td>
     </tr>`;
   }).join('');
 }
@@ -1400,7 +1379,7 @@ function localPlayStep(){
 function localPlayStop(){
   if(_localPlayTimer){clearInterval(_localPlayTimer);_localPlayTimer=null;}
   const btn=document.getElementById('local-play-btn');
-  if(btn)btn.textContent='▶ 再生';
+  if(btn)btn.textContent='▶';
 }
 function localPlayToggle(){
   if(_localPlayTimer){localPlayStop();}
@@ -1408,7 +1387,7 @@ function localPlayToggle(){
     if(localDateIdx>=localDates.length-1)localLoadDate(0);
     _localPlayTimer=setInterval(localPlayStep,_localSpeed);
     const btn=document.getElementById('local-play-btn');
-    if(btn)btn.textContent='⏸ 停止';
+    if(btn)btn.textContent='⏸';
   }
 }
 
@@ -1426,7 +1405,7 @@ function globalPlayStep(){
 function globalPlayStop(){
   if(_globalPlayTimer){clearInterval(_globalPlayTimer);_globalPlayTimer=null;}
   const btn=document.getElementById('global-play-btn');
-  if(btn)btn.textContent='▶ 再生';
+  if(btn)btn.textContent='▶';
 }
 function globalPlayToggle(){
   if(_globalPlayTimer){globalPlayStop();}
@@ -1434,7 +1413,7 @@ function globalPlayToggle(){
     if(globalDateIdx>=globalDates.length-1)globalLoadDate(0);
     _globalPlayTimer=setInterval(globalPlayStep,_globalSpeed);
     const btn=document.getElementById('global-play-btn');
-    if(btn)btn.textContent='⏸ 停止';
+    if(btn)btn.textContent='⏸';
   }
 }
 
