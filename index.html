@@ -794,19 +794,20 @@
     </div>
     <span style="font-size:.75rem;color:var(--text-dim);margin-left:auto;" id="champ-count"></span>
   </div>
-  <div class="table-wrap" style="max-height:calc(100vh - 200px);">
-    <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
-      <thead>
-        <tr>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('attr')">属性</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('name')">キャラクター</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">ワールド</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">プレイヤー名</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">戦闘力</th>
-        </tr>
-      </thead>
-      <tbody id="champ-tbody"></tbody>
-    </table>
+  <div style="max-width:960px;margin:0 auto;">
+    <div class="table-wrap" style="max-height:calc(100vh - 200px);">
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+        <thead>
+          <tr>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('name')">キャラクター</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">ワールド</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">プレイヤー名</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">戦闘力</th>
+          </tr>
+        </thead>
+        <tbody id="champ-tbody"></tbody>
+      </table>
+    </div>
   </div>
   <div style="margin-top:.8rem;font-size:.75rem;color:var(--text-dim);line-height:1.6;">
     ※ 各ワールドのバトルリーグ上位ランカー編成から、キャラ単体BPが最も高いプレイヤーを集計。毎日18時更新。<br>
@@ -2600,7 +2601,7 @@ async function loadChampions(){
     if(!res.ok){
       console.warn("champions.json not found:", res.status);
       if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
-        `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#e74c3c;">champions.json が見つかりません (HTTP ${res.status})<br><small style="color:var(--text-dim)">GitHub Actions を実行してください</small></td></tr>`;
+        `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#e74c3c;">champions.json が見つかりません (HTTP ${res.status})<br><small style="color:var(--text-dim)">GitHub Actions を実行してください</small></td></tr>`;
       return;
     }
     const data = await res.json();
@@ -2611,7 +2612,7 @@ async function loadChampions(){
   }catch(e){
     console.warn("champions.json load error:", e);
     if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
-      `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</td></tr>`;
+      `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</td></tr>`;
   }
 }
 
@@ -2729,7 +2730,7 @@ function renderChamp(){
   document.getElementById('champ-count').textContent = data.length + '件';
   const tbody = document.getElementById('champ-tbody');
   if(!data.length){
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-dim);">該当なし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-dim);">該当なし</td></tr>';
     return;
   }
   const fmt = n => (n||0).toLocaleString('en-US');
@@ -2738,10 +2739,9 @@ function renderChamp(){
     const hasP = !!d.playerName;
     const dim = 'color:var(--text-dim);';
     return `<tr onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;">
-        <span style="font-size:.78rem;font-weight:700;color:${col};">${d.attr||'-'}</span>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-size:.82rem;">
+        <span style="font-size:.78rem;font-weight:700;color:${col};margin-right:.45rem;" title="${d.attr||''}属性">${d.attr||'-'}</span><span style="font-weight:600;">${d.name||('ID:'+d.id)}</span>
       </td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-weight:600;font-size:.82rem;">${d.name||('ID:'+d.id)}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
