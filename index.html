@@ -37,7 +37,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
   :root {
     --bg-deep:#0a0a0f;--bg-card:#12121a;--bg-card-hover:#1a1a26;
-    --border:#2a2a3a;--text:#e0e0ec;--text-dim:#8888a0;--accent:#6c5ce7;
+    --border:#2a2a3a;--text:#e0e0ec;--text-dim:#8888a0;--accent:#6c5ce7;--accent-fg:#a78bfa;
     --domination:#ff6b6b;--monopoly:#e74c3c;--oligopoly:#f39c12;--contested:#2ecc71;
     --oligo-a:#f39c12;--oligo-b:#74b9ff;--oligo-c:#fd79a8;
     --c-ai:#4a9ded;--c-ku:#ed4a4a;--c-sui:#3de88a;--c-ki:#edcc3d;--c-ten:#c0c0e8;--c-mei:#a84aed;
@@ -68,7 +68,7 @@
   }
   @media(min-width:1100px){.tabs-wrap::after{display:none;animation:none;}}
   .tab-btn{font-family:'Noto Sans JP',sans-serif;font-size:1rem;font-weight:600;padding:.8rem 1.5rem;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0;}
-  .tab-btn:hover{color:var(--text);} .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-btn:hover{color:var(--text);} .tab-btn.active{color:var(--accent-fg);border-bottom-color:var(--accent);}
   .controls{padding:1rem 2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border);}
   .controls label{font-size:1rem;color:var(--text-dim);}
   .controls select,.controls button{font-family:'Noto Sans JP',sans-serif;font-size:1rem;padding:.4rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);cursor:pointer;}
@@ -76,7 +76,7 @@
   .controls button:hover{filter:brightness(1.2);} .controls button:disabled{opacity:.5;cursor:not-allowed;}
   .info-bar{border-bottom:1px solid var(--border);}
   .info-row{padding:.35rem 2rem;display:flex;gap:.5rem;font-size:.875rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap;}
-  .info-sep{color:#3a3a4a;font-size:.875rem;}
+  .info-sep{color:#9c9cbc;font-size:.875rem;}
   .status-text .ok{color:#2ecc71;} .status-text .err{color:#e74c3c;} .status-text .loading{color:#f39c12;}
   .dashboard{padding:1.5rem 2rem;display:grid;gap:1.5rem;}
   .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
@@ -108,8 +108,8 @@
   .castle-cell{font-weight:600;font-size:.875rem;white-space:nowrap;}
   .tag-domination{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.875rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);}
   .tag-monopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.875rem;font-weight:700;color:#fff;background:var(--monopoly);}
-  .tag-oligopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.875rem;font-weight:700;color:#fff;background:var(--oligopoly);}
-  .tag-contested{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.875rem;font-weight:700;color:#fff;background:var(--contested);}
+  .tag-oligopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.875rem;font-weight:700;color:#1a1a1a;background:var(--oligopoly);}
+  .tag-contested{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.875rem;font-weight:700;color:#0a2a18;background:var(--contested);}
   .filter-row{padding:0 1.2rem .8rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
   .filter-row input,.filter-row select{font-family:'Noto Sans JP',sans-serif;font-size:.9rem;padding:.3rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);}
   .filter-row input{width:260px;}
@@ -154,6 +154,22 @@
     /* champ has wider PC padding; tighten on mobile to prevent table from exceeding viewport (battle-power column was being clipped) */
     #dash-champ tbody td,#dash-champ thead th{padding:.4rem .5rem;}
     .castle-cell{white-space:nowrap;}
+    /* mobile: extra bottom space so the fixed playback bar (date scrubber + play row) doesn't cover content */
+    #dash-local,#dash-global,#dash-heatmap,#dash-stock,#dash-arena{padding-bottom:120px!important;}
+    #dash-champ{padding-bottom:140px!important;}
+    /* mobile: freeze first column of wide tables so the row's identity stays visible while horizontally scrolling */
+    #dash-local .table-wrap tbody td:first-child,
+    #dash-global .table-wrap tbody td:first-child{position:sticky;left:0;background:var(--bg-card);z-index:3;border-right:1px solid var(--border);}
+    #dash-local .table-wrap thead th:first-child,
+    #dash-global .table-wrap thead th:first-child{position:sticky;left:0;background:#1a1a26;z-index:4;border-right:1px solid var(--border);}
+    /* mobile: let the search inputs use the full row width so placeholders don't get truncated */
+    #lament-search,#champ-search{flex:1 1 100%!important;min-width:0!important;max-width:none!important;}
+  }
+  /* touch devices: enlarge playback control tap targets to >= 40px (Apple HIG / Material guideline) */
+  @media(hover:none) and (pointer:coarse){
+    .hm-date-nav button{min-width:40px;min-height:40px;padding:.5rem .7rem;}
+    .hm-play-btn{min-height:40px;padding:.5rem 1rem;}
+    .hm-speed-btn{min-width:40px;min-height:36px;padding:.4rem .7rem;}
   }
   /* ヒートマップ */
   .hm-summary-table{width:100%;border-collapse:collapse;font-size:.875rem;margin-bottom:.6rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
@@ -679,7 +695,7 @@
   </div>
   <div class="hm-grid" id="hm-grid"></div></div>
 <!-- 採用属性分布 -->
-<div class="dashboard hidden" id="dash-arena">
+<div class="dashboard hidden" id="dash-arena" style="padding-bottom:70px;">
   <div class="controls" style="border-bottom:1px solid var(--border);padding:.5rem 1.2rem;flex-wrap:wrap;gap:.4rem .6rem;align-items:center;">
     <label style="color:var(--text-dim);font-size:.875rem;white-space:nowrap;flex-shrink:0">📊 バトリ20位（5キャラ編成）</label>
     <label style="white-space:nowrap;flex-shrink:0;font-size:1rem;color:var(--text-dim)">ソート:</label>
@@ -1225,7 +1241,7 @@ function initFilters(){
 }
 
 function ss(t,c=""){document.getElementById("statusBar").innerHTML=`<span class="${c}">${t}</span>`;}
-function oc(n,a){if(!n||n==="NPC")return"#444";if(n===a.dominant)return"var(--oligo-a)";const o=[];for(const x of a.mn){if(x!==a.dominant&&x!=="NPC"&&!o.includes(x))o.push(x);}return o.indexOf(n)===0?"var(--oligo-b)":"var(--oligo-c)";}
+function oc(n,a){if(!n||n==="NPC")return"#6a6a6a";if(n===a.dominant)return"var(--oligo-a)";const o=[];for(const x of a.mn){if(x!==a.dominant&&x!=="NPC"&&!o.includes(x))o.push(x);}return o.indexOf(n)===0?"var(--oligo-b)":"var(--oligo-c)";}
 
 function az(co){
   const mn=MI.map(id=>co[id]?.guildName||"NPC");
