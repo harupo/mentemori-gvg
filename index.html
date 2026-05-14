@@ -496,6 +496,7 @@
   <button class="tab-btn" data-tab="arena" onclick="switchTab('arena')">🌈 採用属性分布</button>
   <button class="tab-btn" data-tab="stock" onclick="switchTab('stock')">📦 ギルドストック</button>
   <button class="tab-btn" data-tab="lament" onclick="switchTab('lament')">🎵 ラメント</button>
+  <button class="tab-btn" data-tab="champ" onclick="switchTab('champ')">🏆 最強プレイヤー</button>
 </div>
 <div class="info-bar" id="infoBar">
   <div class="info-row">
@@ -752,6 +753,47 @@
   </div>
 </div>
 
+<!-- 各キャラ最強プレイヤー -->
+
+<div class="dashboard hidden" id="dash-champ" style="padding:1rem 1.5rem 110px;">
+  <div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:.8rem;padding-bottom:.6rem;border-bottom:1px solid var(--border);">
+    <span style="font-size:.85rem;font-weight:700;color:var(--text-dim);">🏆 各キャラ最強プレイヤー</span>
+    <input id="champ-search" type="text" placeholder="キャラ名・プレイヤー名で検索…"
+      oninput="renderChamp()"
+      style="font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);flex:1;min-width:180px;max-width:320px;">
+    <div style="display:flex;gap:4px;flex-wrap:wrap;" id="champ-attr-btns">
+      <button class="champ-attr-btn active" data-attr="all" onclick="champSetAttr('all')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;">全て</button>
+      <button class="champ-attr-btn" data-attr="藍" onclick="champSetAttr('藍')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ai);cursor:pointer;">藍</button>
+      <button class="champ-attr-btn" data-attr="紅" onclick="champSetAttr('紅')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ku);cursor:pointer;">紅</button>
+      <button class="champ-attr-btn" data-attr="翠" onclick="champSetAttr('翠')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-sui);cursor:pointer;">翠</button>
+      <button class="champ-attr-btn" data-attr="黄" onclick="champSetAttr('黄')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ki);cursor:pointer;">黄</button>
+      <button class="champ-attr-btn" data-attr="天" onclick="champSetAttr('天')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ten);cursor:pointer;">天</button>
+      <button class="champ-attr-btn" data-attr="冥" onclick="champSetAttr('冥')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-mei);cursor:pointer;">冥</button>
+    </div>
+    <span style="font-size:.72rem;color:var(--text-dim);margin-left:auto;" id="champ-count"></span>
+  </div>
+  <div class="table-wrap" style="max-height:calc(100vh - 200px);">
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+      <thead>
+        <tr>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('attr')">属性</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('name')">キャラクター</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">最強プレイヤー</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">World</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('pos')">バトリ順位</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('pbp')">プレイヤーBP</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">キャラ単体BP</th>
+        </tr>
+      </thead>
+      <tbody id="champ-tbody"></tbody>
+    </table>
+  </div>
+  <div style="margin-top:.8rem;font-size:.68rem;color:var(--text-dim);line-height:1.6;">
+    ※ 各ワールドのバトルリーグ上位ランカー編成から、キャラ単体BPが最も高いプレイヤーを集計。毎日18時更新。<br>
+    ※ 上位ランカー圏内に出現しないキャラは「—」表示になります。
+  </div>
+</div>
+
 <div class="hm-date-bar hidden" id="local-date-bar">
   <div class="hm-date-row">
     <div class="hm-date-nav"><button id="local-date-prev" onclick="localDateStep(-1)">◀</button></div>
@@ -801,6 +843,26 @@
       <button class="hm-speed-btn active" onclick="arenaSetSpeed(650)">1x</button>
       <button class="hm-speed-btn" onclick="arenaSetSpeed(325)">2x</button>
       <button class="hm-speed-btn" onclick="arenaSetSpeed(160)">4x</button>
+    </div>
+  </div>
+</div>
+
+<div class="hm-date-bar hidden" id="champ-date-bar">
+  <div class="hm-date-row">
+    <div class="hm-date-nav"><button id="c-date-prev" onclick="champDateStep(-1)">◀</button></div>
+    <input type="range" class="hm-date-slider" id="c-date-slider" min="0" max="0" value="0" oninput="champDateChange()">
+    <div class="hm-date-nav"><button id="c-date-next" onclick="champDateStep(1)">▶</button></div>
+    <span class="hm-date-value" id="c-date-value">-</span>
+    <span class="hm-date-tag"   id="c-date-tag"></span>
+  </div>
+  <div class="hm-play-row">
+    <button class="hm-play-btn" id="c-play-btn" onclick="champPlayToggle()">▶ 再生</button>
+    <span class="hm-speed-label">速度</span>
+    <div class="hm-speed-btns">
+      <button class="hm-speed-btn" onclick="champSetSpeed(1300)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="champSetSpeed(650)">1x</button>
+      <button class="hm-speed-btn" onclick="champSetSpeed(325)">2x</button>
+      <button class="hm-speed-btn" onclick="champSetSpeed(160)">4x</button>
     </div>
   </div>
 </div>
@@ -1229,6 +1291,7 @@ function switchTab(tab){
   curTab=tab;
   if(tab!=="heatmap"&&hmPlayTimer)hmPlayStop();
   if(tab!=="arena"&&arenaPlayTimer)arenaPlayStop();
+  if(tab!=="champ"&&champPlayTimer)champPlayStop();
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
   document.getElementById("dash-local").classList.toggle("hidden",tab!=="local"||!LD.length);
   document.getElementById("dash-global").classList.toggle("hidden",tab!=="global"||!GD.length);
@@ -1236,15 +1299,18 @@ function switchTab(tab){
   document.getElementById("dash-arena").classList.toggle("hidden",tab!=="arena");
   document.getElementById("dash-stock").classList.toggle("hidden",tab!=="stock");
   document.getElementById("dash-lament").classList.toggle("hidden",tab!=="lament");
+  document.getElementById("dash-champ").classList.toggle("hidden",tab!=="champ");
   document.getElementById("local-date-bar").classList.toggle("hidden",tab!=="local");
   document.getElementById("global-date-bar").classList.toggle("hidden",tab!=="global");
   document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaDates.length);
+  document.getElementById("champ-date-bar").classList.toggle("hidden",tab!=="champ"||!champDates.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
   if(tab==="arena")arenaRender();
   if(tab==="stock")renderStock();
   if(tab==="lament")renderLament();
+  if(tab==="champ")renderChamp();
 }
 
 // JSON読み込み
@@ -1271,6 +1337,7 @@ async function loadData(){
     loadHMHistory();
     loadArena();
     loadGuildStock();
+    loadChampions();
   }catch(e){ss(`✗ ${e.message}`,"err");}
 }
 
@@ -2497,6 +2564,174 @@ function arenaTblSort(col){
     else sel.value=col+"-desc";
   }
   arenaRender();
+}
+
+// ═══════════════════════════════
+// 各キャラ最強プレイヤー
+// ═══════════════════════════════
+let CHAMP_DATA = [];
+let _champAttr = 'all';
+let _champSortKey = 'attr';
+let _champSortDir = 1;
+let champDates=[], champDateIdx=-1, champCache={}, champPlayTimer=null, champPlaySpeed=650;
+
+function champItemsToArray(data){ return Object.values(data.items || {}); }
+
+async function loadChampions(){
+  try{
+    const res = await fetch(DATA_BASE + "champions.json");
+    if(!res.ok){
+      console.warn("champions.json not found:", res.status);
+      if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
+        `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#e74c3c;">champions.json が見つかりません (HTTP ${res.status})<br><small style="color:var(--text-dim)">GitHub Actions を実行してください</small></td></tr>`;
+      return;
+    }
+    const data = await res.json();
+    CHAMP_DATA = champItemsToArray(data);
+    console.log("champions.json loaded:", CHAMP_DATA.length, "characters");
+    if(curTab==="champ")renderChamp();
+    loadChampHistory(data);
+  }catch(e){
+    console.warn("champions.json load error:", e);
+    if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
+      `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</td></tr>`;
+  }
+}
+
+async function loadChampHistory(latestData){
+  try{
+    const res=await fetch(DATA_BASE+"history/index.json");
+    if(!res.ok)return;
+    const idx=await res.json();
+    champDates=idx.champions||[];
+    if(!champDates.length)return;
+    champCache[champDates[champDates.length-1]]=CHAMP_DATA;
+    const slider=document.getElementById("c-date-slider");
+    slider.max=champDates.length-1;slider.value=champDates.length-1;
+    champDateIdx=champDates.length-1;
+    champUpdateUI();
+    if(curTab==="champ")document.getElementById("champ-date-bar").classList.remove("hidden");
+  }catch(e){console.warn("champ history failed:",e);}
+}
+
+async function champLoadDate(idx){
+  if(idx<0||idx>=champDates.length)return;
+  champDateIdx=idx;
+  document.getElementById("c-date-slider").value=idx;
+  champUpdateUI();
+  const dateStr=champDates[idx];
+  if(!champCache[dateStr]){
+    document.getElementById("c-date-tag").textContent="読み込み中…";
+    try{
+      const res=await fetch(`${DATA_BASE}history/champions/${dateStr}.json`);
+      if(!res.ok){document.getElementById("c-date-tag").textContent="データなし";return;}
+      champCache[dateStr]=champItemsToArray(await res.json());
+    }catch{document.getElementById("c-date-tag").textContent="読み込み失敗";return;}
+    champUpdateUI();
+  }
+  CHAMP_DATA=champCache[dateStr];
+  renderChamp();
+}
+
+function champUpdateUI(){
+  const d=champDates[champDateIdx]||"-";
+  document.getElementById("c-date-value").textContent=d;
+  const isLatest=champDateIdx===champDates.length-1;
+  document.getElementById("c-date-tag").textContent=isLatest?"（最新）":`${champDates.length-1-champDateIdx}日前`;
+  document.getElementById("c-date-prev").disabled=champDateIdx<=0;
+  document.getElementById("c-date-next").disabled=champDateIdx>=champDates.length-1;
+}
+
+function champDateChange(){champPlayStop();champLoadDate(+document.getElementById("c-date-slider").value);}
+function champDateStep(d){champPlayStop();champLoadDate(champDateIdx+d);}
+
+function champPlayToggle(){champPlayTimer?champPlayStop():champPlayStart();}
+function champPlayStart(){
+  if(champDateIdx>=champDates.length-1)champDateIdx=-1;
+  const btn=document.getElementById("c-play-btn");
+  btn.textContent="⏸ 停止";btn.classList.add("playing");
+  champPlayTimer=true;
+  champPlayTick();
+}
+function champPlayStop(){
+  if(champPlayTimer){clearTimeout(champPlayTimer);champPlayTimer=null;}
+  const btn=document.getElementById("c-play-btn");
+  btn.textContent="▶ 再生";btn.classList.remove("playing");
+}
+async function champPlayTick(){
+  if(champDateIdx>=champDates.length-1){champPlayStop();return;}
+  await champLoadDate(champDateIdx+1);
+  if(champPlayTimer!==null||document.getElementById("c-play-btn").classList.contains("playing")){
+    champPlayTimer=setTimeout(champPlayTick,champPlaySpeed);
+  }
+}
+function champSetSpeed(ms){
+  champPlaySpeed=ms;
+  document.querySelectorAll("#champ-date-bar .hm-speed-btn").forEach(b=>{
+    const sp={"0.5x":1300,"1x":650,"2x":325,"4x":160};
+    b.classList.toggle("active",sp[b.textContent]===ms);
+  });
+}
+
+function champSetAttr(attr){
+  _champAttr = attr;
+  document.querySelectorAll('.champ-attr-btn').forEach(b=>{
+    const isActive = b.dataset.attr === attr;
+    b.style.background = isActive ? 'var(--accent)' : 'var(--bg-card)';
+    b.style.color = isActive ? '#fff' : (ATTR_COL[b.dataset.attr] || 'var(--text-dim)');
+    b.style.borderColor = isActive ? 'var(--accent)' : 'var(--border)';
+  });
+  renderChamp();
+}
+
+function champSort(key){
+  if(_champSortKey === key) _champSortDir *= -1;
+  else { _champSortKey = key; _champSortDir = 1; }
+  renderChamp();
+}
+
+function renderChamp(){
+  const q = (document.getElementById('champ-search')?.value || '').toLowerCase();
+  const ATTR_ORDER = {藍:0,紅:1,翠:2,黄:3,天:4,冥:5};
+  let data = CHAMP_DATA.filter(d=>{
+    if(_champAttr !== 'all' && d.attr !== _champAttr) return false;
+    if(q && !(d.name||'').toLowerCase().includes(q) && !(d.playerName||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const sk = _champSortKey, sd = _champSortDir;
+  data.sort((a,b)=>{
+    if(sk==='attr')   return ((ATTR_ORDER[a.attr]??9)-(ATTR_ORDER[b.attr]??9))*sd || (a.id-b.id);
+    if(sk==='name')   return (a.name||'').localeCompare(b.name||'','ja')*sd;
+    if(sk==='player') return (a.playerName||'').localeCompare(b.playerName||'','ja')*sd;
+    if(sk==='world')  return ((+a.label||0)-(+b.label||0))*sd;
+    if(sk==='pos')    return ((a.position||0)-(b.position||0))*sd;
+    if(sk==='pbp')    return ((a.playerBP||0)-(b.playerBP||0))*sd;
+    if(sk==='cbp')    return ((a.charBP||0)-(b.charBP||0))*sd;
+    return 0;
+  });
+  document.getElementById('champ-count').textContent = data.length + '件';
+  const tbody = document.getElementById('champ-tbody');
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-dim);">該当なし</td></tr>';
+    return;
+  }
+  const fmt = n => (n||0).toLocaleString('en-US');
+  tbody.innerHTML = data.map(d=>{
+    const col = ATTR_COL[d.attr] || 'var(--text)';
+    const hasP = !!d.playerName;
+    const dim = 'color:var(--text-dim);';
+    return `<tr onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;">
+        <span style="font-size:.78rem;font-weight:700;color:${col};">${d.attr||'-'}</span>
+      </td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-weight:600;font-size:.82rem;">${d.name||('ID:'+d.id)}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;font-size:.78rem;${hasP?'':dim}">${hasP?('#'+d.position):'—'}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text-dim);">${hasP?fmt(d.playerBP):'—'}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
+    </tr>`;
+  }).join('');
 }
 
 document.addEventListener("DOMContentLoaded",()=>{loadData();});
