@@ -46,7 +46,22 @@
   body{font-family:'Noto Sans JP',sans-serif;background:var(--bg-deep);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden;}
   .header{padding:.6rem 2rem .4rem;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#101018,var(--bg-deep));}
   .header h1{font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,#fff,#a0a0d0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-  .tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  /* Tabs wrapper provides positioning context for the right-edge fade indicator
+     that hints at horizontal scrollability on narrow viewports. */
+  .tabs-wrap{position:relative;border-bottom:1px solid var(--border);}
+  .tabs{display:flex;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
+  /* trailing spacer so the last tab isn't hidden under the fade */
+  .tabs::after{content:'';flex:0 0 32px;}
+  /* right fade + chevron — visible by default; hidden on wide desktop where all tabs fit */
+  .tabs-wrap::after{
+    content:'▸';position:absolute;top:0;right:0;bottom:0;width:36px;
+    background:linear-gradient(to left,var(--bg-deep) 35%,transparent);
+    color:var(--text-dim);font-size:1rem;
+    display:flex;align-items:center;justify-content:flex-end;
+    padding-right:8px;
+    pointer-events:none;z-index:2;
+  }
+  @media(min-width:1100px){.tabs-wrap::after{display:none;}}
   .tab-btn{font-family:'Noto Sans JP',sans-serif;font-size:1rem;font-weight:600;padding:.8rem 1.5rem;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap;flex-shrink:0;}
   .tab-btn:hover{color:var(--text);} .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
   .controls{padding:1rem 2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border);}
@@ -514,6 +529,7 @@
 <div class="header">
   <h1>⚔️ メメントモリ 拠点占有ダッシュボード</h1>
 </div>
+<div class="tabs-wrap">
 <div class="tabs">
   <button class="tab-btn active" data-tab="local" onclick="switchTab('local')">⚔️ ギルドバトル</button>
   <button class="tab-btn" data-tab="global" onclick="switchTab('global')">🌐 グランドバトル</button>
@@ -522,6 +538,7 @@
   <button class="tab-btn" data-tab="stock" onclick="switchTab('stock')">📦 ギルドストック</button>
   <button class="tab-btn" data-tab="lament" onclick="switchTab('lament')">🎵 ラメント</button>
   <button class="tab-btn" data-tab="champ" onclick="switchTab('champ')">🏆 最強プレイヤー</button>
+</div>
 </div>
 <div class="info-bar" id="infoBar">
   <div class="info-row">
