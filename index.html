@@ -10,6 +10,28 @@
 <title>メメントモリ ギルドバトル / グランドバトル 拠点占有ダッシュボード</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+/* ═══════════════════════════════════════════════════════════════════════
+   Font Size Guideline (data dashboard, WCAG-aware)
+   ─────────────────────────────────────────────────────────────────────
+   Base: 1rem = 16px (HTML root, browser default)
+
+   Level    rem        px    Use
+   xs       0.75rem    12px  Footnote / badge / small label (FLOOR — DO NOT GO SMALLER)
+   sm       0.8125rem  13px  Table secondary cell, helper text
+   base     0.875rem   14px  Table body, default text
+   md       1rem       16px  Sub-heading, prominent label
+   lg       1.125rem   18px  Section heading
+   xl       1.5rem     24px  Group heading
+   2xl      2rem       32px  Hero metric
+
+   Rules:
+   1. 12px (0.75rem) absolute minimum for any user-visible text (WCAG-aligned).
+   2. Data tables: body cells ≥ 13px (.8125rem); secondary cells may use 12-13px.
+   3. Do not encode meaning in color alone (color-blind safety).
+   4. Monospace allowed for numeric IDs / tallies (≥ 12px).
+   5. New code: pick from the scale above, don't introduce odd values.
+   ═══════════════════════════════════════════════════════════════════════ */
+
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
   :root {
     --bg-deep:#0a0a0f;--bg-card:#12121a;--bg-card-hover:#1a1a26;
@@ -31,15 +53,15 @@
   .controls button{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;transition:all .2s;}
   .controls button:hover{filter:brightness(1.2);} .controls button:disabled{opacity:.5;cursor:not-allowed;}
   .info-bar{border-bottom:1px solid var(--border);}
-  .info-row{padding:.35rem 2rem;display:flex;gap:.5rem;font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap;}
-  .info-sep{color:#3a3a4a;font-size:.65rem;}
+  .info-row{padding:.35rem 2rem;display:flex;gap:.5rem;font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap;}
+  .info-sep{color:#3a3a4a;font-size:.75rem;}
   .status-text .ok{color:#2ecc71;} .status-text .err{color:#e74c3c;} .status-text .loading{color:#f39c12;}
   .dashboard{padding:1.5rem 2rem;display:grid;gap:1.5rem;}
   .summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
   .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.7rem .5rem;text-align:center;}
   .stat-card .value{font-size:1.4rem;font-weight:900;font-family:'JetBrains Mono',monospace;}
-  .stat-card .label{font-size:.6rem;color:var(--text-dim);margin-top:.2rem;text-transform:uppercase;letter-spacing:.03em;}
-  .stat-card .rate{font-size:.65rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);margin-top:.1rem;}
+  .stat-card .label{font-size:.75rem;color:var(--text-dim);margin-top:.2rem;text-transform:uppercase;letter-spacing:.03em;}
+  .stat-card .rate{font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);margin-top:.1rem;}
   .stat-card.domination .value{color:var(--domination);} .stat-card.monopoly .value{color:var(--monopoly);}
   .stat-card.oligopoly .value{color:var(--oligopoly);} .stat-card.contested .value{color:var(--contested);}
   .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;}
@@ -55,10 +77,10 @@
   tbody td{padding:.5rem .8rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;}
   tbody tr:hover{background:var(--bg-card-hover);}
   .castle-cell{font-weight:600;font-size:.78rem;white-space:nowrap;}
-  .tag-domination{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);}
-  .tag-monopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:var(--monopoly);}
-  .tag-oligopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:var(--oligopoly);}
-  .tag-contested{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;color:#fff;background:var(--contested);}
+  .tag-domination{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;color:#fff;background:linear-gradient(135deg,#ff6b6b,#ee5a24);}
+  .tag-monopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;color:#fff;background:var(--monopoly);}
+  .tag-oligopoly{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;color:#fff;background:var(--oligopoly);}
+  .tag-contested{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.75rem;font-weight:700;color:#fff;background:var(--contested);}
   .filter-row{padding:0 1.2rem .8rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
   .filter-row input,.filter-row select{font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.3rem .6rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);}
   .filter-row input{width:260px;}
@@ -77,7 +99,7 @@
   .mono-section-header.monopoly-header{color:var(--monopoly);}
   .mono-section-header.oligopoly-header{color:var(--oligopoly);}
   .worlds-cell{max-width:260px;white-space:normal;line-height:1.8;}
-  .world-tag{display:inline-block;padding:.1rem .45rem;margin:.1rem .15rem;border-radius:4px;font-size:.72rem;font-family:'JetBrains Mono',monospace;font-weight:600;background:#1e1e3a;border:1px solid #2e2e4a;color:#b0b0d0;cursor:pointer;transition:all .15s;}
+  .world-tag{display:inline-block;padding:.1rem .45rem;margin:.1rem .15rem;border-radius:4px;font-size:.75rem;font-family:'JetBrains Mono',monospace;font-weight:600;background:#1e1e3a;border:1px solid #2e2e4a;color:#b0b0d0;cursor:pointer;transition:all .15s;}
   .world-tag:hover{background:#2a2a50;border-color:#4a4a7a;color:#e0e0ff;}
   .world-tag.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   .wf-float{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--bg-card);border:1px solid var(--accent);border-radius:10px;padding:.6rem 1.2rem;display:flex;align-items:center;gap:1rem;z-index:100;box-shadow:0 4px 24px rgba(108,92,231,.3);}
@@ -89,13 +111,13 @@
     .hm-date-spacer{height:90px;}
     .header{padding:.5rem 1rem .3rem;} .header h1{font-size:1rem;}
     .tab-btn{padding:.6rem .8rem;font-size:.78rem;}
-    .info-row{padding:.3rem 1rem;font-size:.65rem;}
+    .info-row{padding:.3rem 1rem;font-size:.75rem;}
     .controls{padding:.6rem 1rem;} .dashboard{padding:.6rem .8rem;gap:.6rem;}
     .summary-row{grid-template-columns:repeat(4,1fr);gap:.3rem;}
-    .stat-card{padding:.4rem .2rem;border-radius:5px;} .stat-card .value{font-size:.9rem;} .stat-card .label{font-size:.45rem;}
+    .stat-card{padding:.4rem .2rem;border-radius:5px;} .stat-card .value{font-size:.9rem;} .stat-card .label{font-size:.75rem;}
     .hm-controls{padding:.4rem .6rem;margin-bottom:.4rem;}
     .hm-controls-grid{grid-template-columns:1fr!important;gap:.4rem;}
-    .hm-meta{font-size:.65rem;flex-wrap:wrap;}
+    .hm-meta{font-size:.75rem;flex-wrap:wrap;}
     .hm-view-btn{padding:.35rem .8rem;font-size:.75rem;}
     .hm-filter-toggle{display:block;}
     .hm-controls.collapsed{display:none;}
@@ -104,8 +126,8 @@
   }
   /* ヒートマップ */
   .hm-summary-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-bottom:.6rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-  .hm-summary-table th{padding:.35rem .6rem;text-align:left;font-weight:600;color:var(--text-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);}
-  .hm-summary-table td{padding:.3rem .6rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.72rem;}
+  .hm-summary-table th{padding:.35rem .6rem;text-align:left;font-weight:600;color:var(--text-dim);font-size:.75rem;text-transform:uppercase;letter-spacing:.03em;border-bottom:1px solid var(--border);}
+  .hm-summary-table td{padding:.3rem .6rem;border-bottom:1px solid #1e1e2e;font-family:'JetBrains Mono',monospace;font-size:.75rem;}
   .hm-summary-table tr:last-child td{border-bottom:none;}
   .hm-summary-table .hm-st-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:.4rem;vertical-align:middle;}
   .hm-summary-table .hm-st-name{color:var(--text);}
@@ -113,9 +135,9 @@
   .hm-summary-table .hm-st-pct{text-align:right;color:var(--text-dim);}
   .hm-controls{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:.5rem .8rem;margin-bottom:.6rem;}
   .hm-controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;align-items:end;}
-  .hm-field label{display:block;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
+  .hm-field label{display:block;font-size:.75rem;color:var(--text-dim);margin-bottom:.2rem;}
   .hm-field .hm-input,.hm-field .hm-select{width:100%;height:30px;border-radius:6px;border:1px solid var(--border);background:var(--bg-deep);color:var(--text);padding:0 .5rem;font-family:'Noto Sans JP',sans-serif;font-size:.75rem;outline:none;}
-  .hm-range-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
+  .hm-range-row{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-dim);margin-bottom:.2rem;}
   .hm-field input[type="range"]{width:100%;accent-color:var(--accent);}
 
   /* 統合凡例 */
@@ -126,23 +148,23 @@
     display:flex;align-items:center;gap:.4rem;min-width:0;
   }
   .hm-legend-label{
-    font-size:.68rem;color:var(--text-dim);white-space:nowrap;font-weight:600;
+    font-size:.75rem;color:var(--text-dim);white-space:nowrap;font-weight:600;
   }
   .hm-legend-bar-wrap{
     display:flex;align-items:center;gap:.3rem;flex:1;min-width:60px;max-width:180px;
   }
   .hm-legend-edge{
-    font-size:.65rem;color:var(--text-dim);white-space:nowrap;opacity:.8;
+    font-size:.75rem;color:var(--text-dim);white-space:nowrap;opacity:.8;
   }
   @media(max-width:480px){
     .hm-legend-bar-wrap{min-width:60px;}
-    .hm-legend-label{font-size:.62rem;}
-    .hm-legend-edge{font-size:.6rem;}
+    .hm-legend-label{font-size:.75rem;}
+    .hm-legend-edge{font-size:.75rem;}
   }
   .hm-legend{margin-top:.5rem;}
-  .hm-legend-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-dim);margin-bottom:.2rem;}
+  .hm-legend-row{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text-dim);margin-bottom:.2rem;}
   .hm-legend-bar{height:6px;border-radius:99px;background:linear-gradient(90deg,hsl(215 78% 50%) 0%,hsl(179 78% 49%) 17%,hsl(143 78% 47%) 33%,hsl(95 78% 46%) 56%,hsl(48 78% 44%) 78%,hsl(0 78% 42%) 100%);border:1px solid rgba(255,255,255,.08);flex:1;}
-  .hm-meta{display:flex;gap:1rem;margin-top:.4rem;font-size:.7rem;color:var(--text-dim);align-items:center;}
+  .hm-meta{display:flex;gap:1rem;margin-top:.4rem;font-size:.75rem;color:var(--text-dim);align-items:center;}
   .hm-view-toggle{display:flex;gap:0;margin-left:auto;}
   .hm-view-btn{font-family:'Noto Sans JP',sans-serif;font-size:.8rem;font-weight:700;padding:.45rem 1rem;border:2px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;transition:all .15s;}
   .hm-view-btn:first-child{border-radius:8px 0 0 8px;} .hm-view-btn:last-child{border-radius:0 8px 8px 0;}
@@ -150,7 +172,7 @@
   /* .controls button の上書き */
   .controls .hm-view-btn{background:transparent !important;border-color:var(--border) !important;color:var(--text-dim) !important;border-width:2px;}
   .controls .hm-view-btn.active{background:var(--accent) !important;border-color:var(--accent) !important;color:#fff !important;}
-  .hm-filter-toggle{display:none;font-family:'Noto Sans JP',sans-serif;font-size:.7rem;font-weight:600;padding:.25rem .7rem;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);border-radius:6px;cursor:pointer;}
+  .hm-filter-toggle{display:none;font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.25rem .7rem;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);border-radius:6px;cursor:pointer;}
   .hm-filter-toggle:hover{color:var(--text);border-color:var(--accent);}
   .hm-controls.collapsed{}
   .hm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem;}
@@ -158,23 +180,23 @@
   .hm-tile:hover{transform:translateY(-2px) scale(1.01);filter:brightness(1.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 14px 28px rgba(0,0,0,.3);}
   .hm-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 35%);pointer-events:none;}
   .hm-tile-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;position:relative;z-index:1;}
-  .hm-tile-world{font-size:.7rem;opacity:.88;}
+  .hm-tile-world{font-size:.75rem;opacity:.88;}
   .hm-tile-wid{font-weight:800;font-size:1.4rem;line-height:1;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
-  .hm-badge{font-size:.65rem;padding:.3rem .5rem;border-radius:99px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.08);white-space:nowrap;}
+  .hm-badge{font-size:.75rem;padding:.3rem .5rem;border-radius:99px;background:rgba(0,0,0,.14);border:1px solid rgba(255,255,255,.08);white-space:nowrap;}
   .hm-tile-body{position:relative;z-index:1;margin-top:1rem;}
   .hm-tile-rate{font-size:1.6rem;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.3rem;font-family:'JetBrains Mono',monospace;}
-  .hm-tile-sub{font-size:.7rem;opacity:.92;}
-  .hm-tile-guild{font-size:.68rem;margin-top:.3rem;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .hm-tile-sub{font-size:.75rem;opacity:.92;}
+  .hm-tile-guild{font-size:.75rem;margin-top:.3rem;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   @media(max-width:1024px){.hm-controls-grid{grid-template-columns:1fr;}}
-  @media(max-width:640px){.hm-grid:not(.hm-compact){grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;}.hm-tile{min-height:80px;padding:.6rem;border-radius:10px;}.hm-tile-wid{font-size:1.1rem;}.hm-tile-rate{font-size:1.1rem;}.hm-tile-body{margin-top:.5rem;}.hm-tile-sub{font-size:.6rem;}.hm-tile-guild{font-size:.55rem;}.hm-badge{font-size:.55rem;padding:.2rem .4rem;}}
+  @media(max-width:640px){.hm-grid:not(.hm-compact){grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;}.hm-tile{min-height:80px;padding:.6rem;border-radius:10px;}.hm-tile-wid{font-size:1.1rem;}.hm-tile-rate{font-size:1.1rem;}.hm-tile-body{margin-top:.5rem;}.hm-tile-sub{font-size:.75rem;}.hm-tile-guild{font-size:.75rem;}.hm-badge{font-size:.75rem;padding:.2rem .4rem;}}
   .hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
   .hm-compact .hm-tile{min-height:0;padding:3px 2px;border-radius:4px;text-align:center;box-shadow:none;}
   .hm-compact .hm-tile::after{display:none;}
   .hm-compact .hm-tile:hover{transform:scale(1.08);}
   .hm-compact .hm-tile-top{display:none;}
   .hm-compact .hm-tile-body{margin-top:0;}
-  .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.7rem;line-height:1.2;opacity:.9;}
-  .hm-compact .hm-tile-rate{font-size:.65rem;font-weight:700;margin-bottom:0;}
+  .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.75rem;line-height:1.2;opacity:.9;}
+  .hm-compact .hm-tile-rate{font-size:.75rem;font-weight:700;margin-bottom:0;}
   .hm-compact .hm-tile-sub,.hm-compact .hm-tile-guild,.hm-compact .hm-badge{display:none;}
   .hm-date-bar{position:fixed;bottom:0;left:0;right:0;background:#1a1a26;border-top:2px solid var(--accent);padding:.6rem 1.2rem;z-index:90;box-shadow:0 -4px 20px rgba(0,0,0,.5);}
   .hm-date-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:0 auto;}
@@ -185,31 +207,31 @@
   .hm-date-nav button{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .6rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);border-radius:6px;cursor:pointer;transition:all .15s;}
   .hm-date-nav button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#fff;}
   .hm-date-nav button:disabled{opacity:.3;cursor:not-allowed;}
-  .hm-date-tag{font-size:.68rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;}
+  .hm-date-tag{font-size:.75rem;color:var(--text-dim);font-family:'JetBrains Mono',monospace;white-space:nowrap;flex-shrink:0;}
   .hm-play-row{display:flex;align-items:center;gap:.6rem;max-width:1200px;margin:.5rem auto 0;}
   .hm-date-spacer{height:70px;}
   .hm-play-row{display:flex;align-items:center;gap:.8rem;margin-top:.6rem;}
   .hm-play-btn{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .8rem;border:1px solid var(--accent);background:var(--accent);color:#fff;border-radius:6px;cursor:pointer;transition:all .15s;min-width:4em;text-align:center;}
   .hm-play-btn:hover{filter:brightness(1.2);}
   .hm-play-btn.playing{background:#e74c3c;border-color:#e74c3c;}
-  .hm-speed-label{font-size:.72rem;color:var(--text-dim);}
+  .hm-speed-label{font-size:.75rem;color:var(--text-dim);}
   .hm-speed-btns{display:flex;gap:2px;}
-  .hm-speed-btn{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:600;padding:.25rem .5rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
+  .hm-speed-btn{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;padding:.25rem .5rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
   .hm-speed-btn:first-child{border-radius:5px 0 0 5px;} .hm-speed-btn:last-child{border-radius:0 5px 5px 0;}
   .hm-speed-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   #dash-heatmap.hm-playing>.hm-summary-table,#dash-heatmap.hm-playing>.hm-controls{display:none;}
   #dash-heatmap.hm-playing>.hm-date-spacer{height:80px;}
   #dash-heatmap.hm-playing .hm-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(36px,1fr))!important;gap:2px!important;}
   #dash-heatmap.hm-playing .hm-compact .hm-tile{padding:3px 2px;border-radius:4px;}
-  #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.55rem;}
-  #dash-heatmap.hm-playing .hm-compact .hm-tile-rate{font-size:.5rem;}
+  #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.75rem;}
+  #dash-heatmap.hm-playing .hm-compact .hm-tile-rate{font-size:.75rem;}
   @media(min-width:769px){
     #dash-heatmap.hm-playing .hm-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))!important;gap:3px!important;}
     #dash-heatmap.hm-playing .hm-compact .hm-tile{padding:6px 4px;border-radius:5px;}
     .hm-compact{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))!important;gap:3px!important;}
     .hm-compact .hm-tile{padding:6px 4px;border-radius:5px;}
-    #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.7rem;}
-    #dash-heatmap.hm-playing .hm-compact .hm-tile-rate{font-size:.65rem;}
+    #dash-heatmap.hm-playing .hm-compact .hm-tile-wid-compact{font-size:.75rem;}
+    #dash-heatmap.hm-playing .hm-compact .hm-tile-rate{font-size:.75rem;}
   }
 
   /* ── 採用属性分布タブ ─────────────────────────── */
@@ -228,27 +250,27 @@
   .arena-dom-bar-wrap{display:flex;align-items:center;gap:.8rem;margin-bottom:.4rem;flex-wrap:wrap;}
   .arena-dom-bar{flex:1;min-width:120px;height:8px;border-radius:99px;display:flex;overflow:hidden;}
   .arena-dom-seg{height:100%;}
-  .arena-dom-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.7rem;}
+  .arena-dom-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.75rem;}
   .arena-dom-legend-item{display:flex;align-items:center;gap:.3rem;}
   .arena-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
   .arena-src-toggle{display:flex;gap:0;}
-  .arena-src-btn{font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:600;padding:.3rem .7rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
+  .arena-src-btn{font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:600;padding:.3rem .7rem;border:1px solid var(--border);background:var(--bg-deep);color:var(--text-dim);cursor:pointer;transition:all .15s;}
   .arena-src-btn:first-child{border-radius:5px 0 0 5px;} .arena-src-btn:last-child{border-radius:0 5px 5px 0;}
   .arena-src-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   #dash-arena .hm-tile-dominant{font-size:1.45rem;font-weight:900;line-height:1;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;margin-bottom:.15rem;}
-  #dash-arena .hm-tile-pct{font-size:.68rem;opacity:.85;}
+  #dash-arena .hm-tile-pct{font-size:.75rem;opacity:.85;}
   #dash-arena .hm-compact .attr-bar{display:none;}
   #dash-arena .hm-compact .hm-tile-dominant{font-size:.8rem;}
   #dash-arena .hm-compact .hm-tile-pct{display:none;}
-  #dash-arena .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.65rem;opacity:.85;line-height:1.3;}
+  #dash-arena .hm-compact .hm-tile-wid-compact{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.75rem;opacity:.85;line-height:1.3;}
   #dash-arena thead th.ai{color:var(--c-ai);} #dash-arena thead th.ku{color:var(--c-ku);}
   #dash-arena thead th.sui{color:var(--c-sui);} #dash-arena thead th.ki{color:var(--c-ki);}
   #dash-arena thead th.ten{color:var(--c-ten);} #dash-arena thead th.mei{color:var(--c-mei);}
   #dash-arena thead th{text-align:right;cursor:pointer;user-select:none;}
   #dash-arena thead th:first-child{text-align:left;}
   #dash-arena thead th:hover{color:var(--text);}
-  #dash-arena thead th.sort-asc::after{content:" ▲";font-size:.65rem;}
-  #dash-arena thead th.sort-desc::after{content:" ▼";font-size:.65rem;}
+  #dash-arena thead th.sort-asc::after{content:" ▲";font-size:.75rem;}
+  #dash-arena thead th.sort-desc::after{content:" ▼";font-size:.75rem;}
   #dash-arena tbody td{text-align:right;}
   #dash-arena tbody td:first-child{text-align:left;}
   .td-attrbar-wrap{position:relative;}
@@ -308,7 +330,7 @@
   #a-table .arena-ext-link{
     display:inline-flex;align-items:center;justify-content:center;
     margin-left:.35rem;width:16px;height:16px;
-    font-size:.65rem;font-style:normal;
+    font-size:.75rem;font-style:normal;
     color:var(--text-dim);text-decoration:none;
     border:1px solid transparent;border-radius:3px;
     vertical-align:middle;opacity:0;
@@ -344,34 +366,34 @@
   .stock-tile:hover{transform:translateY(-2px);filter:brightness(1.12);}
   .stock-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 35%);pointer-events:none;}
   .stock-tile-top{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1;}
-  .stock-tile-world{font-size:.68rem;opacity:.85;}
+  .stock-tile-world{font-size:.75rem;opacity:.85;}
   .stock-tile-wid{font-weight:800;font-size:1.3rem;line-height:1;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
   .stock-tile-body{position:relative;z-index:1;margin-top:.6rem;}
   .stock-tile-val{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:.2rem;}
-  .stock-tile-lv{font-size:.68rem;opacity:.88;}
-  .stock-tile-badge{font-size:.6rem;padding:.25rem .45rem;border-radius:99px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.1);white-space:nowrap;}
+  .stock-tile-lv{font-size:.75rem;opacity:.88;}
+  .stock-tile-badge{font-size:.75rem;padding:.25rem .45rem;border-radius:99px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.1);white-space:nowrap;}
   /* コンパクト */
   .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(44px,1fr))!important;gap:2px!important;}
   .stock-grid.hm-compact .stock-tile{min-height:0;padding:3px 2px;border-radius:4px;text-align:center;}
   .stock-grid.hm-compact .stock-tile::after{display:none;}
   .stock-grid.hm-compact .stock-tile-top,.stock-grid.hm-compact .stock-tile-body{display:none;}
-  .stock-grid.hm-compact .stock-tile-compact{display:block;font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;opacity:.9;}
+  .stock-grid.hm-compact .stock-tile-compact{display:block;font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;opacity:.9;}
   @media(min-width:769px){
     .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))!important;gap:3px!important;}
     .stock-grid.hm-compact .stock-tile{padding:5px 3px;}
-    .stock-grid.hm-compact .stock-tile-compact{font-size:.68rem;}
+    .stock-grid.hm-compact .stock-tile-compact{font-size:.75rem;}
   }
   /* ストックタブ summary legend */
-  .stock-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.72rem;align-items:center;}
+  .stock-legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.75rem;align-items:center;}
   .stock-legend-dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
 
   /* 散布図 */
   .scatter-wrap{padding:1rem 1.5rem 120px;max-width:900px;margin:0 auto;}
   .scatter-svg{width:100%;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);}
-  .scatter-quadrant-label{font-size:11px;fill:rgba(255,255,255,.3);font-family:'Noto Sans JP',sans-serif;}
+  .scatter-quadrant-label{font-size:.75rem;fill:rgba(255,255,255,.3);font-family:'Noto Sans JP',sans-serif;}
   .scatter-dot{cursor:pointer;transition:r .1s,opacity .1s;}
   .scatter-dot:hover{opacity:1 !important;}
-  .scatter-axis-label{font-size:11px;fill:var(--text-dim,#888);font-family:'JetBrains Mono',monospace;}
+  .scatter-axis-label{font-size:.75rem;fill:var(--text-dim,#888);font-family:'JetBrains Mono',monospace;}
   .scatter-tooltip{position:fixed;background:rgba(20,20,32,.95);border:1px solid var(--accent,#6c5ce7);border-radius:8px;padding:.5rem .8rem;font-size:.75rem;pointer-events:none;z-index:200;display:none;color:#fff;line-height:1.5;}
 
   /* 占有ヒートマップ: 一覧→通常ジャンプ */
@@ -395,11 +417,11 @@
   }
 
   /* 中央拠点ヒートマップ */
-  .hm-center-guild{font-size:.68rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+  .hm-center-guild{font-size:.75rem;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
   .hm-center-score{font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;line-height:1.1;}
-  .hm-center-label{font-size:.62rem;opacity:.8;margin-top:.1rem;}
+  .hm-center-label{font-size:.75rem;opacity:.8;margin-top:.1rem;}
   .hm-center-compact-score{font-size:.75rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
-  .hm-center-compact-sub{font-size:.55rem;opacity:.85;}
+  .hm-center-compact-sub{font-size:.75rem;opacity:.85;}
 
   @media(max-width:600px){
     /* ギルドストック表示ボタンを短縮 */
@@ -414,10 +436,10 @@
     #stock-sort{max-width:100%;}
     /* ストックタブ: コンパクトタイルをより小さく */
     .stock-grid.hm-compact{grid-template-columns:repeat(auto-fill,minmax(40px,1fr))!important;gap:2px!important;}
-    .stc-wid{font-size:.52rem;}
-    .stc-val{font-size:.50rem;}
+    .stc-wid{font-size:.75rem;}
+    .stc-val{font-size:.75rem;}
     /* ストックタブ: 一覧/通常/散布図 ボタンが切れないよう */
-    #stock-vb-scatter{font-size:.72rem;padding:.35rem .5rem;}
+    #stock-vb-scatter{font-size:.75rem;padding:.35rem .5rem;}
   }
 
 
@@ -435,14 +457,14 @@
     display:flex;flex-direction:column;align-items:center;gap:1px;
   }
   .hm-center-compact-top{
-    font-size:.6rem;font-weight:700;font-family:'JetBrains Mono',monospace;
+    font-size:.75rem;font-weight:700;font-family:'JetBrains Mono',monospace;
     line-height:1.2;opacity:.9;letter-spacing:-.02em;white-space:nowrap;
   }
   .hm-center-compact-fraction{
-    font-size:.68rem;font-weight:800;
+    font-size:.75rem;font-weight:800;
   }
   .hm-center-compact-streak{
-    font-size:.72rem;font-weight:800;
+    font-size:.75rem;font-weight:800;
     font-family:'JetBrains Mono',monospace;
     line-height:1;background:rgba(0,0,0,.22);
     border-radius:3px;padding:1px 3px;
@@ -450,7 +472,7 @@
   }
   /* 通常ビューのストリークバッジ */
   .hm-center-streak-badge{
-    font-size:.72rem;font-weight:700;
+    font-size:.75rem;font-weight:700;
     padding:.18rem .45rem;border-radius:99px;
     background:rgba(0,0,0,.28);white-space:nowrap;
     line-height:1.2;
@@ -467,8 +489,8 @@
     gap:0;line-height:1.15;
     font-family:'JetBrains Mono',monospace;font-weight:700;
   }
-  .stc-wid{font-size:.58rem;opacity:.85;}
-  .stc-val{font-size:.55rem;opacity:.95;letter-spacing:-.02em;}
+  .stc-wid{font-size:.75rem;opacity:.85;}
+  .stc-val{font-size:.75rem;opacity:.95;letter-spacing:-.02em;}
 
   /* ── 履歴バー モバイル対応 ── */
   @media(max-width:768px){
@@ -478,10 +500,10 @@
     .hm-date-nav{order:1;flex-shrink:0;}
     .hm-date-nav:last-of-type{order:3;}
     .hm-date-value{order:4;font-size:.75rem;min-width:5.5em;}
-    .hm-date-tag{order:5;font-size:.62rem;}
-    .hm-play-btn{order:6;padding:.25rem .5rem;font-size:.7rem;min-width:2.5em;margin-left:0 !important;}
+    .hm-date-tag{order:5;font-size:.75rem;}
+    .hm-play-btn{order:6;padding:.25rem .5rem;font-size:.75rem;min-width:2.5em;margin-left:0 !important;}
     .hm-speed-btns{order:7;margin-left:0 !important;}
-    .hm-speed-btn{font-size:.62rem;padding:.2rem .35rem;}
+    .hm-speed-btn{font-size:.75rem;padding:.2rem .35rem;}
   }
 </style>
 </head>
@@ -524,7 +546,7 @@
   </div>
   <div class="table-card" id="l-domCard"><h3><span style="color:var(--domination);">👑 制覇</span> <span id="l-domC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>制覇ギルド</th><th>城数</th></tr></thead><tbody id="l-domB"></tbody></table></div></div>
   <div class="table-card"><h3><span style="color:var(--monopoly);">🔴 独占</span> <span id="l-monoC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>独占ギルド</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th></tr></thead><tbody id="l-monoB"></tbody></table></div></div>
-  <div class="table-card"><h3><span style="color:var(--oligopoly);">🟠 寡占</span> <span id="l-oligoC"></span> <span style="font-size:.72rem;font-weight:400;margin-left:1rem;color:var(--text-dim);">凡例: <span style="color:var(--oligo-a);font-weight:700;">■寡占</span> <span style="color:var(--oligo-b);font-weight:700;margin-left:.4rem;">■他B</span> <span style="color:var(--oligo-c);font-weight:700;margin-left:.4rem;">■他C</span></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>最多ギルド</th><th>数</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th></tr></thead><tbody id="l-oligoB"></tbody></table></div></div>
+  <div class="table-card"><h3><span style="color:var(--oligopoly);">🟠 寡占</span> <span id="l-oligoC"></span> <span style="font-size:.75rem;font-weight:400;margin-left:1rem;color:var(--text-dim);">凡例: <span style="color:var(--oligo-a);font-weight:700;">■寡占</span> <span style="color:var(--oligo-b);font-weight:700;margin-left:.4rem;">■他B</span> <span style="color:var(--oligo-c);font-weight:700;margin-left:.4rem;">■他C</span></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th>World</th><th>最多ギルド</th><th>数</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th></tr></thead><tbody id="l-oligoB"></tbody></table></div></div>
   <div class="table-card"><h3>全ワールド一覧</h3><div class="filter-row"><input type="text" id="l-fG" placeholder="ギルド名 / ワールド番号で検索…" oninput="renderLT()"><select id="l-fS" onchange="renderLT()"><option value="all">全て</option><option value="domination">制覇</option><option value="monopoly">独占</option><option value="oligopoly">寡占</option><option value="contested">分散</option></select></div><div class="table-wrap"><table><thead><tr><th>World</th><th>状態</th><th>ブラッセル</th><th>ウィスケルケー</th><th>モダーヴ</th><th>シメイ</th><th>グラベンスティン</th><th>支配ギルド</th></tr></thead><tbody id="l-tB"></tbody></table></div></div>
 </div>
 
@@ -549,7 +571,7 @@
   </div>
   <div class="table-card" id="g-domCard"><h3><span style="color:var(--domination);">👑 制覇</span> <span id="g-domC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>制覇ギルド</th><th>城数</th></tr></thead><tbody id="g-domB"></tbody></table></div></div>
   <div class="table-card"><h3><span style="color:var(--monopoly);">🔴 独占</span> <span id="g-monoC"></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>独占ギルド</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th></tr></thead><tbody id="g-monoB"></tbody></table></div></div>
-  <div class="table-card"><h3><span style="color:var(--oligopoly);">🟠 寡占</span> <span id="g-oligoC"></span> <span style="font-size:.72rem;font-weight:400;margin-left:1rem;color:var(--text-dim);">凡例: <span style="color:var(--oligo-a);font-weight:700;">■寡占</span> <span style="color:var(--oligo-b);font-weight:700;margin-left:.4rem;">■他B</span> <span style="color:var(--oligo-c);font-weight:700;margin-left:.4rem;">■他C</span></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>最多ギルド</th><th>数</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th></tr></thead><tbody id="g-oligoB"></tbody></table></div></div>
+  <div class="table-card"><h3><span style="color:var(--oligopoly);">🟠 寡占</span> <span id="g-oligoC"></span> <span style="font-size:.75rem;font-weight:400;margin-left:1rem;color:var(--text-dim);">凡例: <span style="color:var(--oligo-a);font-weight:700;">■寡占</span> <span style="color:var(--oligo-b);font-weight:700;margin-left:.4rem;">■他B</span> <span style="color:var(--oligo-c);font-weight:700;margin-left:.4rem;">■他C</span></span></h3><div class="table-wrap" style="max-height:400px;"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>最多ギルド</th><th>数</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th></tr></thead><tbody id="g-oligoB"></tbody></table></div></div>
   <div class="table-card"><h3>全ブロック一覧</h3><div class="filter-row"><input type="text" id="g-fG" placeholder="ギルド名 / ワールド番号で検索…" oninput="renderGT()"><select id="g-fS" onchange="renderGT()"><option value="all">全て</option><option value="domination">制覇</option><option value="monopoly">独占</option><option value="oligopoly">寡占</option><option value="contested">分散</option></select></div><div class="table-wrap"><table><thead><tr><th class="srv-col">サーバー</th><th>ワールド</th><th>クラス</th><th>状態</th><th>アイン</th><th>イエソド</th><th>マルクト</th><th>ケテル</th><th>テファレト</th><th>支配ギルド</th></tr></thead><tbody id="g-tB"></tbody></table></div></div>
 </div>
 
@@ -562,7 +584,7 @@
       <button class="hm-view-btn" onclick="setHMView('normal')" id="hm-btn-normal">通常</button>
       <button class="hm-view-btn" onclick="toggleHMCenter()" id="hm-btn-center">🏰 中央拠点</button>
     </div>
-    <span style="font-size:.7rem;color:var(--text-dim);" id="hm-visCount">175件</span>
+    <span style="font-size:.75rem;color:var(--text-dim);" id="hm-visCount">175件</span>
     <button class="hm-filter-toggle" onclick="toggleHMFilter()">⚙ フィルタ</button>
     <button id="hm-stock-bar-btn" onclick="hmToggleStockBar()"
       style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;padding:.3rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);cursor:pointer;transition:all .15s;margin-left:auto;"
@@ -613,7 +635,7 @@
       </div>
     </div>
   </div>
-  <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.68rem;display:none;gap:.7rem;align-items:center;flex-wrap:wrap;">
+  <div id="hm-stock-legend" style="padding:.35rem 1.5rem .4rem;font-size:.75rem;display:none;gap:.7rem;align-items:center;flex-wrap:wrap;">
     <span style="color:var(--text-dim);font-weight:700">ギルドストック:</span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#1e1e1e;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">低</span></span>
     <span style="display:flex;align-items:center;gap:.3rem"><span style="display:inline-block;width:20px;height:5px;background:#484848;border-radius:2px;border:1px solid rgba(255,255,255,.3);vertical-align:middle"></span><span style="color:var(--text-dim)">やや低</span></span>
@@ -655,7 +677,7 @@
       <div class="stat-card mei"><div class="value" id="a-mei">-</div><div class="label">冥 avg</div></div>
     </div>
     <div class="arena-dom-bar-wrap">
-      <span style="font-size:.7rem;color:var(--text-dim);font-weight:600;white-space:nowrap;">支配属性:</span>
+      <span style="font-size:.75rem;color:var(--text-dim);font-weight:600;white-space:nowrap;">支配属性:</span>
       <div class="arena-dom-bar" id="a-dom-bar"></div>
       <div class="arena-dom-legend" id="a-dom-legend"></div>
     </div>
@@ -665,7 +687,7 @@
         <button class="hm-view-btn"        id="a-vb-normal"  onclick="arenaSetView('normal')">通常</button>
         <button class="hm-view-btn"        id="a-vb-table"   onclick="arenaSetView('table')">テーブル</button>
       </div>
-      <span style="font-size:.7rem;color:var(--text-dim);" id="a-vis-count">-件</span>
+      <span style="font-size:.75rem;color:var(--text-dim);" id="a-vis-count">-件</span>
     </div>
     <div id="a-grid" class="hm-grid hm-compact"></div>
     <div class="table-card hidden" id="a-table-card">
@@ -687,10 +709,10 @@
       <option value="stock-asc">ギルドストック 低い順</option>
       <option value="combo-desc">占有×活動 複合スコア</option>
     </select>
-    <span style="font-size:.72rem;color:var(--text-dim);" id="stock-vis-count">-</span>
+    <span style="font-size:.75rem;color:var(--text-dim);" id="stock-vis-count">-</span>
   </div>
   <div class="stock-legend" style="padding:.5rem 1.2rem;">
-    <div id="stock-legend-row" class="stock-legend-item-row" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;font-size:.72rem;"></div>
+    <div id="stock-legend-row" class="stock-legend-item-row" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;font-size:.75rem;"></div>
   </div>
   <div id="stock-grid" class="stock-grid" style="padding:0 1.2rem 1rem;"></div>
   <div class="scatter-tooltip" id="scatter-tooltip"></div>
@@ -722,15 +744,15 @@
       oninput="renderLament()"
       style="font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);flex:1;min-width:180px;max-width:320px;">
     <div style="display:flex;gap:4px;flex-wrap:wrap;" id="lament-attr-btns">
-      <button class="lament-attr-btn active" data-attr="all" onclick="lamentSetAttr('all')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer;">全て</button>
-      <button class="lament-attr-btn" data-attr="藍" onclick="lamentSetAttr('藍')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ai);cursor:pointer;">藍</button>
-      <button class="lament-attr-btn" data-attr="紅" onclick="lamentSetAttr('紅')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ku);cursor:pointer;">紅</button>
-      <button class="lament-attr-btn" data-attr="翠" onclick="lamentSetAttr('翠')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-sui);cursor:pointer;">翠</button>
-      <button class="lament-attr-btn" data-attr="黄" onclick="lamentSetAttr('黄')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ki);cursor:pointer;">黄</button>
-      <button class="lament-attr-btn" data-attr="天" onclick="lamentSetAttr('天')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ten);cursor:pointer;">天</button>
-      <button class="lament-attr-btn" data-attr="冥" onclick="lamentSetAttr('冥')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-mei);cursor:pointer;">冥</button>
+      <button class="lament-attr-btn active" data-attr="all" onclick="lamentSetAttr('all')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer;">全て</button>
+      <button class="lament-attr-btn" data-attr="藍" onclick="lamentSetAttr('藍')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ai);cursor:pointer;">藍</button>
+      <button class="lament-attr-btn" data-attr="紅" onclick="lamentSetAttr('紅')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ku);cursor:pointer;">紅</button>
+      <button class="lament-attr-btn" data-attr="翠" onclick="lamentSetAttr('翠')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-sui);cursor:pointer;">翠</button>
+      <button class="lament-attr-btn" data-attr="黄" onclick="lamentSetAttr('黄')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ki);cursor:pointer;">黄</button>
+      <button class="lament-attr-btn" data-attr="天" onclick="lamentSetAttr('天')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ten);cursor:pointer;">天</button>
+      <button class="lament-attr-btn" data-attr="冥" onclick="lamentSetAttr('冥')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-mei);cursor:pointer;">冥</button>
     </div>
-    <span style="font-size:.72rem;color:var(--text-dim);margin-left:auto;" id="lament-count"></span>
+    <span style="font-size:.75rem;color:var(--text-dim);margin-left:auto;" id="lament-count"></span>
   </div>
   <div class="table-wrap" style="max-height:calc(100vh - 200px);">
     <table id="lament-table" style="width:100%;border-collapse:collapse;font-size:.82rem;">
@@ -748,7 +770,7 @@
       <tbody id="lament-tbody"></tbody>
     </table>
   </div>
-  <div style="margin-top:.8rem;font-size:.68rem;color:var(--text-dim);line-height:1.6;">
+  <div style="margin-top:.8rem;font-size:.75rem;color:var(--text-dim);line-height:1.6;">
     ※ 英語タイトルはYouTube公式MV・CDに基づきます。最新キャラは随時追加予定。
   </div>
 </div>
@@ -762,15 +784,15 @@
       oninput="renderChamp()"
       style="font-family:'Noto Sans JP',sans-serif;font-size:.82rem;padding:.35rem .7rem;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);flex:1;min-width:180px;max-width:320px;">
     <div style="display:flex;gap:4px;flex-wrap:wrap;" id="champ-attr-btns">
-      <button class="champ-attr-btn active" data-attr="all" onclick="champSetAttr('all')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;">全て</button>
-      <button class="champ-attr-btn" data-attr="藍" onclick="champSetAttr('藍')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ai);cursor:pointer;">藍</button>
-      <button class="champ-attr-btn" data-attr="紅" onclick="champSetAttr('紅')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ku);cursor:pointer;">紅</button>
-      <button class="champ-attr-btn" data-attr="翠" onclick="champSetAttr('翠')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-sui);cursor:pointer;">翠</button>
-      <button class="champ-attr-btn" data-attr="黄" onclick="champSetAttr('黄')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ki);cursor:pointer;">黄</button>
-      <button class="champ-attr-btn" data-attr="天" onclick="champSetAttr('天')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ten);cursor:pointer;">天</button>
-      <button class="champ-attr-btn" data-attr="冥" onclick="champSetAttr('冥')" style="font-family:'Noto Sans JP',sans-serif;font-size:.72rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-mei);cursor:pointer;">冥</button>
+      <button class="champ-attr-btn active" data-attr="all" onclick="champSetAttr('all')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;">全て</button>
+      <button class="champ-attr-btn" data-attr="藍" onclick="champSetAttr('藍')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ai);cursor:pointer;">藍</button>
+      <button class="champ-attr-btn" data-attr="紅" onclick="champSetAttr('紅')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ku);cursor:pointer;">紅</button>
+      <button class="champ-attr-btn" data-attr="翠" onclick="champSetAttr('翠')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-sui);cursor:pointer;">翠</button>
+      <button class="champ-attr-btn" data-attr="黄" onclick="champSetAttr('黄')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ki);cursor:pointer;">黄</button>
+      <button class="champ-attr-btn" data-attr="天" onclick="champSetAttr('天')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-ten);cursor:pointer;">天</button>
+      <button class="champ-attr-btn" data-attr="冥" onclick="champSetAttr('冥')" style="font-family:'Noto Sans JP',sans-serif;font-size:.75rem;font-weight:700;padding:.28rem .65rem;border-radius:5px;border:1px solid var(--border);background:var(--bg-card);color:var(--c-mei);cursor:pointer;">冥</button>
     </div>
-    <span style="font-size:.72rem;color:var(--text-dim);margin-left:auto;" id="champ-count"></span>
+    <span style="font-size:.75rem;color:var(--text-dim);margin-left:auto;" id="champ-count"></span>
   </div>
   <div class="table-wrap" style="max-height:calc(100vh - 200px);">
     <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
@@ -778,17 +800,15 @@
         <tr>
           <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('attr')">属性</th>
           <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('name')">キャラクター</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">最強プレイヤー</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">World</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('pos')">バトリ順位</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('pbp')">プレイヤーBP</th>
-          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">キャラ単体BP</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">ワールド</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">プレイヤー名</th>
+          <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">戦闘力</th>
         </tr>
       </thead>
       <tbody id="champ-tbody"></tbody>
     </table>
   </div>
-  <div style="margin-top:.8rem;font-size:.68rem;color:var(--text-dim);line-height:1.6;">
+  <div style="margin-top:.8rem;font-size:.75rem;color:var(--text-dim);line-height:1.6;">
     ※ 各ワールドのバトルリーグ上位ランカー編成から、キャラ単体BPが最も高いプレイヤーを集計。毎日18時更新。<br>
     ※ 上位ランカー圏内に出現しないキャラは「—」表示になります。
   </div>
@@ -1066,11 +1086,11 @@ function renderLament(){
   const tbody = document.getElementById('lament-tbody');
   tbody.innerHTML = data.map(d=>{
     const col = ATTR_COL[d.attr] || 'var(--text)';
-    const qlTag = d.qlipha ? '<span style="font-size:.6rem;padding:.1rem .3rem;border-radius:3px;background:rgba(168,74,237,.25);color:#c0a0ef;margin-left:.3rem;">クリファ</span>' : '';
+    const qlTag = d.qlipha ? '<span style="font-size:.75rem;padding:.1rem .3rem;border-radius:3px;background:rgba(168,74,237,.25);color:#c0a0ef;margin-left:.3rem;">クリファ</span>' : '';
     const ytJpBtn = d.yt ? `<a href="${d.yt}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
-      style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#ff0000;color:#fff;font-size:.65rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.65rem;">—</span>';
+      style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#ff0000;color:#fff;font-size:.75rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.75rem;">—</span>';
     const ytEnBtn = d.yt_en ? `<a href="${d.yt_en}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
-      style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#1565c0;color:#fff;font-size:.65rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.65rem;">—</span>';
+      style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:22px;border-radius:4px;background:#1565c0;color:#fff;font-size:.75rem;text-decoration:none;font-weight:700;">▶</a>` : '<span style="color:var(--text-dim);font-size:.75rem;">—</span>';
     return `<tr style="cursor:default;" onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;">
         <span style="font-size:.78rem;font-weight:700;color:${col};">${d.attr}</span>
@@ -1743,7 +1763,7 @@ function renderStockScatter(){
       <!-- ドット -->
       ${dots}
     </svg>
-    <div style="margin-top:.5rem;font-size:.72rem;color:var(--text-dim);text-align:center;line-height:1.6">
+    <div style="margin-top:.5rem;font-size:.75rem;color:var(--text-dim);text-align:center;line-height:1.6">
       ● クリックで占有ヒートマップへジャンプ &nbsp;|&nbsp; 点の色 = ギルドストック（暗=低 / 金=高）
     </div>
   </div>`;
@@ -2470,7 +2490,7 @@ function renderStock(){
   grid.style.padding = '';
   // 凡例
   const legend = document.getElementById('stock-legend-row');
-  legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.7rem">ギルドストック:</span>' +
+  legend.innerHTML = '<span style="color:var(--text-dim);font-weight:700;font-size:.75rem">ギルドストック:</span>' +
     STOCK_LEVELS.map((l,i)=>{
       const lo = i===0 ? 0 : STOCK_Q[i-1];
       const dotBorder = i>=3 ? 'border:1px solid #888;' : '';
@@ -2511,15 +2531,15 @@ function renderStock(){
     return `<article class="stock-tile" style="background:${col};color:${tc};cursor:pointer;" onclick="stockJumpToHeatmap('${label}')">
       <div class="stock-tile-top">
         <div>
-          <div class="stock-tile-world">World <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;opacity:.7">#${idx+1}</span></div>
+          <div class="stock-tile-world">World <span style="font-family:'JetBrains Mono',monospace;font-size:.75rem;opacity:.7">#${idx+1}</span></div>
           <div class="stock-tile-wid">${label}</div>
         </div>
         <div class="stock-tile-badge">${lbl}</div>
       </div>
       <div class="stock-tile-body">
         <div class="stock-tile-val">${val}</div>
-        ${occStr ? `<div style="font-size:.68rem;opacity:.85;margin-top:.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">占有 ${occStr}</div>` : ''}
-        ${occLbl ? `<div style="font-size:.6rem;opacity:.7">${occLbl}</div>` : ''}
+        ${occStr ? `<div style="font-size:.75rem;opacity:.85;margin-top:.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">占有 ${occStr}</div>` : ''}
+        ${occLbl ? `<div style="font-size:.75rem;opacity:.7">${occLbl}</div>` : ''}
       </div>
     </article>`;
   }).join('');
@@ -2580,7 +2600,7 @@ async function loadChampions(){
     if(!res.ok){
       console.warn("champions.json not found:", res.status);
       if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
-        `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#e74c3c;">champions.json が見つかりません (HTTP ${res.status})<br><small style="color:var(--text-dim)">GitHub Actions を実行してください</small></td></tr>`;
+        `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#e74c3c;">champions.json が見つかりません (HTTP ${res.status})<br><small style="color:var(--text-dim)">GitHub Actions を実行してください</small></td></tr>`;
       return;
     }
     const data = await res.json();
@@ -2591,7 +2611,7 @@ async function loadChampions(){
   }catch(e){
     console.warn("champions.json load error:", e);
     if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
-      `<tr><td colspan="7" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</td></tr>`;
+      `<tr><td colspan="5" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</td></tr>`;
   }
 }
 
@@ -2709,7 +2729,7 @@ function renderChamp(){
   document.getElementById('champ-count').textContent = data.length + '件';
   const tbody = document.getElementById('champ-tbody');
   if(!data.length){
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--text-dim);">該当なし</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:var(--text-dim);">該当なし</td></tr>';
     return;
   }
   const fmt = n => (n||0).toLocaleString('en-US');
@@ -2722,10 +2742,8 @@ function renderChamp(){
         <span style="font-size:.78rem;font-weight:700;color:${col};">${d.attr||'-'}</span>
       </td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-weight:600;font-size:.82rem;">${d.name||('ID:'+d.id)}</td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;font-size:.78rem;${hasP?'':dim}">${hasP?('#'+d.position):'—'}</td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--text-dim);">${hasP?fmt(d.playerBP):'—'}</td>
+      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
       <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
     </tr>`;
   }).join('');
