@@ -2759,12 +2759,12 @@ function renderChamp(){
     const hasP = !!d.playerName;
     const dim = 'color:var(--text-dim);';
     return `<tr onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
-      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-size:.9rem;">
-        <span style="font-size:.875rem;font-weight:700;color:${col};margin-right:.5rem;" title="${d.attr||''}属性">${d.attr||'-'}</span><span style="font-weight:600;">${d.name||('ID:'+d.id)}</span>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;">
+        <span style="font-weight:700;color:${col};margin-right:.5rem;" title="${d.attr||''}属性">${d.attr||'-'}</span><span style="font-weight:600;">${d.name||('ID:'+d.id)}</span>
       </td>
-      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.875rem;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
-      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;font-size:.9rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
-      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.875rem;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
     </tr>`;
   }).join('');
 }
