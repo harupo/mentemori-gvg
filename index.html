@@ -794,15 +794,15 @@
     </div>
     <span style="font-size:.75rem;color:var(--text-dim);margin-left:auto;" id="champ-count"></span>
   </div>
-  <div style="max-width:960px;margin:0 auto;">
+  <div style="max-width:1120px;margin:0 auto;">
     <div class="table-wrap" style="max-height:calc(100vh - 200px);">
       <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
         <thead>
           <tr>
-            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('name')">キャラクター</th>
-            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">ワールド</th>
-            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">プレイヤー名</th>
-            <th style="position:sticky;top:0;background:#1a1a26;padding:.5rem .7rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">戦闘力</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('name')">キャラクター</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.7rem 1rem;text-align:center;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('world')">ワールド</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.7rem 1rem;text-align:left;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('player')">プレイヤー名</th>
+            <th style="position:sticky;top:0;background:#1a1a26;padding:.7rem 1rem;text-align:right;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;" onclick="champSort('cbp')">戦闘力</th>
           </tr>
         </thead>
         <tbody id="champ-tbody"></tbody>
@@ -2739,12 +2739,12 @@ function renderChamp(){
     const hasP = !!d.playerName;
     const dim = 'color:var(--text-dim);';
     return `<tr onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-size:.82rem;">
-        <span style="font-size:.78rem;font-weight:700;color:${col};margin-right:.45rem;" title="${d.attr||''}属性">${d.attr||'-'}</span><span style="font-weight:600;">${d.name||('ID:'+d.id)}</span>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;white-space:nowrap;font-size:.82rem;">
+        <span style="font-size:.78rem;font-weight:700;color:${col};margin-right:.5rem;" title="${d.attr||''}属性">${d.attr||'-'}</span><span style="font-weight:600;">${d.name||('ID:'+d.id)}</span>
       </td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
-      <td style="padding:.42rem .7rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.78rem;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;font-size:.82rem;${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
+      <td style="padding:.6rem 1rem;border-bottom:1px solid #1e1e2e;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
     </tr>`;
   }).join('');
 }
