@@ -20,11 +20,28 @@ const CHAR_MAP = {
   51:'紅',52:'藍',53:'黄',54:'紅',55:'翠',56:'翠',57:'藍',58:'紅',59:'藍',60:'翠',
   61:'冥',62:'紅',63:'冥',64:'藍',65:'天',66:'黄',67:'黄',68:'藍',69:'冥',70:'翠',
   71:'黄',72:'紅',73:'黄',74:'藍',75:'紅',76:'翠',77:'藍',78:'黄',79:'藍',80:'翠',
-  81:'黄',82:'翠',83:'黄',84:'藍',85:'紅',86:'天',87:'冥',88:'天',89:'紅',
+  81:'黄',82:'翠',83:'黄',84:'藍',85:'紅',86:'天',87:'冥',88:'天',89:'紅',92:'翠',
   93:'紅',95:'藍',96:'黄',99:'紅',100:'黄',101:'藍',102:'紅',103:'翠',
   105:'冥',106:'藍',107:'紅',108:'翠',109:'天',111:'翠',112:'紅',113:'黄',114:'翠',115:'黄',
   116:'翠',117:'天',121:'天',122:'紅',123:'藍',124:'翠',125:'冥',126:'黄',128:'天',129:'冥',
-  130:'紅',131:'藍',132:'翠',135:'黄',137:'冥',139:'黄'
+  130:'紅',131:'藍',132:'翠',134:'藍',135:'黄',137:'冥',139:'黄',141:'天'
+};
+
+// CharacterId → キャラ名（キャラクターリスト.xlsx 準拠・126体）
+const CHAR_NAME = {
+  1:'モニカ',2:'イリア',3:'アイリス',4:'ロキ',5:'ソルティーナ',6:'アムレート',7:'フェンリル',8:'フローレンス',9:'ソーニャ',10:'モーザ',
+  11:'シャーロット',12:'アリアンロッド',13:'テオドラ',14:'ペトラ',15:'サブリナ',16:'フレイシア',17:'アモール',18:'リーン',19:'ベル',20:'ディアン',
+  21:'シズ',22:'ザラ',23:'ロザリー',24:'リブラ',25:'アイビー',26:'マーリン',27:'コルディ',28:'ニーナ',29:'メルティーユ',30:'ルーク',
+  31:'ガルム',32:'スクルド',33:'チェルナ',34:'ソテイラ',35:'ミミ',36:'トロポン',37:'ハトホル',38:'オリヴィエ',39:'プリマヴェーラ',40:'カロル',
+  41:'ナターシャ',42:'フォルティナ',43:'ケルベロス',44:'ルサールカ',45:'エルフリンデ',46:'ルナリンド',47:'ヴァルリーデ',48:'A.A.',49:'オフィーリア',50:'アームストロング',
+  51:'ソフィア',52:'シヴィ',53:'ウィーラ',54:'シフォン',55:'レア',56:'クラウディア',57:'ステラ',58:'アーティ',59:'エイル',60:'フィアー',
+  61:'冥イリア',62:'プリシラ',63:'パラデア',64:'ギルウィアル',65:'アイネ',66:'黄アイリス',67:'リシェス',68:'フェーネ',69:'カグヤ',70:'夏サブリナ',
+  71:'夏モーザ',72:'夏コルディ',73:'聖アモール',74:'藍トロポン',75:'モルガナ',76:'ユニ',77:'ミナシュマリ',78:'アサヒ',79:'セルリア',80:'ミラ',
+  81:'タマ',82:'アレクサンドラ',83:'黄フェンリル',84:'リズ',85:'マチルダ',86:'メリア',87:'ネブラ',88:'天ロザリー',89:'ルシール',92:'イディーネ',
+  93:'アルトリア',95:'夏ニーナ',96:'夏アムレート',99:'リリコット',100:'モワノー',101:'エヴリン',102:'リーベ',103:'コベル',105:'冥ナターシャ',106:'ユリーカ',
+  107:'冬ソルティーナ',108:'翠ルナリンド',109:'アイリーン',111:'ティリー',112:'春シズ',113:'ルスティカ',114:'ポーラ',115:'ポプリ',116:'D.D.',117:'天A.A.',
+  121:'ルミカ',122:'フラック',123:'団長コルディ',124:'ユルディズ',125:'カーミラ',126:'ミフリ',128:'リヴェリア',129:'冥ケルベロス',130:'アイシェ',131:'藍マーリン',
+  132:'翠ステラ',134:'藍フィアー',135:'メルラン',137:'レジーナ',139:'トリクシー',141:'リリー'
 };
 const ATTRS = ['藍','紅','翠','黄','天','冥'];
 
@@ -171,6 +188,9 @@ async function fetchArena() {
     .map(w => w.world_id);
   console.log(`  ${targets.length} ワールド`);
 
+  // 各キャラの単体BP最強プレイヤーを集計（charId → 記録）
+  const champions = {};
+
   const items = await runQueue(targets, CONCURRENCY, async (wid) => {
     const j = await fetchJSON(`${API}/${wid}/arena/latest`);
     if (!j?.data || !Array.isArray(j.data) || j.data.length === 0) return null;
@@ -180,14 +200,32 @@ async function fetchArena() {
     let total = 0;
     const unmappedIds = {};
 
-    for (const player of players) {
+    for (let pi = 0; pi < players.length; pi++) {
+      const player = players[pi];
       for (const char of (player.UserCharacterInfoList || [])) {
-        const attr = CHAR_MAP[char.CharacterId];
+        const cid = char.CharacterId;
+        const attr = CHAR_MAP[cid];
         if (attr) {
           raw[attr]++;
           total++;
         } else {
-          unmappedIds[char.CharacterId] = (unmappedIds[char.CharacterId] || 0) + 1;
+          unmappedIds[cid] = (unmappedIds[cid] || 0) + 1;
+        }
+        // 各キャラ単体BP最強プレイヤー更新
+        const cbp = char.BattlePower || 0;
+        const cur = champions[cid];
+        if (!cur || cbp > cur.charBP) {
+          champions[cid] = {
+            id: cid,
+            name: CHAR_NAME[cid] || `ID:${cid}`,
+            attr: attr || '',
+            playerName: player.PlayerName || '',
+            wid,
+            label: fmtW(wid),
+            position: pi + 1,
+            playerBP: player.BattlePower || 0,
+            charBP: cbp,
+          };
         }
       }
     }
@@ -215,11 +253,24 @@ async function fetchArena() {
   });
 
   items.sort((a, b) => a.wid - b.wid);
+
+  // ランカー圏内に未出現のキャラも全126体を行として残す（プレイヤー情報は空）
+  for (const [idStr, name] of Object.entries(CHAR_NAME)) {
+    if (!champions[idStr]) {
+      const id = Number(idStr);
+      champions[idStr] = {
+        id, name, attr: CHAR_MAP[id] || '',
+        playerName: '', wid: 0, label: '', position: 0, playerBP: 0, charBP: 0,
+      };
+    }
+  }
+
   const ts = Math.max(0, ...items.map(i => i.timestamp || 0));
   console.log(`  ${items.length} ワールド取得完了`);
   console.log(`  合計プレイヤー: ${items.reduce((s,i)=>s+i.player_count,0)}`);
   console.log(`  合計キャラスロット: ${items.reduce((s,i)=>s+i.char_count,0)}`);
-  return { items, timestamp: ts };
+  console.log(`  最強プレイヤー集計: ${Object.values(champions).filter(c=>c.playerName).length}/${Object.keys(champions).length} キャラ出現`);
+  return { items, timestamp: ts, champions };
 }
 
 async function main() {
@@ -274,12 +325,19 @@ async function main() {
   await sleep(2000);
 
   const arena = await fetchArena();
+  const champions = arena.champions || {};
+  delete arena.champions;
   arena.fetchedAt = new Date().toISOString();
   writeFileSync('data/arena.json', JSON.stringify(arena));
   console.log(`  → data/arena.json (${(JSON.stringify(arena).length / 1024).toFixed(1)} KB)`);
 
+  // 各キャラ最強プレイヤー
+  const champOut = { items: champions, fetchedAt: arena.fetchedAt, timestamp: arena.timestamp };
+  writeFileSync('data/champions.json', JSON.stringify(champOut));
+  console.log(`  → data/champions.json (${Object.keys(champions).length} キャラ, ${(JSON.stringify(champOut).length / 1024).toFixed(1)} KB)`);
+
   // 履歴保存（先にhistoryを保存してからストリーク計算する）
-  saveHistory(local, global, arena);
+  saveHistory(local, global, arena, champOut);
 
   // 中央拠点ストリーク計算（historyを参照するため saveHistory の後に実行）
   saveCenterStreaks(local);
@@ -287,20 +345,22 @@ async function main() {
   console.log('=== 完了 ===');
 }
 
-function saveHistory(local, global, arena) {
+function saveHistory(local, global, arena, champOut) {
   const toJSTDate = d => new Date(new Date(d).getTime() + 9 * 3600000).toISOString().slice(0, 10);
   const today = toJSTDate(local.fetchedAt || new Date().toISOString());
 
   mkdirSync('data/history/local', { recursive: true });
   mkdirSync('data/history/global', { recursive: true });
   mkdirSync('data/history/arena', { recursive: true });
+  mkdirSync('data/history/champions', { recursive: true });
 
   const indexPath = 'data/history/index.json';
-  let index = { local: [], global: [], arena: [] };
+  let index = { local: [], global: [], arena: [], champions: [] };
   if (existsSync(indexPath)) {
     try { index = JSON.parse(readFileSync(indexPath, 'utf-8')); } catch {}
   }
   if (!index.arena) index.arena = [];
+  if (!index.champions) index.champions = [];
 
   if (local.items?.length > 0) {
     const lPath = `data/history/local/${today}.json`;
@@ -323,11 +383,19 @@ function saveHistory(local, global, arena) {
     console.log(`  → ${aPath}`);
   }
 
+  if (champOut && Object.keys(champOut.items || {}).length > 0) {
+    const cPath = `data/history/champions/${today}.json`;
+    writeFileSync(cPath, JSON.stringify(champOut));
+    if (!index.champions.includes(today)) index.champions.push(today);
+    console.log(`  → ${cPath}`);
+  }
+
   index.local.sort();
   index.global.sort();
   index.arena.sort();
+  index.champions.sort();
   writeFileSync(indexPath, JSON.stringify(index, null, 2));
-  console.log(`  → ${indexPath} (local:${index.local.length}件, global:${index.global.length}件, arena:${index.arena.length}件)`);
+  console.log(`  → ${indexPath} (local:${index.local.length}件, global:${index.global.length}件, arena:${index.arena.length}件, champions:${index.champions.length}件)`);
 }
 
 // ═══ 中央拠点 連続占拠ストリーク計算 ══════════════════════════════
