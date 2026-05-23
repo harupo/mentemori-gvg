@@ -1229,6 +1229,16 @@ const DATA_BASE="data/";
 // Numeric labels (world IDs etc.) are safe without escape but escape defensively
 // at any boundary where the value could conceivably be user-controlled.
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// Playback speed buttons share one text→ms mapping across 5 tabs. Helper scopes the
+// "active" toggle to a specific date bar — historically hmSetSpeed used the unscoped
+// selector '.hm-speed-btn' which incorrectly cleared/set the active state on every
+// other tab's bar at the same time.
+const PLAYER_SPEED_TEXT={1300:"0.5x",650:"1x",325:"2x",160:"4x"};
+function setSpeedActive(barSelector,ms){
+  document.querySelectorAll(barSelector+" .hm-speed-btn").forEach(b=>{
+    b.classList.toggle("active",b.textContent.trim()===PLAYER_SPEED_TEXT[ms]);
+  });
+}
 function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
 let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact",hmCenterMode=false;
@@ -1540,9 +1550,7 @@ let _globalPlayTimer=null, _globalSpeed=650;
 
 function localSetSpeed(ms){
   _localSpeed=ms;
-  document.querySelectorAll('#local-date-bar .hm-speed-btn').forEach(b=>{
-    b.classList.toggle('active', b.textContent===({1300:'0.5x',650:'1x',325:'2x',160:'4x'}[ms]));
-  });
+  setSpeedActive('#local-date-bar',ms);
   if(_localPlayTimer){clearInterval(_localPlayTimer);_localPlayTimer=setInterval(localPlayStep,ms);}
 }
 function localPlayStep(){
@@ -1566,9 +1574,7 @@ function localPlayToggle(){
 
 function globalSetSpeed(ms){
   _globalSpeed=ms;
-  document.querySelectorAll('#global-date-bar .hm-speed-btn').forEach(b=>{
-    b.classList.toggle('active', b.textContent===({1300:'0.5x',650:'1x',325:'2x',160:'4x'}[ms]));
-  });
+  setSpeedActive('#global-date-bar',ms);
   if(_globalPlayTimer){clearInterval(_globalPlayTimer);_globalPlayTimer=setInterval(globalPlayStep,ms);}
 }
 function globalPlayStep(){
@@ -1947,10 +1953,7 @@ async function hmPlayTick(){
 
 function hmSetSpeed(ms){
   hmPlaySpeed=ms;
-  document.querySelectorAll(".hm-speed-btn").forEach(b=>{
-    const speeds={"0.5x":1300,"1x":650,"2x":325,"4x":160};
-    b.classList.toggle("active",speeds[b.textContent]===ms);
-  });
+  setSpeedActive('#hm-date-bar',ms);
 }
 
 function setHMView(mode){
@@ -2407,10 +2410,7 @@ async function arenaPlayTick(){
 }
 function arenaSetSpeed(ms){
   arenaPlaySpeed=ms;
-  document.querySelectorAll("#arena-date-bar .hm-speed-btn").forEach(b=>{
-    const sp={"0.5x":1300,"1x":650,"2x":325,"4x":160};
-    b.classList.toggle("active",sp[b.textContent]===ms);
-  });
+  setSpeedActive('#arena-date-bar',ms);
 }
 
 function arenaSetSrc(src){
@@ -2751,10 +2751,7 @@ async function champPlayTick(){
 }
 function champSetSpeed(ms){
   champPlaySpeed=ms;
-  document.querySelectorAll("#champ-date-bar .hm-speed-btn").forEach(b=>{
-    const sp={"0.5x":1300,"1x":650,"2x":325,"4x":160};
-    b.classList.toggle("active",sp[b.textContent]===ms);
-  });
+  setSpeedActive('#champ-date-bar',ms);
 }
 
 function champSetAttr(attr){
