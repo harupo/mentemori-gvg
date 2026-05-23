@@ -1213,6 +1213,11 @@ const TL={domination:"制覇",monopoly:"独占",oligopoly:"寡占",contested:"�
 const MF="font-family:'JetBrains Mono',monospace;font-weight:600";
 const CNA={1:"EL",2:"EX",3:"GM"};
 const DATA_BASE="data/";
+// HTML escape — for use whenever interpolating API-derived strings (guild/player names)
+// into template literals destined for innerHTML or HTML attribute values.
+// Numeric labels (world IDs etc.) are safe without escape but escape defensively
+// at any boundary where the value could conceivably be user-controlled.
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function fD(d){const p=n=>String(n).padStart(2,"0");return d.getFullYear()+"/"+p(d.getMonth()+1)+"/"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
 
 let LD=[],GD=[],lC=null,gC=null,curTab="local",gWF=null,hmView="compact",hmCenterMode=false;
@@ -2136,7 +2141,7 @@ function renderHMCenter(sortBy, minR){
       const streakTC = streakC >= 5 ? '5+' : `${streakC}d`;
       return `<article class="hm-tile hm-center-compact-tile" style="background:${bg};color:${tc};"
           onclick="hmJumpToNormal('${it.label}')"
-          title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild} / ${streakC >= 5 ? '5日以上' : streakC+'日'}継続">
+          title="w${it.label} / 中央${it.max}/5城 / ${esc(it.topGuild)} / ${streakC >= 5 ? '5日以上' : streakC+'日'}継続">
         <div class="hm-center-compact-inner">
           <div class="hm-center-compact-top">w${it.label} <span class="hm-center-compact-fraction">${it.max}/5</span></div>
           <div class="hm-center-compact-streak">${streakTC}</div>
@@ -2148,7 +2153,7 @@ function renderHMCenter(sortBy, minR){
     const streakTxt = streak >= 5 ? '5日以上' : `${streak}日`;
     return `<article class="hm-tile" style="background:${bg};color:${tc};"
         onclick="hmJumpToNormal('${it.label}')"
-        title="w${it.label} / 中央${it.max}/5城 / ${it.topGuild} / ${streakTxt}継続">
+        title="w${it.label} / 中央${it.max}/5城 / ${esc(it.topGuild)} / ${streakTxt}継続">
       <div class="hm-tile-top">
         <div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${it.label}</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.15rem">
@@ -2158,7 +2163,7 @@ function renderHMCenter(sortBy, minR){
       </div>
       <div class="hm-tile-body">
         <div class="hm-center-score">${it.max}<span style="font-size:1rem;opacity:.7">/5</span></div>
-        <div class="hm-center-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${it.topGuild || '(未占有)'}</div>
+        <div class="hm-center-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${esc(it.topGuild) || '(未占有)'}</div>
       </div>
       ${stockBarHtml(it.label)}
     </article>`;
@@ -2243,7 +2248,7 @@ function renderHM(){
   if(compact){
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad} / ストック:${stockFmt(d.label)}" onclick="hmJumpToNormal('${d.label}')">
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="w${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${esc(d.ad)} / ストック:${stockFmt(d.label)}" onclick="hmJumpToNormal('${d.label}')">
         <div class="hm-tile-body"><div class="hm-tile-wid-compact">w${d.label}</div><div class="hm-tile-rate">${d.am}/21</div></div>
         ${hmShowStockBar ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(d.label)}"></div>` : ""}
       </article>`;
@@ -2251,9 +2256,9 @@ function renderHM(){
   }else{
     grid.innerHTML=fd.map(d=>{
       const bg=hmColor(d.ratio);const c=hmText(d.ratio);
-      return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${d.ad} / ストック:${stockFmt(d.label)}" onclick="hmShowWorldInTable('${d.label}')">
+      return`<article class="hm-tile" style="background:${bg};color:${c};" title="World ${d.label} / ${d.pct.toFixed(1)}% / ${d.am}拠点 / ${esc(d.ad)} / ストック:${stockFmt(d.label)}" onclick="hmShowWorldInTable('${d.label}')">
         <div class="hm-tile-top"><div><div class="hm-tile-world">World</div><div class="hm-tile-wid">${d.label}</div></div><div class="hm-badge">${hmLabel(d.ratio)}</div></div>
-        <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div><div class="hm-tile-guild">${d.ad}</div></div>
+        <div class="hm-tile-body"><div class="hm-tile-rate">${d.pct.toFixed(1)}%</div><div class="hm-tile-sub">最大占有 ${d.am}/21 拠点</div><div class="hm-tile-guild">${esc(d.ad)}</div></div>
         ${hmShowStockBar ? `<div class="hm-tile-stock-bar" style="background:${stockBarColor(d.label)}"></div>` : ""}
       </article>`;
     }).join("");
@@ -2790,10 +2795,10 @@ function renderChamp(){
     const dim = 'color:var(--text-dim);';
     return `<tr onmouseenter="this.style.background='var(--bg-card-hover)'" onmouseleave="this.style.background=''">
       <td>
-        <span style="font-weight:700;color:${col};margin-right:.5rem;" title="${d.attr||''}属性">${d.attr||'-'}</span><span style="font-weight:600;">${d.name||('ID:'+d.id)}</span>
+        <span style="font-weight:700;color:${col};margin-right:.5rem;" title="${esc(d.attr||'')}属性">${esc(d.attr||'-')}</span><span style="font-weight:600;">${esc(d.name||('ID:'+d.id))}</span>
       </td>
-      <td style="text-align:center;font-family:'JetBrains Mono',monospace;${hasP?'':dim}">${hasP?('W'+d.label):'—'}</td>
-      <td style="${hasP?'':dim}">${hasP?d.playerName:'—'}</td>
+      <td style="text-align:center;font-family:'JetBrains Mono',monospace;${hasP?'':dim}">${hasP?('W'+esc(d.label)):'—'}</td>
+      <td style="${hasP?'':dim}">${hasP?esc(d.playerName):'—'}</td>
       <td style="text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;${hasP?'':dim}">${hasP?fmt(d.charBP):'—'}</td>
     </tr>`;
   }).join('');
