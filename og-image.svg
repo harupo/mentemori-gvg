@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0a0f"/>
+      <stop offset="1" stop-color="#181826"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff6b6b"/>
+      <stop offset="1" stop-color="#f39c12"/>
+    </linearGradient>
+    <style>
+      .title  { font: 700 78px "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif; fill: #f5f5fa; }
+      .sub    { font: 600 42px "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif; fill: #e0e0ec; }
+      .desc   { font: 400 26px "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif; fill: #a0a0b8; }
+      .url    { font: 600 22px "JetBrains Mono", Consolas, monospace; fill: #6a7a8a; letter-spacing: .03em; }
+      .pillTx { font: 700 22px "Noto Sans JP", sans-serif; fill: #f5f5fa; }
+    </style>
+  </defs>
+
+  <!-- background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- top accent stripe -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#accent)"/>
+
+  <!-- decorative heatmap tile cluster (right side, evokes the dashboard's grid) -->
+  <g transform="translate(820,150)" opacity="0.95">
+    <!-- 4x4 tiles, varied colors mirroring the heatmap palette -->
+    <g font-family="JetBrains Mono, monospace" font-weight="700" font-size="20" text-anchor="middle">
+      <!-- row 1 -->
+      <rect x="0"   y="0"   width="72" height="72" rx="8" fill="#7a1f1f"/><text x="36"  y="44" fill="#fff">w1</text>
+      <rect x="80"  y="0"   width="72" height="72" rx="8" fill="#a23030"/><text x="116" y="44" fill="#fff">w2</text>
+      <rect x="160" y="0"   width="72" height="72" rx="8" fill="#cc5a1f"/><text x="196" y="44" fill="#fff">w3</text>
+      <rect x="240" y="0"   width="72" height="72" rx="8" fill="#5a8a3a"/><text x="276" y="44" fill="#fff">w4</text>
+      <!-- row 2 -->
+      <rect x="0"   y="80"  width="72" height="72" rx="8" fill="#cc5a1f"/><text x="36"  y="124" fill="#fff">w5</text>
+      <rect x="80"  y="80"  width="72" height="72" rx="8" fill="#7a1f1f"/><text x="116" y="124" fill="#fff">w6</text>
+      <rect x="160" y="80"  width="72" height="72" rx="8" fill="#a23030"/><text x="196" y="124" fill="#fff">w7</text>
+      <rect x="240" y="80"  width="72" height="72" rx="8" fill="#cc5a1f"/><text x="276" y="124" fill="#fff">w8</text>
+      <!-- row 3 -->
+      <rect x="0"   y="160" width="72" height="72" rx="8" fill="#5a8a3a"/><text x="36"  y="204" fill="#fff">w9</text>
+      <rect x="80"  y="160" width="72" height="72" rx="8" fill="#cc5a1f"/><text x="116" y="204" fill="#fff">w10</text>
+      <rect x="160" y="160" width="72" height="72" rx="8" fill="#a23030"/><text x="196" y="204" fill="#fff">w11</text>
+      <rect x="240" y="160" width="72" height="72" rx="8" fill="#7a1f1f"/><text x="276" y="204" fill="#fff">w12</text>
+      <!-- row 4 -->
+      <rect x="0"   y="240" width="72" height="72" rx="8" fill="#a23030"/><text x="36"  y="284" fill="#fff">w13</text>
+      <rect x="80"  y="240" width="72" height="72" rx="8" fill="#5a8a3a"/><text x="116" y="284" fill="#fff">w14</text>
+      <rect x="160" y="240" width="72" height="72" rx="8" fill="#cc5a1f"/><text x="196" y="284" fill="#fff">w15</text>
+      <rect x="240" y="240" width="72" height="72" rx="8" fill="#7a1f1f"/><text x="276" y="284" fill="#fff">w16</text>
+    </g>
+  </g>
+
+  <!-- castle accent -->
+  <text x="80" y="170" font-size="92">🏰</text>
+
+  <!-- title block (left) -->
+  <text class="title" x="80" y="280">メメントモリ GvG</text>
+  <text class="sub"   x="80" y="340">グランドバトル 拠点占有ダッシュボード</text>
+
+  <!-- feature pills -->
+  <g transform="translate(80,390)">
+    <rect x="0"   y="0" width="160" height="44" rx="22" fill="#1f2030" stroke="#3a3a55" stroke-width="1"/>
+    <text class="pillTx" x="80" y="29" text-anchor="middle">拠点占有率</text>
+
+    <rect x="172" y="0" width="160" height="44" rx="22" fill="#1f2030" stroke="#3a3a55" stroke-width="1"/>
+    <text class="pillTx" x="252" y="29" text-anchor="middle">採用属性</text>
+
+    <rect x="344" y="0" width="190" height="44" rx="22" fill="#1f2030" stroke="#3a3a55" stroke-width="1"/>
+    <text class="pillTx" x="439" y="29" text-anchor="middle">各キャラ最強</text>
+
+    <rect x="546" y="0" width="200" height="44" rx="22" fill="#1f2030" stroke="#3a3a55" stroke-width="1"/>
+    <text class="pillTx" x="646" y="29" text-anchor="middle">ギルドストック</text>
+  </g>
+
+  <!-- description -->
+  <text class="desc" x="80" y="490">毎日 18 時更新 / リアルタイム可視化 / コミュニティ向けの非公式ダッシュボード</text>
+
+  <!-- URL at bottom -->
+  <text class="url" x="80" y="570">harupo.github.io/mentemori-gvg</text>
+
+  <!-- bottom accent stripe -->
+  <rect x="0" y="624" width="1200" height="6" fill="url(#accent)"/>
+</svg>

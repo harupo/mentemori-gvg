@@ -8,6 +8,25 @@
   <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>メメントモリ ギルドバトル / グランドバトル 拠点占有ダッシュボード</title>
+<meta name="description" content="メメントモリ GvG / グランドバトルの各 World の拠点占有状況・採用属性・各キャラ最強プレイヤー・ギルドストックをリアルタイム可視化するコミュニティダッシュボード。">
+<link rel="canonical" href="https://harupo.github.io/mentemori-gvg/">
+<meta name="theme-color" content="#0a0a0f">
+<!-- Favicon: inline SVG keeps the head self-contained (no extra request, no 404 from
+     the GitHub Pages default favicon search). Castle matches the dashboard's 🏰 motif. -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<!-- Open Graph / Twitter card — for Discord / X / LINE share unfurls.
+     og-image.svg is 1200x630; Discord renders SVG OG images natively, X falls back
+     to a text card (replace with a PNG export if X support matters more later). -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://harupo.github.io/mentemori-gvg/">
+<meta property="og:title" content="メメントモリ GvG / グランドバトル 拠点占有ダッシュボード">
+<meta property="og:description" content="各 World の拠点占有・採用属性・各キャラ最強プレイヤー・ギルドストックをリアルタイム可視化するコミュニティダッシュボード。">
+<meta property="og:image" content="https://harupo.github.io/mentemori-gvg/og-image.svg">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="メメントモリ GvG / グランドバトル 拠点占有ダッシュボード">
+<meta name="twitter:description" content="各 World の拠点占有・採用属性・各キャラ最強プレイヤー・ギルドストックをリアルタイム可視化。">
+<meta name="twitter:image" content="https://harupo.github.io/mentemori-gvg/og-image.svg">
 <!-- Fonts: preconnect first so the connection is warm by the time the stylesheet
      request lands, then the stylesheet itself. Replaces the @import previously
      buried in <style> (which forces a serialized fetch after CSS parses). -->
@@ -2319,7 +2338,7 @@ async function loadArena(){
     loadArenaHistory(data);
   }catch(e){
     console.warn("arena.json load failed:",e);
-    if(curTab==="arena")document.getElementById("a-grid").innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</div>`;
+    if(curTab==="arena")document.getElementById("a-grid").innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${esc(e.message)}</div>`;
   }
 }
 
@@ -2678,7 +2697,7 @@ async function loadChampions(){
   }catch(e){
     console.warn("champions.json load error:", e);
     if(curTab==="champ")document.getElementById("champ-tbody").innerHTML=
-      `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${e.message}</td></tr>`;
+      `<tr><td colspan="4" style="text-align:center;padding:2rem;color:#e74c3c;">読み込みエラー: ${esc(e.message)}</td></tr>`;
   }
 }
 
