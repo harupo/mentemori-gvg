@@ -968,6 +968,26 @@
   </div>
 </div>
 
+<!-- Stock tab: month-by-month slider. One step = one month (other tabs step daily). -->
+<div class="hm-date-bar hidden" id="stock-date-bar">
+  <div class="hm-date-row">
+    <div class="hm-date-nav"><button id="s-month-prev" onclick="stockMonthStep(-1)">◀</button></div>
+    <input type="range" class="hm-date-slider" id="s-month-slider" min="0" max="0" value="0" oninput="stockMonthChange()">
+    <div class="hm-date-nav"><button id="s-month-next" onclick="stockMonthStep(1)">▶</button></div>
+    <span class="hm-date-value" id="s-month-value">-</span>
+    <span class="hm-date-tag"   id="s-month-tag"></span>
+  </div>
+  <div class="hm-play-row">
+    <button class="hm-play-btn" id="s-play-btn" onclick="stockPlayToggle()">▶ 再生</button>
+    <span class="hm-speed-label">速度</span>
+    <div class="hm-speed-btns">
+      <button class="hm-speed-btn" onclick="stockSetSpeed(1300)">0.5x</button>
+      <button class="hm-speed-btn active" onclick="stockSetSpeed(650)">1x</button>
+      <button class="hm-speed-btn" onclick="stockSetSpeed(325)">2x</button>
+      <button class="hm-speed-btn" onclick="stockSetSpeed(160)">4x</button>
+    </div>
+  </div>
+</div>
 
 <div class="hm-back-btn hidden" id="hm-back-btn">
   <button onclick="hmBackToHeatmap()">◀ ヒートマップに戻る</button>
@@ -1189,9 +1209,17 @@ function renderLament(){
 }
 
 
-// ギルドストックデータは data/guild_stock.json から動的ロード
+// ギルドストックデータ: 月単位で集計済みの per-month JSON を data/stock/ から lazy-load。
+// GUILD_STOCK_MAR / STOCK_Q は「現在 stock スライダーで選択中の月」のデータを保持する
+// (legacy 名 — 当初 3 月のみだった時の名前のまま; 中身は selected month に切り替わる)。
+// 月一覧と meta は data/stock/index.json から起動時に取得。
 let GUILD_STOCK_MAR = {};
 let STOCK_Q = [71669, 110362, 145180, 167463];
+let stockMonths = [];          // ["2025-05", "2025-06", ..., "2026-05"]
+let stockMonthIdx = -1;        // index into stockMonths (latest by default)
+let stockCache = {};           // { "2026-03": {items, quintiles, ...}, ... }
+let stockPlayTimer = null;
+let stockPlaySpeed = 650;
 
 // quintile 0-4 → 色・ラベル
 const STOCK_LEVELS = [
@@ -1418,6 +1446,7 @@ function switchTab(tab){
   document.getElementById("hm-date-bar").classList.toggle("hidden",tab!=="heatmap"||!LD.length);
   document.getElementById("arena-date-bar").classList.toggle("hidden",tab!=="arena"||!arenaDates.length);
   document.getElementById("champ-date-bar").classList.toggle("hidden",tab!=="champ"||!champDates.length);
+  document.getElementById("stock-date-bar").classList.toggle("hidden",tab!=="stock"||!stockMonths.length);
   document.getElementById("wf-float").classList.toggle("hidden",tab!=="global"||!gWF);
   if(tab==="heatmap"&&LD.length)renderHM();
   if(tab==="arena")arenaRender();
@@ -1449,7 +1478,7 @@ async function loadData(){
     renderL();renderG();switchTab(curTab);
     loadHMHistory();
     loadArena();
-    loadGuildStock();
+    loadStockIndex();
     loadChampions();
   }catch(e){ss(`✗ ${e.message}`,"err");}
 }
@@ -2303,19 +2332,111 @@ function renderHM(){
 // 採用属性分布
 // ══════════════════════════════════════════════════════
 
-async function loadGuildStock(){
+// Stock data uses a 2-tier load:
+//   data/stock/index.json   — list of available months (small, fetched on init)
+//   data/stock/YYYY-MM.json — per-month aggregated stock (fetched on demand, cached)
+// Falls back to legacy data/guild_stock.json if the index isn't present yet,
+// so an old deploy keeps working until the new data is built.
+async function loadStockIndex(){
   try{
-    const res = await fetch(DATA_BASE + "guild_stock.json");
-    if(!res.ok){ console.warn("guild_stock.json not found:", res.status); return; }
-    const data = await res.json();
-    GUILD_STOCK_MAR = data.items || {};
-    if(data.quintiles){
-      STOCK_Q = [data.quintiles.q20, data.quintiles.q40, data.quintiles.q60, data.quintiles.q80];
+    const res = await fetch(DATA_BASE + "stock/index.json");
+    if(!res.ok){
+      // fallback: legacy single-month file
+      const legacyRes = await fetch(DATA_BASE + "guild_stock.json");
+      if(legacyRes.ok){
+        const d = await legacyRes.json();
+        GUILD_STOCK_MAR = d.items || {};
+        if(d.quintiles) STOCK_Q = [d.quintiles.q20,d.quintiles.q40,d.quintiles.q60,d.quintiles.q80];
+        console.log("legacy guild_stock.json loaded:", Object.keys(GUILD_STOCK_MAR).length, "worlds");
+        if(curTab === "stock") renderStock();
+        if(curTab === "heatmap" && hmShowStockBar) renderHM();
+      } else {
+        console.warn("stock/index.json not found:", res.status);
+      }
+      return;
     }
-    console.log("guild_stock.json loaded:", Object.keys(GUILD_STOCK_MAR).length, "worlds");
-    if(curTab === "stock") renderStock();
+    const idx = await res.json();
+    stockMonths = (idx.months || []).map(m => m.period);
+    if(!stockMonths.length){ console.warn("stock index has no months"); return; }
+    stockMonthIdx = stockMonths.length - 1;
+    const slider = document.getElementById("s-month-slider");
+    if(slider){ slider.max = stockMonths.length - 1; slider.value = stockMonthIdx; }
+    await loadStockMonth(stockMonths[stockMonthIdx]);
+    if(curTab === "stock") document.getElementById("stock-date-bar").classList.remove("hidden");
+    console.log("stock index loaded:", stockMonths.length, "months;", "current:", stockMonths[stockMonthIdx]);
   } catch(e){
-    console.warn("guild_stock.json load error:", e);
+    console.warn("stock index load error:", e);
+  }
+}
+
+async function loadStockMonth(period){
+  let data = stockCache[period];
+  if(!data){
+    try{
+      const res = await fetch(DATA_BASE + "stock/" + period + ".json");
+      if(!res.ok){ console.warn("stock/"+period+".json not found:", res.status); return; }
+      data = await res.json();
+      stockCache[period] = data;
+    } catch(e){ console.warn("stock month load error:", period, e); return; }
+  }
+  GUILD_STOCK_MAR = data.items || {};
+  if(data.quintiles){
+    STOCK_Q = [data.quintiles.q20, data.quintiles.q40, data.quintiles.q60, data.quintiles.q80];
+  }
+  stockUpdateUI();
+  if(curTab === "stock") renderStock();
+  if(curTab === "heatmap" && hmShowStockBar) renderHM();
+}
+
+function stockUpdateUI(){
+  const p = stockMonths[stockMonthIdx] || "-";
+  const valEl = document.getElementById("s-month-value");
+  const tagEl = document.getElementById("s-month-tag");
+  const prevEl = document.getElementById("s-month-prev");
+  const nextEl = document.getElementById("s-month-next");
+  if(valEl) valEl.textContent = p;
+  const isLatest = stockMonthIdx === stockMonths.length - 1;
+  if(tagEl) tagEl.textContent = isLatest ? "（最新）" : `${stockMonths.length - 1 - stockMonthIdx}ヶ月前`;
+  if(prevEl) prevEl.disabled = stockMonthIdx <= 0;
+  if(nextEl) nextEl.disabled = stockMonthIdx >= stockMonths.length - 1;
+}
+
+function stockMonthChange(){
+  stockPlayStop();
+  const idx = +document.getElementById("s-month-slider").value;
+  if(idx < 0 || idx >= stockMonths.length) return;
+  stockMonthIdx = idx;
+  loadStockMonth(stockMonths[idx]);
+}
+function stockMonthStep(d){
+  stockPlayStop();
+  const newIdx = stockMonthIdx + d;
+  if(newIdx < 0 || newIdx >= stockMonths.length) return;
+  stockMonthIdx = newIdx;
+  document.getElementById("s-month-slider").value = newIdx;
+  loadStockMonth(stockMonths[newIdx]);
+}
+function stockSetSpeed(ms){ stockPlaySpeed = ms; setSpeedActive('#stock-date-bar', ms); }
+function stockPlayToggle(){ stockPlayTimer ? stockPlayStop() : stockPlayStart(); }
+function stockPlayStart(){
+  if(stockMonthIdx >= stockMonths.length - 1) stockMonthIdx = -1;
+  const btn = document.getElementById("s-play-btn");
+  btn.textContent = "⏸ 停止"; btn.classList.add("playing");
+  stockPlayTimer = true;
+  stockPlayTick();
+}
+function stockPlayStop(){
+  if(stockPlayTimer){ clearTimeout(stockPlayTimer); stockPlayTimer = null; }
+  const btn = document.getElementById("s-play-btn");
+  if(btn){ btn.textContent = "▶ 再生"; btn.classList.remove("playing"); }
+}
+async function stockPlayTick(){
+  if(stockMonthIdx >= stockMonths.length - 1){ stockPlayStop(); return; }
+  stockMonthIdx++;
+  document.getElementById("s-month-slider").value = stockMonthIdx;
+  await loadStockMonth(stockMonths[stockMonthIdx]);
+  if(stockPlayTimer !== null || document.getElementById("s-play-btn").classList.contains("playing")){
+    stockPlayTimer = setTimeout(stockPlayTick, stockPlaySpeed);
   }
 }
 
