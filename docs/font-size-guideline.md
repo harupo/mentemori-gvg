@@ -15,9 +15,7 @@ Harupo の Web 系全成果物のフロントエンド UI（ダッシュボー�
 対象案件の例:
 - mentemori-gvg (本ドキュメントの起点)
 - LamentMania
-- kimono-coord (repame v2)
-- LCMS
-- ClearManagementSystem
+- その他のクライアント案件 Web UI 全般
 - 新規立ち上げの Web UI
 
 非対象: 紙印刷物、メール HTML、ロゴ／ヒーロー画像内テキスト
