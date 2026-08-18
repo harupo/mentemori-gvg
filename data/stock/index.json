@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-18T17:29:49.445Z",
-  "source": "stock_log sheet, daily totals, monthly mean (0/blank excluded; outliers < 30% of world median excluded)",
+  "generatedAt": "2026-08-18T17:30:43.093Z",
+  "source": "stock_log sheet, daily totals, monthly mean (0/blank excluded; outliers < 30% of world median excluded; world-months with <= 10 valid days excluded)",
   "months": [
     {
       "period": "2025-05",
@@ -10,62 +10,62 @@
     {
       "period": "2025-06",
       "days": 30,
-      "worlds": 150
+      "worlds": 143
     },
     {
       "period": "2025-07",
       "days": 31,
-      "worlds": 156
+      "worlds": 152
     },
     {
       "period": "2025-08",
       "days": 31,
-      "worlds": 159
+      "worlds": 153
     },
     {
       "period": "2025-09",
       "days": 30,
-      "worlds": 157
+      "worlds": 153
     },
     {
       "period": "2025-10",
       "days": 31,
-      "worlds": 159
+      "worlds": 153
     },
     {
       "period": "2025-11",
       "days": 30,
-      "worlds": 160
+      "worlds": 153
     },
     {
       "period": "2025-12",
       "days": 31,
-      "worlds": 159
+      "worlds": 153
     },
     {
       "period": "2026-01",
       "days": 31,
-      "worlds": 158
+      "worlds": 153
     },
     {
       "period": "2026-02",
       "days": 28,
-      "worlds": 160
+      "worlds": 153
     },
     {
       "period": "2026-03",
       "days": 32,
-      "worlds": 175
+      "worlds": 174
     },
     {
       "period": "2026-04",
       "days": 30,
-      "worlds": 178
+      "worlds": 177
     },
     {
       "period": "2026-05",
       "days": 31,
-      "worlds": 179
+      "worlds": 178
     },
     {
       "period": "2026-06",
