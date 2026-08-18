@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-24T16:37:52.346Z",
+  "generatedAt": "2026-08-18T11:58:48.839Z",
   "source": "stock_log sheet, daily totals, monthly mean (0/blank excluded)",
   "months": [
     {
@@ -20,7 +20,7 @@
     {
       "period": "2025-08",
       "days": 31,
-      "worlds": 155
+      "worlds": 159
     },
     {
       "period": "2025-09",
@@ -64,8 +64,23 @@
     },
     {
       "period": "2026-05",
-      "days": 23,
-      "worlds": 178
+      "days": 31,
+      "worlds": 179
+    },
+    {
+      "period": "2026-06",
+      "days": 30,
+      "worlds": 179
+    },
+    {
+      "period": "2026-07",
+      "days": 31,
+      "worlds": 180
+    },
+    {
+      "period": "2026-08",
+      "days": 18,
+      "worlds": 180
     }
   ]
 }
