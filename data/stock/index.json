@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-18T11:58:48.839Z",
-  "source": "stock_log sheet, daily totals, monthly mean (0/blank excluded)",
+  "generatedAt": "2026-08-18T17:29:49.445Z",
+  "source": "stock_log sheet, daily totals, monthly mean (0/blank excluded; outliers < 30% of world median excluded)",
   "months": [
     {
       "period": "2025-05",
